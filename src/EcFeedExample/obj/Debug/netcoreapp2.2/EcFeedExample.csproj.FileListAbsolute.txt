@@ -1,0 +1,14 @@
+/home/krzysztof/CSharp/src/EcFeedExample/bin/Debug/netcoreapp2.2/EcFeedExample.deps.json
+/home/krzysztof/CSharp/src/EcFeedExample/bin/Debug/netcoreapp2.2/EcFeedExample.runtimeconfig.json
+/home/krzysztof/CSharp/src/EcFeedExample/bin/Debug/netcoreapp2.2/EcFeedExample.runtimeconfig.dev.json
+/home/krzysztof/CSharp/src/EcFeedExample/bin/Debug/netcoreapp2.2/EcFeedExample.dll
+/home/krzysztof/CSharp/src/EcFeedExample/bin/Debug/netcoreapp2.2/EcFeedExample.pdb
+/home/krzysztof/CSharp/src/EcFeedExample/bin/Debug/netcoreapp2.2/EcFeed.dll
+/home/krzysztof/CSharp/src/EcFeedExample/bin/Debug/netcoreapp2.2/EcFeed.pdb
+/home/krzysztof/CSharp/src/EcFeedExample/obj/Debug/netcoreapp2.2/EcFeedExample.csprojAssemblyReference.cache
+/home/krzysztof/CSharp/src/EcFeedExample/obj/Debug/netcoreapp2.2/EcFeedExample.csproj.CoreCompileInputs.cache
+/home/krzysztof/CSharp/src/EcFeedExample/obj/Debug/netcoreapp2.2/EcFeedExample.AssemblyInfoInputs.cache
+/home/krzysztof/CSharp/src/EcFeedExample/obj/Debug/netcoreapp2.2/EcFeedExample.AssemblyInfo.cs
+/home/krzysztof/CSharp/src/EcFeedExample/obj/Debug/netcoreapp2.2/EcFeedExample.csproj.CopyComplete
+/home/krzysztof/CSharp/src/EcFeedExample/obj/Debug/netcoreapp2.2/EcFeedExample.dll
+/home/krzysztof/CSharp/src/EcFeedExample/obj/Debug/netcoreapp2.2/EcFeedExample.pdb

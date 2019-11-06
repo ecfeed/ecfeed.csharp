@@ -11,13 +11,13 @@ namespace EcFeed {
 
     public class Runner {
 
-        private static string serverTask = @"task";
+        private static string serverVersion = @"genServiceVersion";
         private static string serverService = @"testCaseService";
-        private static string serverServiceParameters = @"requestType=requestData";
-        private static string serverCertificate = @"AAE72557A7DB47EA4CF4C649108E422528EFDA1B";
+        private static string serverServiceRequestType = @"requestType=requestData";
+        private static string serverServiceCertificate = @"AAE72557A7DB47EA4CF4C649108E422528EFDA1B";
 
-        private string server = "https://prod-gen.ecfeed.com";
-        private string keystore = Environment.GetEnvironmentVariable("HOME") + "/ecfeed/security";
+        private string server = "https://gen.ecfeed.com";
+        private string keystore = Environment.GetEnvironmentVariable("HOME") + "/.ecfeed/security.p12";
         private string password = "changeit";
         
         static Runner() {
@@ -39,8 +39,8 @@ namespace EcFeed {
             set { password = value; }
         }
 
-        public void WebTask() {
-            HttpWebRequest request = (HttpWebRequest) HttpWebRequest.Create(server + "/" + serverTask);
+        public void WebVersion() {
+            HttpWebRequest request = (HttpWebRequest) HttpWebRequest.Create(server + "/" + serverVersion);
             request.ServerCertificateValidationCallback = ValidateServerCertficate;
             request.ClientCertificates.Add(GetUserCerificate());
 
@@ -48,7 +48,7 @@ namespace EcFeed {
         }
 
         public void WebService(String body) {
-            HttpWebRequest request = (HttpWebRequest) HttpWebRequest.Create(server + "/" + serverService + "?" + serverServiceParameters);
+            HttpWebRequest request = (HttpWebRequest) HttpWebRequest.Create(server + "/" + serverService + "?" + serverServiceRequestType);
             request.ServerCertificateValidationCallback = ValidateServerCertficate;
             request.ClientCertificates.Add(GetUserCerificate());
             request.ContentType = "application/json";
@@ -68,7 +68,7 @@ namespace EcFeed {
         private bool ValidateServerCertficate(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors sslPolicyErrors) {
             
             foreach(X509ChainElement certificate in chain.ChainElements) {
-                if (certificate.Certificate.GetCertHashString() == serverCertificate) {
+                if (certificate.Certificate.GetCertHashString() == serverServiceCertificate) {
                     return true;
                 }
             }

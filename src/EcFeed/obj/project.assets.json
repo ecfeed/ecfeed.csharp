@@ -185,11 +185,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/krzysztof/CSharp/src/EcFeed/EcFeed.csproj",
+      "projectUniqueName": "/home/krzysztof/ecfeed.csharp/src/EcFeed/EcFeed.csproj",
       "projectName": "EcFeed",
-      "projectPath": "/home/krzysztof/CSharp/src/EcFeed/EcFeed.csproj",
+      "projectPath": "/home/krzysztof/ecfeed.csharp/src/EcFeed/EcFeed.csproj",
       "packagesPath": "/home/krzysztof/.nuget/packages/",
-      "outputPath": "/home/krzysztof/CSharp/src/EcFeed/obj/",
+      "outputPath": "/home/krzysztof/ecfeed.csharp/src/EcFeed/obj/",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "/usr/share/dotnet/sdk/NuGetFallbackFolder"

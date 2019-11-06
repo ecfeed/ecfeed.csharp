@@ -708,11 +708,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/home/krzysztof/CSharp/src/EcFeedExample/EcFeedExample.csproj",
+      "projectUniqueName": "/home/krzysztof/ecfeed.csharp/src/EcFeedExample/EcFeedExample.csproj",
       "projectName": "EcFeedExample",
-      "projectPath": "/home/krzysztof/CSharp/src/EcFeedExample/EcFeedExample.csproj",
+      "projectPath": "/home/krzysztof/ecfeed.csharp/src/EcFeedExample/EcFeedExample.csproj",
       "packagesPath": "/home/krzysztof/.nuget/packages/",
-      "outputPath": "/home/krzysztof/CSharp/src/EcFeedExample/obj/",
+      "outputPath": "/home/krzysztof/ecfeed.csharp/src/EcFeedExample/obj/",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "/usr/share/dotnet/sdk/NuGetFallbackFolder"
@@ -729,8 +729,8 @@
       "frameworks": {
         "netcoreapp2.2": {
           "projectReferences": {
-            "/home/krzysztof/CSharp/src/EcFeed/EcFeed.csproj": {
-              "projectPath": "/home/krzysztof/CSharp/src/EcFeed/EcFeed.csproj"
+            "/home/krzysztof/ecfeed.csharp/src/EcFeed/EcFeed.csproj": {
+              "projectPath": "/home/krzysztof/ecfeed.csharp/src/EcFeed/EcFeed.csproj"
             }
           }
         }

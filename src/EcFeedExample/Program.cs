@@ -10,11 +10,14 @@ namespace EcFeedExample
         }
 
         static void Main(string[] args) {
-            string body = "{\"method\":\"public void com.example.test.LoanDecisionTest.generateCustomerData(java.lang.String,java.lang.String,com.example.test.Gender,int,java.lang.String,com.example.test.DocumentType)\",\"model\":\"0568-9381-1319-0545-5890\",\"userData\":\"{'dataSource':'genCartesian'}\"}";
+            string body = "{" +
+                "\"method\":\"void com.ecfeed.Model.simple(String,String,String,String,String,String,String,String,String,String,String)\"," +
+                "\"model\":\"9835-3029-2264-1682-5114\",\"userData\":\"{'dataSource':'genNWise','constraints':'NONE'}\"," +
+                "\"sessionId\":0" +
+            "}";
 
             Runner program = new Example();
            
-            program.WebTask();
             program.WebService(body);
         }
 

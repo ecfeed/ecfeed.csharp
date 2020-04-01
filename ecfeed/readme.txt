@@ -1,0 +1,1 @@
+The manual can be found on the official web page: https://ecfeed.com/tutorials.

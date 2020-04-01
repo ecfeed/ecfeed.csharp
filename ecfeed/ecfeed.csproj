@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <!-- <NuspecFile>ecfeed.nuspec</NuspecFile> -->
+    <PackageVersion>1.0.0-beta</PackageVersion>
+    <PackageId>EcFeed</PackageId>
+    <Title>EcFeed runner</Title>
+    <Authors>Patryk Chamuczyński;Marek Kuczabiński;Krzysztof Skorupski</Authors>
+    <Description>An open library used to connect to the ecFeed service.</Description>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseExpression>EPL-1.0</PackageLicenseExpression>
+    <PackageReleaseNotes>First release.</PackageReleaseNotes>
+    <PackageTags>test;ecfeed;nwise</PackageTags>
+    <IncludeSource>true</IncludeSource>
+    <RepositoryUrl>https://github.com/ecfeed/ecfeed.csharp</RepositoryUrl>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="newtonsoft.json" Version="12.0.3" />
+    <PackageReference Include="nunit" Version="3.12.0" />
+  </ItemGroup>
+
+</Project>

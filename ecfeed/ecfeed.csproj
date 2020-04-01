@@ -2,23 +2,26 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <PackageVersion>1.0.0-beta</PackageVersion>
+    <PackageVersion>1.0.1-beta</PackageVersion>
     <PackageId>EcFeed</PackageId>
+    <Company>EcFeed</Company>
     <Title>EcFeed runner</Title>
     <Authors>Patryk Chamuczyński;Marek Kuczabiński;Krzysztof Skorupski</Authors>
     <Description>An open library used to connect to the ecFeed service.</Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>EPL-1.0</PackageLicenseExpression>
-    <PackageReleaseNotes>First release.</PackageReleaseNotes>
+    <PackageReleaseNotes>First beta release.</PackageReleaseNotes>
     <PackageTags>test;ecfeed;nwise</PackageTags>
     <IncludeSource>true</IncludeSource>
-    <PackageIconUrl>https://s3-eu-west-1.amazonaws.com/resources.ecfeed.com/img/icon.png</PackageIconUrl>
+    <PackageIcon>icon.png</PackageIcon>
+    <projectUrl>https://ecfeed.com/</projectUrl>
     <RepositoryUrl>https://github.com/ecfeed/ecfeed.csharp</RepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="newtonsoft.json" Version="12.0.3" />
     <PackageReference Include="nunit" Version="3.12.0" />
+    <None Include="icon.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>

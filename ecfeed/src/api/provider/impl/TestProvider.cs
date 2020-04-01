@@ -564,7 +564,7 @@ namespace EcFeed
 
             try
             {
-                testEventArgs.Schema = JsonConvert.DeserializeObject<TestCase>(line);
+                testEventArgs.Schema = StreamParser.ParseTestCase(line);
 
                 if (testEventArgs.Schema.TestCaseArguments == null)
                 {

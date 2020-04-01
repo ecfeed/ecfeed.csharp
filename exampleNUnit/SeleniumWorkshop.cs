@@ -10,7 +10,7 @@ using EcFeed;
 
 namespace exampleNUnit
 {
-    // [Ignore("Some other time")]
+    [Ignore("Some other time")]
     [TestFixture]
     public class SeleniumWorkshop
     {

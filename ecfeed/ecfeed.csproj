@@ -2,7 +2,6 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <!-- <NuspecFile>ecfeed.nuspec</NuspecFile> -->
     <PackageVersion>1.0.0-beta</PackageVersion>
     <PackageId>EcFeed</PackageId>
     <Title>EcFeed runner</Title>
@@ -13,6 +12,7 @@
     <PackageReleaseNotes>First release.</PackageReleaseNotes>
     <PackageTags>test;ecfeed;nwise</PackageTags>
     <IncludeSource>true</IncludeSource>
+    <PackageIconUrl>https://s3-eu-west-1.amazonaws.com/resources.ecfeed.com/img/icon.png</PackageIconUrl>
     <RepositoryUrl>https://github.com/ecfeed/ecfeed.csharp</RepositoryUrl>
   </PropertyGroup>
 

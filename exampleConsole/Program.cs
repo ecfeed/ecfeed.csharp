@@ -39,11 +39,11 @@ namespace Testify.EcFeed.Example
             ITestProvider testProvider = new TestProvider();
             testProvider.Model = "7482-5194-2849-1943-2448";
             testProvider.Method = "com.example.test.Demo.typeString";
-            testProvider.Settings = new Dictionary<string, object> { { "dataSource", "genNWise" }, { "constraints", "NONE" } };
+            // testProvider.Settings = new Dictionary<string, object> { { "dataSource", "genNWise" }, { "constraints", "NONE" } };
 
-            Console.WriteLine(testProvider); // DEBUG
+            // Console.WriteLine(testProvider); // DEBUG
 
-            Task<string> response = testProvider.Generate(template: Template.CSV);
+            Task<string> response = testProvider.GenerateNWise(template: Template.CSV);
 
             Console.WriteLine("\nWaiting...\n"); // DEBUG
 
@@ -113,9 +113,8 @@ namespace Testify.EcFeed.Example
         //    SELECT ONE 
         //    Console.WriteLine("TEST HANDLER: " + args);
         //    Console.WriteLine("TEST HANDLER: " + args.DataRaw);
-        //    Console.WriteLine("TEST HANDLER: " + args.DataType);
         //    Console.WriteLine("TEST HANDLER: " + args.Schema);
-           Console.WriteLine("TEST HANDLER: [{0}]", string.Join(", ", args.DataTest.Arguments));
+        //    Console.WriteLine("TEST HANDLER: [{0}]", string.Join(", ", args.DataTest.Arguments));
         }
 
         static void StatusEventHandler(object sender, StatusEventArgs args)

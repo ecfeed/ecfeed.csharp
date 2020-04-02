@@ -5,7 +5,7 @@ namespace EcFeed
 {
     public struct TestCase
     {
-        [JsonProperty("testCase")] public TestCaseArgument[] TestCaseArguments { get; set; }
+        [JsonProperty("testCase", Required = Required.Always)] public TestCaseArgument[] TestCaseArguments { get; set; }
 
         public override string ToString() => TestCaseHelper.ParseToString(ref this);
     }

@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using NUnit.Framework;
+using System;
 
 namespace EcFeed
 {
@@ -15,30 +16,59 @@ namespace EcFeed
             return JsonConvert.DeserializeObject<StatusMessage>(data);
         }
 
-        public static object[] ParseTestCaseToDataType(string data)
+        public static InfoMessage ParseInfoMessage(string data)
         {
-            return ParseTestCaseToDataType(ParseTestCase(data));
+            return JsonConvert.DeserializeObject<InfoMessage>(data);
         }
-        public static object[] ParseTestCaseToDataType(TestCase data)
+
+        public static object[] ParseTestCaseToDataType(string data, string[] type)
+        {
+            return ParseTestCaseToDataType(ParseTestCase(data), type);
+        }
+        public static object[] ParseTestCaseToDataType(TestCase data, string[] type)
         {
             object[] result = new object[data.TestCaseArguments.Length];
 
             for (int i=0 ; i < data.TestCaseArguments.Length ; i++)
             {
-                result[i] = data.TestCaseArguments[i].Value;
+                result[i] = CastType(data.TestCaseArguments[i].Value, type[i]);
             }
 
             return result;
         }
 
-        public static TestCaseData ParseTestToNUnit(string data)
+        private static object CastType(object value, string type)
         {
-            return ParseTestToNUnit(ParseTestCase(data));
+            try
+            {
+                switch (type)
+                {
+                    case "byte": return Convert.ToByte(value);
+                    case "short": return Convert.ToInt16(value);
+                    case "int": return Convert.ToInt32(value);
+                    case "long": return Convert.ToInt64(value);
+                    case "float": return Convert.ToSingle(value);
+                    case "double": return Convert.ToDouble(value);
+                    case "boolean": return Convert.ToBoolean(value);
+                }
+
+                return value;
+            }
+            catch (Exception e)
+            {Console.WriteLine(e.Message);
+                return value;
+            }
+            
         }
 
-        public static TestCaseData ParseTestToNUnit(TestCase data)
+        public static TestCaseData ParseTestToNUnit(string data, string[] type)
         {
-            return new TestCaseData(ParseTestCaseToDataType(data));
+            return ParseTestToNUnit(ParseTestCase(data), type);
+        }
+
+        public static TestCaseData ParseTestToNUnit(TestCase data, string[] type)
+        {
+            return new TestCaseData(ParseTestCaseToDataType(data, type));
         }
 
     }

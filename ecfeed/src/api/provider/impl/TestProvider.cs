@@ -28,6 +28,8 @@ namespace EcFeed
         public string Method { get; set; }
         public Dictionary<string, object> Settings { get; set; }       
 
+        public string[] ArgumentTypes { get; set; }
+
         public event EventHandler<TestEventArgs> TestEventHandler;
         public event EventHandler<StatusEventArgs> StatusEventHandler;
 
@@ -528,10 +530,21 @@ namespace EcFeed
 
         private void ProcessSingleResponse(string line, bool streamFilter, StringBuilder responseBuilder)
         {
+            ProcessSingleInfoResponse(line);
             ProcessSingleStatusResponse(line);
             ProcessSingleTestResponse(line, streamFilter, responseBuilder);
         }
 
+        private void ProcessSingleInfoResponse(string line)
+        {
+            try
+            {
+                InfoMessage info = StreamParser.ParseInfoMessage(line);
+                ArgumentTypes = InfoMessageHelper.ExtractTypes(info);
+            }
+            catch (JsonReaderException) { }
+            catch (JsonSerializationException) { }
+        }
         private void ProcessSingleStatusResponse(string line)
         {
             try
@@ -571,8 +584,8 @@ namespace EcFeed
                     throw new TestProviderException("The message cannot be parsed.");
                 }
 
-                testEventArgs.DataObject = StreamParser.ParseTestCaseToDataType(testEventArgs.Schema);
-                testEventArgs.DataTest = StreamParser.ParseTestToNUnit(testEventArgs.Schema);
+                testEventArgs.DataObject = StreamParser.ParseTestCaseToDataType(testEventArgs.Schema, ArgumentTypes);
+                testEventArgs.DataTest = StreamParser.ParseTestToNUnit(testEventArgs.Schema, ArgumentTypes);
 
                 responseBuilder.AppendLine(line);
                 GenerateTestEvent(testEventArgs);

@@ -52,10 +52,19 @@ namespace EcFeed
                     case "boolean": return Convert.ToBoolean(value);
                 }
 
+                foreach (Type userType in Dependencies.UserType)
+                {   
+                    if (userType.FullName.EndsWith(type))
+                    {
+                        string[] enumElements = userType.GetEnumNames();
+                        return Enum.ToObject(userType, Array.IndexOf(enumElements, value));
+                    }
+                }
+                
                 return value;
             }
-            catch (Exception e)
-            {Console.WriteLine(e.Message);
+            catch (Exception)
+            {
                 return value;
             }
             

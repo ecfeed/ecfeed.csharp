@@ -8,11 +8,10 @@ namespace exampleNUnit
     public class UnitTest
     {
         // [TestCaseSource(typeof(FeedString))]
-        [TestCaseSource(nameof(MethodTestProvider), new object[] {"", ""}) ]
-        public void TestString(string a0, string a1, string a2, string a3, string a4, string a5, string a6, string a7, string a8, string a9, string a10)
-        {
-            Assert.That(false, Is.True);
-        }
+        // public void TestString(string a0, string a1, string a2, string a3, string a4, string a5, string a6, string a7, string a8, string a9, string a10)
+        // {
+        //     Assert.That(false, Is.True);
+        // }
 
         // [TestCaseSource(typeof(FeedInt))]
         // public void TestInt(int a0, int a1)
@@ -26,13 +25,10 @@ namespace exampleNUnit
         //     Assert.That(false, Is.True);
         // }
 
-        static IEnumerable MethodTestProvider(string model, string method)
+        [TestCaseSource(typeof(FeedEnum))]
+        public void TestEnum(CSharpEnum a0)
         {
-            ITestProvider testProvider = new TestProvider();
-            testProvider.Model = "7482-5194-2849-1943-2448";
-            testProvider.Method = "com.example.test.Demo.typeString";
-
-            return testProvider.QueueNWise();
+            // Assert.That(false, Is.True);
         }
     }
 
@@ -72,4 +68,17 @@ namespace exampleNUnit
         }
     }
 
+    class FeedEnum : IEnumerable
+    {
+        public IEnumerator GetEnumerator()
+        {
+            ITestProvider testProvider = new TestProvider();
+            testProvider.Model = "7482-5194-2849-1943-2448";
+            testProvider.Method = "com.example.test.Demo.typeEnum";
+
+            return testProvider.QueueNWise(1).GetEnumerator();
+        }
+    }
+
+    public enum CSharpEnum { Uno, Dos, Tres }
 }

@@ -1,4 +1,5 @@
 using System;
+using System.Reflection;
 using System.Linq;
 using System.IO;
 using System.Text;
@@ -28,6 +29,7 @@ namespace EcFeed
         public string Method { get; set; }
         public Dictionary<string, object> Settings { get; set; }       
 
+        public Assembly TestAssembly { get; set; }
         public string[] ArgumentTypes { get; set; }
 
         public event EventHandler<TestEventArgs> TestEventHandler;

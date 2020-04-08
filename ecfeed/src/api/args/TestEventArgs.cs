@@ -1,14 +1,12 @@
 using System;
-using NUnit.Framework;
 
 namespace EcFeed
 {
-    public sealed class TestEventArgs : EventArgs
+    internal sealed class TestEventArgs : EventArgs
     {
         public TestCase Schema { get; set; }
         public string DataRaw { get; set; }
         public object[] DataObject { get; set; }
-        public TestCaseData DataTest { get; set; }
 
         public override string ToString()
         {

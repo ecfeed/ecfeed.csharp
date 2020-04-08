@@ -36,11 +36,10 @@ namespace exampleNUnit
     {
         public IEnumerator GetEnumerator()
         {
-            ITestProvider testProvider = new TestProvider();
+            TestProvider testProvider = new TestProvider();
             testProvider.Model = "7482-5194-2849-1943-2448";
-            testProvider.Method = "com.example.test.Demo.typeString";
 
-            return testProvider.QueueNWise().GetEnumerator();
+            return testProvider.GenerateNWise("com.example.test.Demo.typeString").GetEnumerator();
         }
     }
 
@@ -50,9 +49,8 @@ namespace exampleNUnit
         {
             ITestProvider testProvider = new TestProvider();
             testProvider.Model = "7482-5194-2849-1943-2448";
-            testProvider.Method = "com.example.test.Demo.typeInt";
 
-            return testProvider.QueueNWise().GetEnumerator();
+            return testProvider.GenerateNWise("com.example.test.Demo.typeInt").GetEnumerator();
         }
     }
 
@@ -62,9 +60,8 @@ namespace exampleNUnit
         {
             ITestProvider testProvider = new TestProvider();
             testProvider.Model = "7482-5194-2849-1943-2448";
-            testProvider.Method = "com.example.test.Demo.typeMix";
 
-            return testProvider.QueueNWise().GetEnumerator();
+            return testProvider.GenerateNWise("com.example.test.Demo.typeMix").GetEnumerator();
         }
     }
 
@@ -74,9 +71,8 @@ namespace exampleNUnit
         {
             ITestProvider testProvider = new TestProvider();
             testProvider.Model = "7482-5194-2849-1943-2448";
-            testProvider.Method = "com.example.test.Demo.typeEnum";
 
-            return testProvider.QueueNWise(1).GetEnumerator();
+            return testProvider.GenerateNWise("com.example.test.Demo.typeEnum", 1).GetEnumerator();
         }
     }
 

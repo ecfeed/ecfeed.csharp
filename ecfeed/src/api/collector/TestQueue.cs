@@ -2,13 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.Concurrent;
-using NUnit.Framework;
 
 namespace EcFeed
 {
-    public sealed class TestQueue : ITestQueue
+    internal sealed class TestQueue : IEnumerable<object[]>
     {
-        private BlockingCollection<TestCaseData> _fifo = new BlockingCollection<TestCaseData>();
+        private BlockingCollection<object[]> _fifo = new BlockingCollection<object[]>();
 
         public int Count
         {
@@ -20,13 +19,17 @@ namespace EcFeed
             return Count;
         }
 
-        internal TestQueue(ITestProvider testProvider)
+        internal TestQueue(TestProvider testProvider)
         {
-            ITestProvider fifoTestProvider = testProvider.Copy();
-            fifoTestProvider.AddTestEventHandler(TestEventHandler);
-            fifoTestProvider.AddStatusEventHandler(StatusEventHandler);
+            testProvider.AddTestEventHandler(TestEventHandler);
+            testProvider.AddStatusEventHandler(StatusEventHandler);
             
-            fifoTestProvider.Generate(Template.Stream);
+            Execute(testProvider);
+        }
+
+        private async void Execute(TestProvider testProvider)
+        {
+            await testProvider.GenerateExecute();
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -34,11 +37,11 @@ namespace EcFeed
             return this.GetEnumerator();
         }
 
-        public IEnumerator<TestCaseData> GetEnumerator()
+        public IEnumerator<object[]> GetEnumerator()
         {
             while (!_fifo.IsCompleted)
             {
-                TestCaseData element = null;
+                object[] element = null;
 
                 try
                 {
@@ -55,7 +58,7 @@ namespace EcFeed
 
         private void TestEventHandler(object sender, TestEventArgs args)
         {
-            _fifo.Add(args.DataTest);
+            _fifo.Add(args.DataObject);
         }
 
         private void StatusEventHandler(object sender, StatusEventArgs args)

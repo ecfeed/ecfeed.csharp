@@ -2,23 +2,47 @@ using System;
 
 namespace EcFeed
 {
-    public static class Template
+    public enum Template
     {
-        public const string JSON = "JSON";
-        public const string CSV = "CSV";
-        public const string Gherkin = "Gherkin";
-        public const string XML = "XML";
-        public const string Stream = "Stream";
-        public const string StreamRaw = "StreamRaw";
-    }   
+        JSON, CSV, Gherkin, XML, Stream, StreamRaw
+    }
 
-    public static class Generator
+    public enum Generator
     {
-        public const string Cartesian = "genCartesian";
-        public const string NWise = "genNWise";
-        public const string Random = "genRandom";
-        public const string Static = "static";
-    } 
+        Cartesian, NWise, Random, Static
+    }
+
+    static class EnumExtensions
+    {
+        public static string GetValue(this Template template)
+        {
+            switch (template)
+            {
+                case Template.JSON: return "JSON";
+                case Template.CSV: return "CSV";
+                case Template.Gherkin: return "Gherkin";
+                case Template.XML: return "XML";
+                case Template.Stream: return "Stream";
+                case Template.StreamRaw: return "StreamRaw";
+
+            }
+            
+            throw new TestProviderException("Invalid export type");
+        }
+
+        public static string GetValue(this Generator generator)
+        {
+            switch (generator)
+            {
+                case Generator.Cartesian: return "genCartesian";
+                case Generator.NWise: return "genNWise";
+                case Generator.Random: return "genRandom";
+                case Generator.Static: return "static";
+            }
+
+            throw new TestProviderException("Invalid generator type");
+        }
+    }
 
     public static class Parameter
     {
@@ -70,6 +94,6 @@ namespace EcFeed
         internal const int ParameterCoverage = 100;
         internal const int ParameterLength = 10;
 
-        internal const string Template = EcFeed.Template.JSON;
+        internal const string Template = "JSON";
     }    
 }

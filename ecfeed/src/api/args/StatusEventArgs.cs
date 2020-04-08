@@ -2,7 +2,7 @@ using System.Net;
 
 namespace EcFeed
 {
-    public sealed class StatusEventArgs
+    internal sealed class StatusEventArgs
     {
         public StatusMessage Schema { get; set; }
         public HttpStatusCode StatusCode { get; set; }

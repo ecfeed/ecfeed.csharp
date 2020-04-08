@@ -13,31 +13,32 @@ using Newtonsoft.Json;
 
 namespace EcFeed
 {
-    public sealed class TestProvider : ITestProvider
+    public class TestProvider : ITestProvider
     {
         static TestProvider()
         {
             System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
         }
 
-        public string KeyStorePath { get; set; }
-        public string KeyStorePassword { get; set; }
-        public string CertificateHash { get; set; }
-        public string GeneratorAddress { get; set; }
+        public string KeyStorePath { get; private set; }
+        public string KeyStorePassword { get; private set; }
+        public string CertificateHash { get; private set; }
+        public string GeneratorAddress { get; private set; }
 
         public string Model { get; set; }
-        public string Method { get; set; }
-        public Dictionary<string, object> Settings { get; set; }       
+        private string Method { get; set; }
 
-        public Assembly TestAssembly { get; set; }
-        public string[] ArgumentTypes { get; set; }
+        public GeneratorOptions Settings { get; set; }       
 
-        public event EventHandler<TestEventArgs> TestEventHandler;
-        public event EventHandler<StatusEventArgs> StatusEventHandler;
+        internal Assembly TestAssembly { get; set; }
+        internal string[] ArgumentTypes { get; set; }
+
+        internal event EventHandler<TestEventArgs> TestEventHandler;
+        internal event EventHandler<StatusEventArgs> StatusEventHandler;
 
         public TestProvider(
             string keyStorePath = null, string keyStorePassword = null, string certificateHash = null, string generatorAddress = null, 
-            string model = null, string method = null, Dictionary<string, object> settings = null,
+            string model = null, GeneratorOptions settings = null,
             bool verify = true)
         {
             KeyStorePath = string.IsNullOrEmpty(keyStorePath) ? SetDefaultKeyStorePath() : keyStorePath;
@@ -51,17 +52,19 @@ namespace EcFeed
             }
 
             Model = model;
-            Method = method;
             Settings = settings;
         }
 
-        public TestProvider(ITestProvider testProvider) 
+        public TestProvider(TestProvider testProvider) 
             : this(
                 testProvider.KeyStorePath, testProvider.KeyStorePassword, testProvider.CertificateHash, testProvider.GeneratorAddress, 
-                testProvider.Model, testProvider.Method, testProvider.Settings,
-                false) { }
+                testProvider.Model, testProvider.Settings,
+                false) 
+        { 
+            this.Method = testProvider.Method;
+        }
 
-        public ITestProvider Copy()
+        internal TestProvider Copy()
         {
             return new TestProvider(this);
         }
@@ -174,7 +177,9 @@ namespace EcFeed
 
         private void ValidateServiceAddressCorectness() { }
 
-        public async Task<string> Generate(
+//-------------------------------------------------------------------------------------------
+
+        public async Task<string> Generate(string method,
             string template = Default.Template)
         {
             Dictionary<string, object> additionalData = new Dictionary<string, object> { };
@@ -182,49 +187,49 @@ namespace EcFeed
             return await RequestGenerate(additionalData, template);
         }
 
-        public async Task<string> GenerateCartesian(
-            string template = Default.Template)
-        {
-            Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Cartesian } };
+        // public async IEnumerable<string> GenerateCartesianx(
+        //     string template = Default.Template)
+        // {
+        //     Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Cartesian } };
 
-            return await RequestGenerate(additionalData, template);
-        }
+        //     return await RequestGenerate(additionalData, template);
+        // }
 
-        public async Task<string> GenerateNWise(
-            string template = Default.Template,
-            int n = Default.ParameterN, 
-            int coverage = Default.ParameterCoverage)
-        {
-            Dictionary<string, string> additionalDataProperties = new Dictionary<string, string> { { Parameter.N, "" + n }, { Parameter.Coverage, "" + coverage } };
-            Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.NWise }, { Parameter.Properties, additionalDataProperties } };
+        // public async IEnumerable<string> x(
+        //     string template = Default.Template,
+        //     int n = Default.ParameterN, 
+        //     int coverage = Default.ParameterCoverage)
+        // {
+        //     Dictionary<string, string> additionalDataProperties = new Dictionary<string, string> { { Parameter.N, "" + n }, { Parameter.Coverage, "" + coverage } };
+        //     Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.NWise }, { Parameter.Properties, additionalDataProperties } };
 
-            return await RequestGenerate(additionalData, template);
-        }
+        //     return await RequestGenerate(additionalData, template);
+        // }
 
-        public async Task<string> GenerateRandom(
-            string template = Default.Template,
-            int length = Default.ParameterLength, 
-            bool duplicates = Default.ParameterDuplicates)
-        {
-            Dictionary<string, object> additionalDataProperties = new Dictionary<string, object> { { Parameter.Length, "" + length }, { Parameter.Duplicates, duplicates ? "true" : "false" } };
-            Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Random }, { Parameter.Properties, additionalDataProperties } };
+        // public async IEnumerable<string> GenerateRandomx(
+        //     string template = Default.Template,
+        //     int length = Default.ParameterLength, 
+        //     bool duplicates = Default.ParameterDuplicates)
+        // {
+        //     Dictionary<string, object> additionalDataProperties = new Dictionary<string, object> { { Parameter.Length, "" + length }, { Parameter.Duplicates, duplicates ? "true" : "false" } };
+        //     Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Random }, { Parameter.Properties, additionalDataProperties } };
 
-            return await RequestGenerate(additionalData, template);
-        }
+        //     return await RequestGenerate(additionalData, template);
+        // }
 
-        public async Task<string> GenerateStatic(
-            string template = Default.Template,
-            object testSuites = null)
-        {
-            object updateTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
-            Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Static }, { Parameter.TestSuites, updateTestSuites } };
+        // public async IEnumerable<string> GenerateStaticx(
+        //     string template = Default.Template,
+        //     object testSuites = null)
+        // {
+        //     object updateTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
+        //     Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Static }, { Parameter.TestSuites, updateTestSuites } };
 
-            return await RequestGenerate(additionalData, template);
-        }
+        //     return await RequestGenerate(additionalData, template);
+        // }
 
         private async Task<string> RequestGenerate(Dictionary<string, object> additionalData, string template)
         {
-            ITestProvider context = this.Copy();
+            TestProvider context = this.Copy();
             context.Settings = MergeTestProviderSettings(additionalData, context.Settings);
 
             string request = GenerateRequestURL(context, template);
@@ -233,107 +238,72 @@ namespace EcFeed
             return await response;
         }
 
-        public TestQueue Queue()
+//-------------------------------------------------------------------------------------------
+
+        public IEnumerable<object[]> Generate(
+            string method,
+            Generator generator,
+            GeneratorOptions generatorOptions)
         {
-            Dictionary<string, object> additionalData = new Dictionary<string, object> { };
-            
-            return RequestQueue(additionalData);
+            return GenerateRequest(method, null);
         }
 
-        public TestQueue QueueCartesian()
+        public IEnumerable<object[]> GenerateCartesian(
+            string method)
         {
-            Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Cartesian } };
+            Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Cartesian.GetValue() } };
 
-            return RequestQueue(additionalData);
+            return GenerateRequest(method, additionalData);
         }
 
-        public TestQueue QueueNWise(
+        public IEnumerable<object[]> GenerateNWise(
+            string method,
             int n = Default.ParameterN, 
             int coverage = Default.ParameterCoverage)
         {
             Dictionary<string, string> additionalDataProperties = new Dictionary<string, string> { { Parameter.N, "" + n }, { Parameter.Coverage, "" + coverage } };
-            Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.NWise }, { Parameter.Properties, additionalDataProperties } };
+            Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.NWise.GetValue() }, { Parameter.Properties, additionalDataProperties } };
 
-            return RequestQueue(additionalData);
+            return GenerateRequest(method, additionalData);
         }
 
-        public TestQueue QueueRandom(
+        public IEnumerable<object[]> GenerateRandom(
+            string method,
             int length = Default.ParameterLength, 
             bool duplicates = Default.ParameterDuplicates)
         {
             Dictionary<string, object> additionalDataProperties = new Dictionary<string, object> { { Parameter.Length, "" + length }, { Parameter.Duplicates, duplicates ? "true" : "false" } };
-            Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Random }, { Parameter.Properties, additionalDataProperties } };
+            Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Random.GetValue() }, { Parameter.Properties, additionalDataProperties } };
 
-            return RequestQueue(additionalData);
+            return GenerateRequest(method, additionalData);
         }
 
-        public TestQueue QueueStatic(
+        public IEnumerable<object[]> GenerateStatic(
+            string method,
             object testSuites = null)
         {
             object updateTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;Console.WriteLine(updateTestSuites);
-            Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Static }, { Parameter.TestSuites, updateTestSuites } };
+            Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Static.GetValue() }, { Parameter.TestSuites, updateTestSuites } };
 
-            return RequestQueue(additionalData);
+            return GenerateRequest(method, additionalData);
         }
 
-        private TestQueue RequestQueue(Dictionary<string, object> additionalData)
+        private TestQueue GenerateRequest(string method, Dictionary<string, object> additionalData = null)
         {
-            ITestProvider context = this.Copy();
-            context.Settings = MergeTestProviderSettings(additionalData, context.Settings);
+            TestProvider context = this.Copy();
+
+            context.Settings = MergeTestProviderSettings(additionalData == null ? new Dictionary<string, object> { } : additionalData , context.Settings);
+            context.Method = method;
 
             return new TestQueue(context);
         }
 
-        public TestList List()
+        internal async Task<string> GenerateExecute()
         {
-            Dictionary<string, object> additionalData = new Dictionary<string, object> { };
-
-            return RequestList(additionalData);
+            return await SendRequest(GenerateRequestURL(this, Template.Stream.GetValue()), true);
         }
 
-        public TestList ListCartesian()
-        {
-            Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Cartesian } };
-
-            return RequestList(additionalData);
-        }
-
-        public TestList ListNWise(
-            int n = Default.ParameterN, 
-            int coverage = Default.ParameterCoverage)
-        {
-            Dictionary<string, string> additionalDataProperties = new Dictionary<string, string> { { Parameter.N, "" + n }, { Parameter.Coverage, "" + coverage } };
-            Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.NWise }, { Parameter.Properties, additionalDataProperties } };
-
-            return RequestList(additionalData);
-        }
-
-        public TestList ListRandom(
-            int length = Default.ParameterLength, 
-            bool duplicates = Default.ParameterDuplicates)
-        {
-            Dictionary<string, object> additionalDataProperties = new Dictionary<string, object> { { Parameter.Length, "" + length }, { Parameter.Duplicates, duplicates ? "true" : "false" } };
-            Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Random }, { Parameter.Properties, additionalDataProperties } };
-
-            return RequestList(additionalData);
-        }
-
-        public TestList ListStatic(
-            object testSuites = null)
-        {
-            object updateTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
-            Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Static }, { Parameter.TestSuites, updateTestSuites } };
-
-            return RequestList(additionalData);
-        }
-
-        private TestList RequestList(Dictionary<string, object> additionalData)
-        {
-            ITestProvider context = this.Copy();
-            context.Settings = MergeTestProviderSettings(additionalData, context.Settings);
-
-            return new TestList(context);
-        }
+//-------------------------------------------------------------------------------------------
 
         private Dictionary<string, object> MergeTestProviderSettings(Dictionary<string, object> settingsFrom, Dictionary<string, object> settingsTo)
         {
@@ -354,10 +324,10 @@ namespace EcFeed
         }
         private string GetRequestType(string template)
         {
-            return template.Equals(Template.Stream) || template.Equals(Template.StreamRaw) ? Request.Data : Request.Export;
+            return template.Equals(Template.Stream.GetValue()) || template.Equals(Template.StreamRaw.GetValue()) ? Request.Data : Request.Export;
         }
 
-        public void AddTestEventHandler(EventHandler<TestEventArgs> testEventHandler)
+        internal void AddTestEventHandler(EventHandler<TestEventArgs> testEventHandler)
         {
             
             if (TestEventHandler == null)
@@ -374,7 +344,7 @@ namespace EcFeed
             
         }
 
-        public void RemoveTestEventHandler(EventHandler<TestEventArgs> testEventHandler)
+        internal void RemoveTestEventHandler(EventHandler<TestEventArgs> testEventHandler)
         {
             
             if (TestEventHandler != null)
@@ -387,7 +357,7 @@ namespace EcFeed
 
         }
 
-        public void AddStatusEventHandler(EventHandler<StatusEventArgs> statusEventHandler)
+        internal void AddStatusEventHandler(EventHandler<StatusEventArgs> statusEventHandler)
         {
             
             if (StatusEventHandler == null)
@@ -404,7 +374,7 @@ namespace EcFeed
             
         }
 
-        public void RemoveStatusEventHandler(EventHandler<StatusEventArgs> statusEventHandler)
+        internal void RemoveStatusEventHandler(EventHandler<StatusEventArgs> statusEventHandler)
         {
             
             if (StatusEventHandler != null)
@@ -437,7 +407,7 @@ namespace EcFeed
             return request;
         }
 
-        private string GenerateRequestURL(ITestProvider provider, string template)
+        private string GenerateRequestURL(TestProvider provider, string template)
         {
             string requestData = SerializeTestProvider(provider, template);
             string request = $"{ GeneratorAddress }/{ Endpoint.Generator }?requestType={ GetRequestType(template) }&request={ requestData }";
@@ -445,7 +415,7 @@ namespace EcFeed
             return request;
         }
 
-        private string SerializeTestProvider(ITestProvider context, string template)
+        private string SerializeTestProvider(TestProvider context, string template)
         {
             ValidateTestProvider(context);
 
@@ -460,24 +430,17 @@ namespace EcFeed
             return JsonConvert.SerializeObject(parsedRequest);
         }
 
-        private void ValidateTestProvider(ITestProvider context)
+        private void ValidateTestProvider(TestProvider context)
         {
-
             if (string.IsNullOrEmpty(context.Model))
             {
                 throw new TestProviderException("The model ID is not defined and the default value cannot be used.");
             }
 
-            if (string.IsNullOrEmpty(context.Method))
-            {
-                throw new TestProviderException("The method name is not defined and the default value cannot be used.");
-            }
-
             if (context.Settings == null)
             {
-                context.Settings = new Dictionary<string, object> { { Parameter.DataSource, Generator.NWise } };
+                context.Settings = new Dictionary<string, object> { { Parameter.DataSource, Generator.NWise.GetValue() } };
             }
-
         }
 
         private async Task<string> SendRequest(string request, bool streamFilter)
@@ -587,7 +550,6 @@ namespace EcFeed
                 }
 
                 testEventArgs.DataObject = StreamParser.ParseTestCaseToDataType(testEventArgs.Schema, ArgumentTypes);
-                testEventArgs.DataTest = StreamParser.ParseTestToNUnit(testEventArgs.Schema, ArgumentTypes);
 
                 responseBuilder.AppendLine(line);
                 GenerateTestEvent(testEventArgs);
@@ -622,20 +584,6 @@ namespace EcFeed
 
         public override string ToString()
         { 
-            List<string> settings = new List<string>();
-
-            if (Settings != null)
-            {
-                foreach (var (key, value) in Settings)
-                {
-                    settings.Add("{" + $"{ key }: { value }" + "}");
-                }
-            }
-            else
-            {
-                settings.Add("EMPTY");
-            }
-
             return
                 $"TestProvider:\n" +
                 $"\t[KeyStorePath: '{ Path.GetFullPath(KeyStorePath) }']\n" +
@@ -643,8 +591,7 @@ namespace EcFeed
                 $"\t[CertificateHash: '{ CertificateHash }']\n" +
                 $"\t[GeneratorAddress: '{ GeneratorAddress }']\n" +
                 $"\t[Model: '{ Model }']\n" +
-                $"\t[Method: '{ Method }']\n" +
-                $"\t[Settings: '{ string.Join(", ", settings) }']";
+                $"\t[Settings: '{ Settings }]";
         }
     }
 }

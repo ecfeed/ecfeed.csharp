@@ -1,20 +1,28 @@
+using System.Collections.Generic;
+
 namespace EcFeed
 {
     public interface ITestProviderQueue
     {
-        TestQueue Queue();
+        IEnumerable<object[]> Generate(
+            string method,
+            Generator generator);
         
-        TestQueue QueueCartesian();
+        IEnumerable<object[]> GenerateCartesian(
+            string method);
         
-        TestQueue QueueNWise(
+        IEnumerable<object[]> GenerateNWise(
+            string method,
             int n = Default.ParameterN, 
             int coverage = Default.ParameterCoverage);
         
-        TestQueue QueueRandom(
+        IEnumerable<object[]> GenerateRandom(
+            string method,
             int length = Default.ParameterLength, 
             bool duplicates = Default.ParameterDuplicates);
         
-        TestQueue QueueStatic(
+        IEnumerable<object[]> GenerateStatic(
+            string method,
             object testSuites = null);
     }
 }

@@ -1,5 +1,4 @@
 using Newtonsoft.Json;
-using NUnit.Framework;
 using System;
 
 namespace EcFeed
@@ -68,16 +67,6 @@ namespace EcFeed
                 return value;
             }
             
-        }
-
-        public static TestCaseData ParseTestToNUnit(string data, string[] type)
-        {
-            return ParseTestToNUnit(ParseTestCase(data), type);
-        }
-
-        public static TestCaseData ParseTestToNUnit(TestCase data, string[] type)
-        {
-            return new TestCaseData(ParseTestCaseToDataType(data, type));
         }
 
     }

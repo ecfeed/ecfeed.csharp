@@ -3,17 +3,9 @@ using System.Collections.Generic;
 
 namespace EcFeed
 {
-    public interface ITestProvider : ITestProviderQueue
+    public interface ITestProvider
     {
-        // ITestProvider Copy();
-
-        // string KeyStorePath { get; set; }
-        // string KeyStorePassword { get; set; }
-        // string CertificateHash { get; set; }
-        // string GeneratorAddress { get; set; }
         string Model { get; set; }
-
-        // Dictionary<string, object> Settings { get; set; }
 
         void ValidateConnectionSettings();
 
@@ -46,5 +38,34 @@ namespace EcFeed
         //     string method,
         //     string template = Default.Template,
         //     object testSuites = null);
+
+        IEnumerable<object[]> Generate(
+            string method,
+            Generator generator,
+            GeneratorOptions generatorOptions);
+        
+        IEnumerable<object[]> GenerateNWise(
+            string method,
+            int n = Default.ParameterN, 
+            int coverage = Default.ParameterCoverage,
+            Dictionary<string, string[]> choices = null,
+            object constraints = null);
+
+        IEnumerable<object[]> GenerateCartesian(
+            string method,
+            Dictionary<string, string[]> choices = null,
+            object constraints = null);
+        
+        IEnumerable<object[]> GenerateRandom(
+            string method,
+            int length = Default.ParameterLength, 
+            bool duplicates = Default.ParameterDuplicates,
+            bool adaptive = Default.ParameterAdaptive,
+            Dictionary<string, string[]> choices = null,
+            object constraints = null);
+        
+        IEnumerable<object[]> GenerateStatic(
+            string method,
+            object testSuites = null);
     }
 }

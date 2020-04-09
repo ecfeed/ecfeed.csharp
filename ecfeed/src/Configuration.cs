@@ -55,6 +55,8 @@ namespace EcFeed
         public const string TestSuites = "testSuites";
         public const string Constraints = "constraints";
         public const string Arguments = "arguments";
+        public const string Choices = "choices";
+        public const string Adaptive = "adaptive";
     }
 
     public static class Request
@@ -90,6 +92,7 @@ namespace EcFeed
         
         internal const string ParameterTestSuite = "ALL";
         internal const bool ParameterDuplicates = true;
+        internal const bool ParameterAdaptive = false;
         internal const int ParameterN = 2;
         internal const int ParameterCoverage = 100;
         internal const int ParameterLength = 10;

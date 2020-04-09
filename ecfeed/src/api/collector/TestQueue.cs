@@ -19,17 +19,17 @@ namespace EcFeed
             return Count;
         }
 
-        internal TestQueue(TestProvider testProvider)
+        internal TestQueue(TestProvider testProvider, GeneratorOptions options, string method)
         {
             testProvider.AddTestEventHandler(TestEventHandler);
             testProvider.AddStatusEventHandler(StatusEventHandler);
             
-            Execute(testProvider);
+            Execute(testProvider, options, method);
         }
 
-        private async void Execute(TestProvider testProvider)
+        private async void Execute(TestProvider testProvider, GeneratorOptions options, string method)
         {
-            await testProvider.GenerateExecute();
+            await testProvider.GenerateExecute(method, options);
         }
 
         IEnumerator IEnumerable.GetEnumerator()

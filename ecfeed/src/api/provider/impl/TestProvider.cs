@@ -1,6 +1,5 @@
 using System;
 using System.Reflection;
-using System.Linq;
 using System.IO;
 using System.Text;
 using System.Net;
@@ -170,64 +169,119 @@ namespace EcFeed
 
 //-------------------------------------------------------------------------------------------
 
-        // public async Task<string> Generate(string method,
-        //     string template = Default.Template)
-        // {
-        //     Dictionary<string, object> additionalData = new Dictionary<string, object> { };
+        public IEnumerable<string> Export(
+            string method,
+            Generator generator,
+            GeneratorOptions generatorOptions,
+            Template exportTemplate = Default.ExportTemplate)
+        {
+            generatorOptions.AddOption(Parameter.DataSource, generator.GetValue());
 
-        //     return await RequestGenerate(additionalData, template);
-        // }
+            return ExportRequest(method, generatorOptions, exportTemplate);
+        }
 
-        // public async IEnumerable<string> GenerateCartesianx(
-        //     string template = Default.Template)
-        // {
-        //     Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Cartesian } };
+        public IEnumerable<string> ExportNWise(
+            string method,
+            int n = Default.ParameterN, 
+            int coverage = Default.ParameterCoverage,
+            Dictionary<string, string[]> choices = null,
+            object constraints = null,
+            Template exportTemplate = Default.ExportTemplate)
+        {
+            GeneratorProperties additionalProperties = new GeneratorProperties();
+            additionalProperties.AddProperty(Parameter.N, "" + n);
+            additionalProperties.AddProperty(Parameter.Coverage, "" + coverage);
 
-        //     return await RequestGenerate(additionalData, template);
-        // }
+            GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
+            additionalOptions.AddOption(Parameter.DataSource, Generator.NWise.GetValue());
 
-        // public async IEnumerable<string> x(
-        //     string template = Default.Template,
-        //     int n = Default.ParameterN, 
-        //     int coverage = Default.ParameterCoverage)
-        // {
-        //     Dictionary<string, string> additionalDataProperties = new Dictionary<string, string> { { Parameter.N, "" + n }, { Parameter.Coverage, "" + coverage } };
-        //     Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.NWise }, { Parameter.Properties, additionalDataProperties } };
+            if (choices != null)
+            {
+                additionalOptions.AddOption(Parameter.Choices, choices);
+            }
 
-        //     return await RequestGenerate(additionalData, template);
-        // }
+            if (constraints != null)
+            {
+                additionalOptions.AddOption(Parameter.Constraints, constraints);
+            }
 
-        // public async IEnumerable<string> GenerateRandomx(
-        //     string template = Default.Template,
-        //     int length = Default.ParameterLength, 
-        //     bool duplicates = Default.ParameterDuplicates)
-        // {
-        //     Dictionary<string, object> additionalDataProperties = new Dictionary<string, object> { { Parameter.Length, "" + length }, { Parameter.Duplicates, duplicates ? "true" : "false" } };
-        //     Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Random }, { Parameter.Properties, additionalDataProperties } };
+            return ExportRequest(method, additionalOptions, exportTemplate);
+        }
 
-        //     return await RequestGenerate(additionalData, template);
-        // }
+        public IEnumerable<string> ExportCartesian(
+            string method,
+            Dictionary<string, string[]> choices = null,
+            object constraints = null,
+            Template exportTemplate = Default.ExportTemplate)
+        {
+            GeneratorProperties additionalProperties = new GeneratorProperties();
 
-        // public async IEnumerable<string> GenerateStaticx(
-        //     string template = Default.Template,
-        //     object testSuites = null)
-        // {
-        //     object updateTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
-        //     Dictionary<string, object> additionalData = new Dictionary<string, object> { { Parameter.DataSource, Generator.Static }, { Parameter.TestSuites, updateTestSuites } };
+            GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
+            additionalOptions.AddOption(Parameter.DataSource, Generator.Cartesian.GetValue());
 
-        //     return await RequestGenerate(additionalData, template);
-        // }
+            if (choices != null)
+            {
+                additionalOptions.AddOption(Parameter.Choices, choices);
+            }
 
-        // private async Task<string> RequestGenerate(Dictionary<string, object> additionalData, string template)
-        // {
-        //     TestProvider context = this.Copy();
-        //     context.Settings = MergeTestProviderSettings(additionalData, context.Settings);
+            if (constraints != null)
+            {
+                additionalOptions.AddOption(Parameter.Constraints, constraints);
+            }
 
-        //     string request = GenerateRequestURL(context, template);
-        //     Task<string> response = SendRequest(request, template.Equals(Template.Stream));
+            return ExportRequest(method, additionalOptions, exportTemplate);
+        }
 
-        //     return await response;
-        // }
+        public IEnumerable<string> ExportRandom(
+            string method,
+            int length = Default.ParameterLength, 
+            bool duplicates = Default.ParameterDuplicates,
+            bool adaptive = Default.ParameterAdaptive,
+            Dictionary<string, string[]> choices = null,
+            object constraints = null,
+            Template exportTemplate = Default.ExportTemplate)
+        {
+            GeneratorProperties additionalProperties = new GeneratorProperties();
+            additionalProperties.AddProperty(Parameter.Length, "" + length);
+            additionalProperties.AddProperty(Parameter.Duplicates, "" + duplicates);
+            additionalProperties.AddProperty(Parameter.Adaptive, "" + adaptive);
+
+            GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
+            additionalOptions.AddOption(Parameter.DataSource, Generator.Random.GetValue());
+
+            if (choices != null)
+            {
+                additionalOptions.AddOption(Parameter.Choices, choices);
+            }
+
+            if (constraints != null)
+            {
+                additionalOptions.AddOption(Parameter.Constraints, constraints);
+            }
+
+            return ExportRequest(method, additionalOptions, exportTemplate);
+        }
+
+        public IEnumerable<string> ExportStatic(
+            string method,
+            object testSuites = null,
+            Template exportTemplate = Default.ExportTemplate)
+        {
+            object updatedTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
+
+            GeneratorProperties additionalProperties = new GeneratorProperties();
+
+            GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
+            additionalOptions.AddOption(Parameter.DataSource, Generator.Static.GetValue());
+            additionalOptions.AddOption(Parameter.TestSuites, updatedTestSuites);
+           
+            return ExportRequest(method, additionalOptions, exportTemplate);
+        }
+
+        private TestQueue<string> ExportRequest(string method, GeneratorOptions options, Template template)
+        {
+            return new TestQueue<string>(this.Copy(), options, template, method);
+        }
 
 //-------------------------------------------------------------------------------------------
 
@@ -335,19 +389,21 @@ namespace EcFeed
             return GenerateRequest(method, additionalOptions);
         }
 
-        private TestQueue GenerateRequest(string method, GeneratorOptions options)
+        private TestQueue<object[]> GenerateRequest(string method, GeneratorOptions options)
         {
-            return new TestQueue(this.Copy(), options, method);
-        }
-
-        internal async Task<string> GenerateExecute(string method, GeneratorOptions options)
-        {
-            string requestURL = GenerateRequestURL(this, options, method, Template.Stream.GetValue());
-
-            return await SendRequest(requestURL, true);
+            return new TestQueue<object[]>(this.Copy(), options, Template.Stream, method);
         }
 
 //-------------------------------------------------------------------------------------------
+
+        internal async Task<string> StartQueue(string method, GeneratorOptions options, Template template)
+        {
+            string requestURL = GenerateRequestURL(this, options, method, template.GetValue());
+
+            return await SendRequest(requestURL, template == Template.Stream);
+        }
+
+//-------------------------------------------------------------------------------------------        
 
         private string GetRequestType(string template)
         {
@@ -490,6 +546,8 @@ namespace EcFeed
                 throw new TestProviderException(e.Message);
             }
         }
+
+//-------------------------------------------------------------------------------------------   
 
         private async Task<string> ProcessResponse(HttpWebResponse response, bool streamFilter) 
         {

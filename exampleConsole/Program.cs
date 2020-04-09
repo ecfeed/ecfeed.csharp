@@ -68,18 +68,18 @@ namespace Testify.EcFeed.Example
             ITestProvider testProvider = new TestProvider();
             testProvider.Model = "7482-5194-2849-1943-2448";
 
-            IEnumerable<object[]> queue = testProvider.GenerateNWise("com.example.test.Demo.typeString");
+            // IEnumerable<string> queue = testProvider.ExportNWise("com.example.test.Demo.typeString");
 
-            Console.WriteLine(queue); // DEBUG
-            Thread.Sleep(1000); // DEBUG
-            Console.WriteLine(queue); // DEBUG
+            // Console.WriteLine(queue); // DEBUG
+            // Thread.Sleep(1000); // DEBUG
+            // Console.WriteLine(queue); // DEBUG
 
-            foreach(object[] element in queue)
+            foreach(var element in testProvider.ExportNWise("com.example.test.Demo.typeString"))
             {
-                Console.WriteLine("HANDLER: [{0}]", string.Join(", ", element));
+                Console.WriteLine("HANDLER: [{0}]", element);
             }
 
-            Console.WriteLine(queue); // DEBUG
+            // Console.WriteLine(queue); // DEBUG
         }
 
         // public static void ExampleTestList()

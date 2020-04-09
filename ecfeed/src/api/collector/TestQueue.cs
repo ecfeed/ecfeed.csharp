@@ -5,31 +5,26 @@ using System.Collections.Concurrent;
 
 namespace EcFeed
 {
-    internal sealed class TestQueue : IEnumerable<object[]>
+    internal sealed class TestQueue<T> : IEnumerable<T>
     {
-        private BlockingCollection<object[]> _fifo = new BlockingCollection<object[]>();
+        private BlockingCollection<T> _fifo = new BlockingCollection<T>();
 
-        public int Count
+        internal int Count
         {
             get => _fifo.Count;
         }
 
-        public int Size()
-        {
-            return Count;
-        }
-
-        internal TestQueue(TestProvider testProvider, GeneratorOptions options, string method)
+        internal TestQueue(TestProvider testProvider, GeneratorOptions options, Template template, string method)
         {
             testProvider.AddTestEventHandler(TestEventHandler);
             testProvider.AddStatusEventHandler(StatusEventHandler);
             
-            Execute(testProvider, options, method);
+            Execute(testProvider, options, template, method);
         }
 
-        private async void Execute(TestProvider testProvider, GeneratorOptions options, string method)
+        private async void Execute(TestProvider testProvider, GeneratorOptions options, Template template, string method)
         {
-            await testProvider.GenerateExecute(method, options);
+            await testProvider.StartQueue(method, options, template);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -37,11 +32,11 @@ namespace EcFeed
             return this.GetEnumerator();
         }
 
-        public IEnumerator<object[]> GetEnumerator()
+        public IEnumerator<T> GetEnumerator()
         {
             while (!_fifo.IsCompleted)
             {
-                object[] element = null;
+                T element = default(T);
 
                 try
                 {
@@ -58,7 +53,19 @@ namespace EcFeed
 
         private void TestEventHandler(object sender, TestEventArgs args)
         {
-            _fifo.Add(args.DataObject);
+            if ( args.DataObject != null && args.DataObject.GetType() == typeof(T))
+            {
+                _fifo.Add((T)(object)args.DataObject);
+                return;
+            }
+            
+            if ( args.DataRaw != null && args.DataRaw.GetType() == typeof(T))
+            {
+                _fifo.Add((T)(object)args.DataObject);
+                return;
+            }
+            
+            throw new TestProviderException("Unknown type");
         }
 
         private void StatusEventHandler(object sender, StatusEventArgs args)

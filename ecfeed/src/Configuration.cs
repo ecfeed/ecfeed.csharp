@@ -97,6 +97,6 @@ namespace EcFeed
         internal const int ParameterCoverage = 100;
         internal const int ParameterLength = 10;
 
-        internal const string Template = "JSON";
+        internal const Template ExportTemplate = Template.CSV;
     }    
 }

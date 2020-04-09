@@ -1,14 +1,14 @@
+using System;
 using System.Net;
 
 namespace EcFeed
 {
-    internal sealed class StatusEventArgs
+    internal sealed class StatusEventArgs : EventArgs
     {
         public StatusMessage Schema { get; set; }
         public HttpStatusCode StatusCode { get; set; }
         public string DataRaw { get; set; }
         public bool IsCompleted { get; set; }
-
 
         public override string ToString()
         {

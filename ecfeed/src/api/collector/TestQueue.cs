@@ -19,12 +19,7 @@ namespace EcFeed
             testProvider.AddTestEventHandler(TestEventHandler);
             testProvider.AddStatusEventHandler(StatusEventHandler);
             
-            Execute(testProvider, options, template, method);
-        }
-
-        private async void Execute(TestProvider testProvider, GeneratorOptions options, Template template, string method)
-        {
-            await testProvider.StartQueue(method, options, template);
+            testProvider.StartQueue(method, options, template);
         }
 
         IEnumerator IEnumerable.GetEnumerator()
@@ -51,21 +46,21 @@ namespace EcFeed
             }
         }
 
-        private void TestEventHandler(object sender, TestEventArgs args)
+        private void TestEventHandler(object sender, DataEventArgs args)
         {
+            if ( args.DataRaw != null && args.DataRaw.GetType() == typeof(T))
+            {
+                _fifo.Add((T)(object)args.DataRaw);
+                return;
+            }
+            
             if ( args.DataObject != null && args.DataObject.GetType() == typeof(T))
             {
                 _fifo.Add((T)(object)args.DataObject);
                 return;
             }
             
-            if ( args.DataRaw != null && args.DataRaw.GetType() == typeof(T))
-            {
-                _fifo.Add((T)(object)args.DataObject);
-                return;
-            }
-            
-            throw new TestProviderException("Unknown type");
+            throw new TestProviderException("Unknown type.");
         }
 
         private void StatusEventHandler(object sender, StatusEventArgs args)

@@ -74,9 +74,10 @@ namespace Testify.EcFeed.Example
             // Thread.Sleep(1000); // DEBUG
             // Console.WriteLine(queue); // DEBUG
 
-            foreach(var element in testProvider.ExportNWise("com.example.test.Demo.typeString"))
+            foreach(var element in testProvider.GenerateNWise("com.example.test.Demo.typeString"))
             {
-                Console.WriteLine("HANDLER: [{0}]", element);
+          //      Console.WriteLine("HANDLER: [{0}]", element);
+                Console.WriteLine("HANDLER: [{0}]", string.Join(", ", element));
             }
 
             // Console.WriteLine(queue); // DEBUG

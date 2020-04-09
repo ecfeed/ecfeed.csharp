@@ -29,7 +29,7 @@ namespace EcFeed
         internal Assembly TestAssembly { get; set; }
         internal string[] ArgumentTypes { get; set; }
 
-        internal event EventHandler<TestEventArgs> TestEventHandler;
+        internal event EventHandler<DataEventArgs> TestEventHandler;
         internal event EventHandler<StatusEventArgs> StatusEventHandler;
 
         public TestProvider(
@@ -94,7 +94,7 @@ namespace EcFeed
             return Default.GeneratorAddress;
         }
 
-        public async void ValidateConnectionSettings() 
+        public void ValidateConnectionSettings() 
         {
             ValidateKeyStorePathSyntax();
             ValidateKeyStorePathCorectness();
@@ -108,7 +108,7 @@ namespace EcFeed
             ValidateServiceAddressSyntax();
             ValidateServiceAddressCorectness();
 
-            await SendRequest(GenerateHealthCheckURL(GeneratorAddress), false);
+            SendRequest(GenerateHealthCheckURL(GeneratorAddress), false);
         }
 
         private void ValidateKeyStorePathSyntax()
@@ -396,11 +396,11 @@ namespace EcFeed
 
 //-------------------------------------------------------------------------------------------
 
-        internal async Task<string> StartQueue(string method, GeneratorOptions options, Template template)
+        internal void StartQueue(string method, GeneratorOptions options, Template template)
         {
             string requestURL = GenerateRequestURL(this, options, method, template.GetValue());
 
-            return await SendRequest(requestURL, template == Template.Stream);
+            SendRequest(requestURL, template == Template.Stream);
         }
 
 //-------------------------------------------------------------------------------------------        
@@ -410,7 +410,7 @@ namespace EcFeed
             return template.Equals(Template.Stream.GetValue()) || template.Equals(Template.StreamRaw.GetValue()) ? Request.Data : Request.Export;
         }
 
-        internal void AddTestEventHandler(EventHandler<TestEventArgs> testEventHandler)
+        internal void AddTestEventHandler(EventHandler<DataEventArgs> testEventHandler)
         {
             
             if (TestEventHandler == null)
@@ -427,7 +427,7 @@ namespace EcFeed
             
         }
 
-        internal void RemoveTestEventHandler(EventHandler<TestEventArgs> testEventHandler)
+        internal void RemoveTestEventHandler(EventHandler<DataEventArgs> testEventHandler)
         {
             
             if (TestEventHandler != null)
@@ -521,7 +521,7 @@ namespace EcFeed
             return JsonConvert.SerializeObject(parsedRequest);
         }
 
-        private async Task<string> SendRequest(string request, bool streamFilter)
+        private void SendRequest(string request, bool streamFilter)
         {
             try 
             {
@@ -529,7 +529,7 @@ namespace EcFeed
                 httpWebRequest.ServerCertificateValidationCallback = ValidateServerCertificate;
                 httpWebRequest.ClientCertificates.Add(new X509Certificate2(KeyStorePath, KeyStorePassword));
 
-                return await ProcessResponse((HttpWebResponse) httpWebRequest.GetResponse(), streamFilter);
+                ProcessResponse((HttpWebResponse) httpWebRequest.GetResponse(), streamFilter);
             }
             catch (CryptographicException)
             {
@@ -549,35 +549,33 @@ namespace EcFeed
 
 //-------------------------------------------------------------------------------------------   
 
-        private async Task<string> ProcessResponse(HttpWebResponse response, bool streamFilter) 
+        private async void ProcessResponse(HttpWebResponse response, bool streamFilter) 
         {
             if (!response.StatusCode.ToString().Equals("OK"))
             {
                 StatusEventArgs statusEventArgs = new StatusEventArgs() { DataRaw = response.StatusDescription, StatusCode = response.StatusCode, IsCompleted = true };
                 GenerateStatusEvent(statusEventArgs);
 
-                return response.StatusDescription;
+                return;
             }
-
-            StringBuilder responseBuilder = new StringBuilder("");
 
             using (StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8)) {
                 string line;
                 
                 while ((line = await reader.ReadLineAsync()) != null) {
-                    ProcessSingleResponse(line, streamFilter, responseBuilder);
+                    ProcessSingleResponse(line, streamFilter);
                 }
 
+                EndTransmission();
             }
 
-            return responseBuilder.ToString();
         }
 
-        private void ProcessSingleResponse(string line, bool streamFilter, StringBuilder responseBuilder)
+        private void ProcessSingleResponse(string line, bool streamFilter)
         {
             ProcessSingleInfoResponse(line);
             ProcessSingleStatusResponse(line);
-            ProcessSingleTestResponse(line, streamFilter, responseBuilder);
+            ProcessSingleDataResponse(line, streamFilter);
         }
 
         private void ProcessSingleInfoResponse(string line)
@@ -599,16 +597,7 @@ namespace EcFeed
 
                 if (statusEventArgs.Schema.Status != null)
                 {
-
-                    if (statusEventArgs.Schema.Status.Equals("END_DATA"))
-                    {
-                        statusEventArgs.IsCompleted = true;
-                    }
-                    else 
-                    {
-                        statusEventArgs.IsCompleted = false;
-                    }
-                        
+                    statusEventArgs.IsCompleted = false;       
                     GenerateStatusEvent(statusEventArgs);
                 }
             }
@@ -616,34 +605,35 @@ namespace EcFeed
             catch (JsonSerializationException) { }
         }
 
-        private void ProcessSingleTestResponse(string line, bool streamFilter, StringBuilder responseBuilder)
+        private void ProcessSingleDataResponse(string line, bool streamFilter)
         {
-            TestEventArgs testEventArgs = new TestEventArgs() { DataRaw = line };
-
+            DataEventArgs testEventArgs = new DataEventArgs() { DataRaw = line };
+            
             try
             {
                 testEventArgs.Schema = StreamParser.ParseTestCase(line);
 
-                if (testEventArgs.Schema.TestCaseArguments == null)
+                if (testEventArgs.Schema.TestCaseArguments != null)
                 {
-                    throw new TestProviderException("The message cannot be parsed.");
-                }
-
-                testEventArgs.DataObject = StreamParser.ParseTestCaseToDataType(testEventArgs.Schema, ArgumentTypes);
-
-                responseBuilder.AppendLine(line);
-                GenerateTestEvent(testEventArgs);
-            }
-            catch (Exception)
-            {
-                if (streamFilter)
+                    testEventArgs.DataObject = StreamParser.ParseTestCaseToDataType(testEventArgs.Schema, ArgumentTypes);
+                    GenerateTestEvent(testEventArgs);
+                }    
+                else
                 {
-                    return;
+                    if (!streamFilter)
+                    {
+                         GenerateTestEvent(testEventArgs);
+                    }
                 }
-
-                responseBuilder.AppendLine(line);
-                GenerateTestEvent(testEventArgs);
             }
+            catch (JsonReaderException) { }
+            catch (JsonSerializationException) { }
+        }
+
+        private void EndTransmission()
+        {
+            StatusEventArgs statusEventArgs = new StatusEventArgs() { DataRaw = "END_DATA", StatusCode = HttpStatusCode.OK, IsCompleted = true };
+            GenerateStatusEvent(statusEventArgs);
         }
 
         private void GenerateStatusEvent(StatusEventArgs args)
@@ -654,7 +644,7 @@ namespace EcFeed
             }
         }
 
-        private void GenerateTestEvent(TestEventArgs args)
+        private void GenerateTestEvent(DataEventArgs args)
         {
             if (TestEventHandler != null && TestEventHandler.GetInvocationList().Length > 0)
             {

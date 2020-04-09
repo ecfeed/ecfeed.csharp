@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 
 namespace EcFeed
 {
-    internal sealed class TestQueue<T> : IEnumerable<T>
+    internal sealed class TestProviderQueue<T> : IEnumerable<T>
     {
         private BlockingCollection<T> _fifo = new BlockingCollection<T>();
 
@@ -14,7 +14,7 @@ namespace EcFeed
             get => _fifo.Count;
         }
 
-        internal TestQueue(TestProvider testProvider, GeneratorOptions options, Template template, string method)
+        internal TestProviderQueue(TestProvider testProvider, GeneratorOptions options, Template template, string method)
         {
             testProvider.AddTestEventHandler(TestEventHandler);
             testProvider.AddStatusEventHandler(StatusEventHandler);

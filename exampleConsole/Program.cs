@@ -65,8 +65,7 @@ namespace Testify.EcFeed.Example
 
         public static void ExampleTestQueue()
         {
-            ITestProvider testProvider = new TestProvider();
-            testProvider.Model = "7482-5194-2849-1943-2448";
+            TestProvider testProvider = new TestProvider("7482-5194-2849-1943-2448");
 
             // IEnumerable<string> queue = testProvider.ExportNWise("com.example.test.Demo.typeString");
 
@@ -74,10 +73,10 @@ namespace Testify.EcFeed.Example
             // Thread.Sleep(1000); // DEBUG
             // Console.WriteLine(queue); // DEBUG
 
-            foreach(var element in testProvider.GenerateNWise("com.example.test.Demo.typeString"))
+            foreach(var element in testProvider.ExportNWise("com.example.test.Demo.typeString", template: Template.Gherkin))
             {
-          //      Console.WriteLine("HANDLER: [{0}]", element);
-                Console.WriteLine("HANDLER: [{0}]", string.Join(", ", element));
+               Console.WriteLine("HANDLER: [{0}]", element);
+                // Console.WriteLine("HANDLER: [{0}]", string.Join(", ", element));
             }
 
             // Console.WriteLine(queue); // DEBUG

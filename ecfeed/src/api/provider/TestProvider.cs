@@ -5,14 +5,13 @@ using System.Text;
 using System.Net;
 using System.Net.Security;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Newtonsoft.Json;
 
 namespace EcFeed
 {
-    public class TestProvider : ITestProvider
+    public class TestProvider
     {
         static TestProvider()
         {
@@ -33,8 +32,7 @@ namespace EcFeed
         internal event EventHandler<StatusEventArgs> StatusEventHandler;
 
         public TestProvider(
-            string keyStorePath = null, string keyStorePassword = null, string certificateHash = null, string generatorAddress = null, 
-            string model = null, bool verify = true)
+            string model, string keyStorePath = null, string keyStorePassword = null, string certificateHash = null, string generatorAddress = null, bool verify = true)
         {
             KeyStorePath = string.IsNullOrEmpty(keyStorePath) ? SetDefaultKeyStorePath() : keyStorePath;
             KeyStorePassword = string.IsNullOrEmpty(keyStorePassword) ? SetDefaultKeyStorePassword() : keyStorePassword;
@@ -51,8 +49,7 @@ namespace EcFeed
 
         public TestProvider(TestProvider testProvider) 
             : this(
-                testProvider.KeyStorePath, testProvider.KeyStorePassword, testProvider.CertificateHash, testProvider.GeneratorAddress, 
-                testProvider.Model, false) { }
+                testProvider.Model, testProvider.KeyStorePath, testProvider.KeyStorePassword, testProvider.CertificateHash, testProvider.GeneratorAddress, false) { }
 
         internal TestProvider Copy()
         {
@@ -173,11 +170,11 @@ namespace EcFeed
             string method,
             Generator generator,
             GeneratorOptions generatorOptions,
-            Template exportTemplate = Default.ExportTemplate)
+            Template template = Default.ExportTemplate)
         {
             generatorOptions.AddOption(Parameter.DataSource, generator.GetValue());
 
-            return ExportRequest(method, generatorOptions, exportTemplate);
+            return ExportRequest(method, generatorOptions, template);
         }
 
         public IEnumerable<string> ExportNWise(
@@ -186,7 +183,7 @@ namespace EcFeed
             int coverage = Default.ParameterCoverage,
             Dictionary<string, string[]> choices = null,
             object constraints = null,
-            Template exportTemplate = Default.ExportTemplate)
+            Template template = Default.ExportTemplate)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
             additionalProperties.AddProperty(Parameter.N, "" + n);
@@ -205,14 +202,14 @@ namespace EcFeed
                 additionalOptions.AddOption(Parameter.Constraints, constraints);
             }
 
-            return ExportRequest(method, additionalOptions, exportTemplate);
+            return ExportRequest(method, additionalOptions, template);
         }
 
         public IEnumerable<string> ExportCartesian(
             string method,
             Dictionary<string, string[]> choices = null,
             object constraints = null,
-            Template exportTemplate = Default.ExportTemplate)
+            Template template = Default.ExportTemplate)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
 
@@ -229,7 +226,7 @@ namespace EcFeed
                 additionalOptions.AddOption(Parameter.Constraints, constraints);
             }
 
-            return ExportRequest(method, additionalOptions, exportTemplate);
+            return ExportRequest(method, additionalOptions, template);
         }
 
         public IEnumerable<string> ExportRandom(
@@ -239,7 +236,7 @@ namespace EcFeed
             bool adaptive = Default.ParameterAdaptive,
             Dictionary<string, string[]> choices = null,
             object constraints = null,
-            Template exportTemplate = Default.ExportTemplate)
+            Template template = Default.ExportTemplate)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
             additionalProperties.AddProperty(Parameter.Length, "" + length);
@@ -259,13 +256,13 @@ namespace EcFeed
                 additionalOptions.AddOption(Parameter.Constraints, constraints);
             }
 
-            return ExportRequest(method, additionalOptions, exportTemplate);
+            return ExportRequest(method, additionalOptions, template);
         }
 
         public IEnumerable<string> ExportStatic(
             string method,
             object testSuites = null,
-            Template exportTemplate = Default.ExportTemplate)
+            Template template = Default.ExportTemplate)
         {
             object updatedTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
 
@@ -275,12 +272,12 @@ namespace EcFeed
             additionalOptions.AddOption(Parameter.DataSource, Generator.Static.GetValue());
             additionalOptions.AddOption(Parameter.TestSuites, updatedTestSuites);
            
-            return ExportRequest(method, additionalOptions, exportTemplate);
+            return ExportRequest(method, additionalOptions, template);
         }
 
-        private TestQueue<string> ExportRequest(string method, GeneratorOptions options, Template template)
+        private TestProviderQueue<string> ExportRequest(string method, GeneratorOptions options, Template template)
         {
-            return new TestQueue<string>(this.Copy(), options, template, method);
+            return new TestProviderQueue<string>(this.Copy(), options, template, method);
         }
 
 //-------------------------------------------------------------------------------------------
@@ -389,9 +386,9 @@ namespace EcFeed
             return GenerateRequest(method, additionalOptions);
         }
 
-        private TestQueue<object[]> GenerateRequest(string method, GeneratorOptions options)
+        private TestProviderQueue<object[]> GenerateRequest(string method, GeneratorOptions options)
         {
-            return new TestQueue<object[]>(this.Copy(), options, Template.Stream, method);
+            return new TestProviderQueue<object[]>(this.Copy(), options, Template.Stream, method);
         }
 
 //-------------------------------------------------------------------------------------------
@@ -617,17 +614,16 @@ namespace EcFeed
                 {
                     testEventArgs.DataObject = StreamParser.ParseTestCaseToDataType(testEventArgs.Schema, ArgumentTypes);
                     GenerateTestEvent(testEventArgs);
+                    return;
                 }    
-                else
-                {
-                    if (!streamFilter)
-                    {
-                         GenerateTestEvent(testEventArgs);
-                    }
-                }
             }
             catch (JsonReaderException) { }
             catch (JsonSerializationException) { }
+
+            if (!streamFilter)
+            {
+                 GenerateTestEvent(testEventArgs);
+            }
         }
 
         private void EndTransmission()

@@ -55,7 +55,10 @@ namespace EcFeed
             this.UserData.ToList().ForEach(x => settings.AddOption(x.Key, x.Value));
             settings.AddOption("properties", Properties.Properties);
 
-            return JsonConvert.SerializeObject(settings.UserData, Formatting.None).Replace("\"", "\'");
+            return JsonConvert.SerializeObject(settings.UserData, Formatting.None)
+                .Replace("\"", "\'")
+                .Replace("':'True'", "':'true'")
+                .Replace("':'False'", "':'false'");
         }
     } 
 

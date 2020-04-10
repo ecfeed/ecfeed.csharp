@@ -1,3 +1,5 @@
+# define DEVELOP
+
 using System;
 
 namespace EcFeed
@@ -73,16 +75,14 @@ namespace EcFeed
 
     static class Default
     {
-    // Production
-
-    // internal const string GeneratorAddress = "https://gen.ecfeed.com";
-    // internal const string CertificateHash = "AAE72557A7DB47EA4CF4C649108E422528EFDA1B";
-
-    // Development
+        #if DEVELOP
+            internal const string GeneratorAddress = "https://develop-gen.ecfeed.com";
+        #else
+            internal const string GeneratorAddress = "https://gen.ecfeed.com";
+        #endif
 
         internal const string KeyStorePassword = "changeit";
-        internal const string GeneratorAddress = "https://develop-gen.ecfeed.com";
-        internal const string CertificateHash = "FD3D44720A70F2A22454AAA0B3F1E8AE6FC0D84E";
+
         internal static readonly string[] KeyStorePath =
         {
             Environment.GetEnvironmentVariable("HOME") + "/.ecfeed/security.p12",
@@ -97,6 +97,6 @@ namespace EcFeed
         internal const int ParameterCoverage = 100;
         internal const int ParameterLength = 10;
 
-        internal const Template ExportTemplate = Template.CSV;
+        internal const Template ParameterTemplate = Template.CSV;
     }    
 }

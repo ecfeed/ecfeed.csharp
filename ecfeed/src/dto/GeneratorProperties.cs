@@ -42,7 +42,10 @@ namespace EcFeed
 
         public override string ToString()
         {
-            return JsonConvert.SerializeObject(Properties, Formatting.None).Replace("\"", "\'");;
+            return JsonConvert.SerializeObject(Properties, Formatting.None)
+                .Replace("\"", "\'")
+                 .Replace("':'True'", "':'true'")
+                .Replace("':'False'", "':'false'");
         }
     } 
 }

@@ -1,4 +1,7 @@
+#define VERBOSE
+
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.IO;
 using System.Text;
@@ -20,23 +23,24 @@ namespace EcFeed
 
         public string KeyStorePath { get; private set; }
         public string KeyStorePassword { get; private set; }
-        public string CertificateHash { get; private set; }
         public string GeneratorAddress { get; private set; }
 
         public string Model { get; set; }
 
-        internal Assembly TestAssembly { get; set; }
-        internal string[] ArgumentTypes { get; set; }
+        private InfoMessage MethodHeader { get; set; }
+        private string[] MethodArgumentNames { get; set; }
+        private string[] MethodArgumentTypes { get; set; }
 
+        private Assembly GlobalAssembly { get; set; }
+        
         internal event EventHandler<DataEventArgs> TestEventHandler;
         internal event EventHandler<StatusEventArgs> StatusEventHandler;
 
         public TestProvider(
-            string model, string keyStorePath = null, string keyStorePassword = null, string certificateHash = null, string generatorAddress = null, bool verify = true)
+            string model, string keyStorePath = null, string keyStorePassword = null, string generatorAddress = null, bool verify = true)
         {
             KeyStorePath = string.IsNullOrEmpty(keyStorePath) ? SetDefaultKeyStorePath() : keyStorePath;
-            KeyStorePassword = string.IsNullOrEmpty(keyStorePassword) ? SetDefaultKeyStorePassword() : keyStorePassword;
-            CertificateHash = string.IsNullOrEmpty(certificateHash) ? SetDefaultCertificateHash() : certificateHash;
+            KeyStorePassword = string.IsNullOrEmpty(keyStorePassword) ? SetDefaultKeyStorePassword() : keyStorePassword;;
             GeneratorAddress = string.IsNullOrEmpty(generatorAddress) ? SetDefaultServiceAddress() : generatorAddress;
 
             if (verify)
@@ -45,11 +49,14 @@ namespace EcFeed
             }
 
             Model = model;
+
+            string main = verify ? "verified" : "non-verified | copy";
+            PrintTrace($"CONFIGURATION ({ main })", this.ToString());
         }
 
         public TestProvider(TestProvider testProvider) 
             : this(
-                testProvider.Model, testProvider.KeyStorePath, testProvider.KeyStorePassword, testProvider.CertificateHash, testProvider.GeneratorAddress, false) { }
+                testProvider.Model, testProvider.KeyStorePath, testProvider.KeyStorePassword, testProvider.GeneratorAddress, false) { }
 
         internal TestProvider Copy()
         {
@@ -81,11 +88,6 @@ namespace EcFeed
             return Default.KeyStorePassword;
         }
 
-        private string SetDefaultCertificateHash()
-        {
-            return Default.CertificateHash;
-        }
-
         private string SetDefaultServiceAddress()
         {
             return Default.GeneratorAddress;
@@ -98,9 +100,6 @@ namespace EcFeed
 
             ValidateKeyStorePasswordSyntax();
             ValidateKeyStorePasswordCorectness();
-
-            ValidateCertificateHashSyntax();
-            ValidateCertificateHashSyntax();
 
             ValidateServiceAddressSyntax();
             ValidateServiceAddressCorectness();
@@ -134,25 +133,24 @@ namespace EcFeed
 
         private void ValidateKeyStorePasswordCorectness()
         {
+            X509Certificate2 certificate = null;
+
             try 
             {
-                new X509Certificate2(KeyStorePath, KeyStorePassword);
+                certificate = new X509Certificate2(KeyStorePath, KeyStorePassword);
             }
             catch (CryptographicException)
             {
-                throw new TestProviderException($"The certificate password is incorrect. Keystore path: '{ Path.GetFullPath(KeyStorePath) }'");
+                 throw new TestProviderException($"The certificate password is incorrect. Keystore path: '{ Path.GetFullPath(KeyStorePath) }'");
             }
-        }
-
-        private void ValidateCertificateHashSyntax()
-        {
-            if (string.IsNullOrEmpty(CertificateHash))
+            finally
             {
-                throw new TestProviderException("The certificate hash is not defined.");
+                if (certificate != null)
+                {
+                    certificate.Dispose();
+                }
             }
         }
-
-        private void ValidateCertificateHashCorectness() { }
 
         private void ValidateServiceAddressSyntax()
         {
@@ -166,11 +164,47 @@ namespace EcFeed
 
 //-------------------------------------------------------------------------------------------
 
+        public InfoMessage GetMethodHeader(string method)
+        {
+            TestProvider context;
+            SendHeaderRequest(out context, method);
+            return context.MethodHeader;
+        }
+
+        public string[] GetMethodTypes(string method)
+        {
+            TestProvider context;
+            SendHeaderRequest(out context, method);
+            return context.MethodArgumentTypes;
+        }
+
+        public string[] GetMethodNames(string method)
+        {
+            TestProvider context;
+            SendHeaderRequest(out context, method);
+            return context.MethodArgumentNames;
+        }
+
+        private void SendHeaderRequest(out TestProvider context, string method)
+        {
+            context = this.Copy();
+
+            GeneratorProperties additionalProperties = new GeneratorProperties();
+            additionalProperties.AddProperty(Parameter.Length, "0");
+
+            GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
+            additionalOptions.AddOption(Parameter.DataSource, Generator.Random.GetValue());
+
+            foreach(string element in ExportRequest(method, additionalOptions, Template.Stream, context)) { };
+        }
+
+//-------------------------------------------------------------------------------------------
+
         public IEnumerable<string> Export(
             string method,
             Generator generator,
             GeneratorOptions generatorOptions,
-            Template template = Default.ExportTemplate)
+            Template template = Default.ParameterTemplate)
         {
             generatorOptions.AddOption(Parameter.DataSource, generator.GetValue());
 
@@ -183,7 +217,7 @@ namespace EcFeed
             int coverage = Default.ParameterCoverage,
             Dictionary<string, string[]> choices = null,
             object constraints = null,
-            Template template = Default.ExportTemplate)
+            Template template = Default.ParameterTemplate)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
             additionalProperties.AddProperty(Parameter.N, "" + n);
@@ -209,7 +243,7 @@ namespace EcFeed
             string method,
             Dictionary<string, string[]> choices = null,
             object constraints = null,
-            Template template = Default.ExportTemplate)
+            Template template = Default.ParameterTemplate)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
 
@@ -236,7 +270,7 @@ namespace EcFeed
             bool adaptive = Default.ParameterAdaptive,
             Dictionary<string, string[]> choices = null,
             object constraints = null,
-            Template template = Default.ExportTemplate)
+            Template template = Default.ParameterTemplate)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
             additionalProperties.AddProperty(Parameter.Length, "" + length);
@@ -262,7 +296,7 @@ namespace EcFeed
         public IEnumerable<string> ExportStatic(
             string method,
             object testSuites = null,
-            Template template = Default.ExportTemplate)
+            Template template = Default.ParameterTemplate)
         {
             object updatedTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
 
@@ -275,9 +309,13 @@ namespace EcFeed
             return ExportRequest(method, additionalOptions, template);
         }
 
-        private TestProviderQueue<string> ExportRequest(string method, GeneratorOptions options, Template template)
+        private TestProviderQueue<string> ExportRequest(
+            string method, 
+            GeneratorOptions options, 
+            Template template, 
+            TestProvider context = null)
         {
-            return new TestProviderQueue<string>(this.Copy(), options, template, method);
+            return new TestProviderQueue<string>(context == null ? this.Copy() : context, options, template, method);
         }
 
 //-------------------------------------------------------------------------------------------
@@ -402,14 +440,8 @@ namespace EcFeed
 
 //-------------------------------------------------------------------------------------------        
 
-        private string GetRequestType(string template)
-        {
-            return template.Equals(Template.Stream.GetValue()) || template.Equals(Template.StreamRaw.GetValue()) ? Request.Data : Request.Export;
-        }
-
         internal void AddTestEventHandler(EventHandler<DataEventArgs> testEventHandler)
         {
-            
             if (TestEventHandler == null)
             {
                 TestEventHandler += testEventHandler;
@@ -420,13 +452,11 @@ namespace EcFeed
                 {
                     TestEventHandler += testEventHandler;
                 } 
-            }
-            
+            }   
         }
 
         internal void RemoveTestEventHandler(EventHandler<DataEventArgs> testEventHandler)
         {
-            
             if (TestEventHandler != null)
             {
                 if (Array.IndexOf(TestEventHandler.GetInvocationList(), testEventHandler) != -1)
@@ -434,12 +464,10 @@ namespace EcFeed
                     TestEventHandler -= testEventHandler;
                 }
             }
-
         }
 
         internal void AddStatusEventHandler(EventHandler<StatusEventArgs> statusEventHandler)
         {
-            
             if (StatusEventHandler == null)
             {
                 StatusEventHandler += statusEventHandler;
@@ -450,13 +478,11 @@ namespace EcFeed
                 {
                     StatusEventHandler += statusEventHandler;
                 } 
-            }
-            
+            }   
         }
 
         internal void RemoveStatusEventHandler(EventHandler<StatusEventArgs> statusEventHandler)
         {
-            
             if (StatusEventHandler != null)
             {
                 if (Array.IndexOf(StatusEventHandler.GetInvocationList(), statusEventHandler) != -1)
@@ -464,35 +490,36 @@ namespace EcFeed
                     StatusEventHandler -= statusEventHandler;
                 }
             }
-
         }
 
-        private bool ValidateServerCertificate(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors sslPolicyErrors) {
-            
-            foreach(X509ChainElement certificate in chain.ChainElements) {
-
-                if (certificate.Certificate.GetCertHashString() == CertificateHash) {
-                    return true;
-                }
-
-            }
- 
-            return false;
-        }
+//-------------------------------------------------------------------------------------------
 
         private string GenerateHealthCheckURL(string address)
         {
             string request = $"{ address }/{ Endpoint.HealthCheck }";
+
+            request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
+
+            PrintTrace("HEALTH CHECK REQUEST", request);
 
             return request;
         }
 
         private string GenerateRequestURL(TestProvider provider, GeneratorOptions options, string method, string template)
         {
-            string requestData = SerializeTestProvider(options, provider.Model, method, template);
+            string requestData = $"{ SerializeTestProvider(options, provider.Model, method, template) }";
             string request = $"{ GeneratorAddress }/{ Endpoint.Generator }?requestType={ GetRequestType(template) }&request={ requestData }";
 
+            request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
+
+            PrintTrace("DATA REQUEST", request);
+
             return request;
+        }
+
+        private string GetRequestType(string template)
+        {
+            return template.Equals(Template.Stream.GetValue()) || template.Equals(Template.StreamRaw.GetValue()) ? Request.Data : Request.Export;
         }
 
         private string SerializeTestProvider(GeneratorOptions options, string model, string method, string template)
@@ -520,11 +547,15 @@ namespace EcFeed
 
         private void SendRequest(string request, bool streamFilter)
         {
+            X509Certificate2 certificate = null;
+
             try 
             {
+                certificate = new X509Certificate2(KeyStorePath, KeyStorePassword);
+
                 HttpWebRequest httpWebRequest = (HttpWebRequest) HttpWebRequest.Create(request);
                 httpWebRequest.ServerCertificateValidationCallback = ValidateServerCertificate;
-                httpWebRequest.ClientCertificates.Add(new X509Certificate2(KeyStorePath, KeyStorePassword));
+                httpWebRequest.ClientCertificates.Add(certificate);
 
                 ProcessResponse((HttpWebResponse) httpWebRequest.GetResponse(), streamFilter);
             }
@@ -542,6 +573,23 @@ namespace EcFeed
 
                 throw new TestProviderException(e.Message);
             }
+            finally
+            {
+                certificate.Dispose();
+            }
+        }
+
+        private bool ValidateServerCertificate(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors sslPolicyErrors) {
+
+            foreach(X509ChainElement certificate in chain.ChainElements) {
+
+                if (certificate.Certificate.IssuerName.Name.Contains("C=NO, L=Oslo, O=EcFeed AS, OU=EcFeed, CN=ecfeed.com")) {
+                    return true;
+                }
+
+            }
+ 
+            return false;
         }
 
 //-------------------------------------------------------------------------------------------   
@@ -577,13 +625,17 @@ namespace EcFeed
 
         private void ProcessSingleInfoResponse(string line)
         {
-            try
+            if (line.Contains("'method'"))
             {
-                InfoMessage info = StreamParser.ParseInfoMessage(line);
-                ArgumentTypes = InfoMessageHelper.ExtractTypes(info);
+                try
+                {
+                    MethodHeader = StreamParser.ParseInfoMessage(line);
+                    MethodArgumentNames = InfoMessageHelper.ExtractArgumentNames(MethodHeader);
+                    MethodArgumentTypes = InfoMessageHelper.ExtractArgumentTypes(MethodHeader);
+                }
+                catch (JsonReaderException) { }
+                catch (JsonSerializationException) { }
             }
-            catch (JsonReaderException) { }
-            catch (JsonSerializationException) { }
         }
         private void ProcessSingleStatusResponse(string line)
         {
@@ -612,7 +664,7 @@ namespace EcFeed
 
                 if (testEventArgs.Schema.TestCaseArguments != null)
                 {
-                    testEventArgs.DataObject = StreamParser.ParseTestCaseToDataType(testEventArgs.Schema, ArgumentTypes);
+                    testEventArgs.DataObject = StreamParser.ParseTestCaseToDataType(testEventArgs.Schema, MethodArgumentTypes);
                     GenerateTestEvent(testEventArgs);
                     return;
                 }    
@@ -648,13 +700,20 @@ namespace EcFeed
             }
         }
 
+//------------------------------------------------------------------------------------------- 
+
+        [Conditional("VERBOSE")]
+        private void PrintTrace(string header, string trace)
+        {
+            Console.WriteLine($"{ DateTime.Now.ToString()} - { header }\n{ trace }\n");
+        }
+
         public override string ToString()
         { 
             return
                 $"TestProvider:\n" +
                 $"\t[KeyStorePath: '{ Path.GetFullPath(KeyStorePath) }']\n" +
                 $"\t[KeyStorePassword: '{ KeyStorePassword }']\n" +
-                $"\t[CertificateHash: '{ CertificateHash }']\n" +
                 $"\t[GeneratorAddress: '{ GeneratorAddress }']\n" +
                 $"\t[Model: '{ Model }']";
         }

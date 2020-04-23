@@ -2,7 +2,7 @@ using System;
 
 namespace EcFeed
 {
-    internal sealed class DataEventArgs : EventArgs
+    internal sealed class DataEventArgs
     {
         public TestCase Schema { get; set; }
         public string DataRaw { get; set; }

@@ -17,46 +17,6 @@ namespace EcFeed
 {
     public class TestProvider
     {
-//-------------------------------------------------------------------------------------------        
-        private class TestQueue<T> : IEnumerable<T>
-        {
-            internal BlockingCollection<T> Fifo { get; set; }
-            internal InfoMessage MethodHeader { get; set; }
-            internal string[] MethodArgumentNames { get; set; }
-            internal string[] MethodArgumentTypes { get; set; }
-
-            public TestQueue()
-            {
-                Fifo = new BlockingCollection<T>();
-            }
-
-            IEnumerator IEnumerable.GetEnumerator()
-            {
-                return this.GetEnumerator();
-            }
-
-            public IEnumerator<T> GetEnumerator()
-            {
-                while (!Fifo.IsCompleted)
-                {
-                    T element = default(T);
-
-                    try
-                    {
-                        element = Fifo.Take();
-                    }
-                    catch (InvalidOperationException) { }
-
-                    if (element != null)
-                    {
-                        yield return element;
-                    }
-                }
-            }
-        }
-
-//-------------------------------------------------------------------------------------------
-
         static TestProvider()
         {
             System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
@@ -81,33 +41,22 @@ namespace EcFeed
         {
             foreach (string path in Default.KeyStorePath)
             {
-                try
+                if (File.Exists(path))
                 {
-                    if (string.IsNullOrEmpty(path) || !File.Exists(path))
-                    {
-                        continue;
-                    }
-
                     return path;
                 }
-                catch (TestProviderException) { }
             }
 
             Console.WriteLine("The default keystore could not be loaded. In order to use the test generator, please provide a correct path.");
             return "";
         }
 
-        public void ValidateConnectionSettings() 
+        public void ValidateConnection() 
         {
-            SendRequest<string>(GenerateURLHealthCheck(GeneratorAddress), Template.Stream);
+            new HandleRequest<string>(SendRequest(GenerateHealthCheckURL(GeneratorAddress)), Template.Stream);
         }
 
 //-------------------------------------------------------------------------------------------
-
-        public InfoMessage GetMethodHeader(string method)
-        {
-            return SendHeaderRequest(method).MethodHeader;
-        }
 
         public string[] GetMethodTypes(string method)
         {
@@ -119,7 +68,7 @@ namespace EcFeed
             return SendHeaderRequest(method).MethodArgumentNames;
         }
 
-        private TestQueue<string> SendHeaderRequest(string method)
+        private HandleRequest<string> SendHeaderRequest(string method)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
             additionalProperties.AddProperty(Parameter.Length, "0");
@@ -127,7 +76,7 @@ namespace EcFeed
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
             additionalOptions.AddOption(Parameter.DataSource, Generator.Random.GetValue());
 
-            TestQueue<string> queue = Process<string>(method, additionalOptions, null, null, Template.Stream);
+            HandleRequest<string> queue = Process<string>(method, additionalOptions, null, null, Template.Stream);
 
             foreach(string element in queue) { };
 
@@ -293,14 +242,14 @@ namespace EcFeed
 
 //-------------------------------------------------------------------------------------------
 
-        private TestQueue<T> Process<T>(
+        private HandleRequest<T> Process<T>(
             string method, 
             GeneratorOptions options, 
             Dictionary<string, string[]> choices = null,
             object constraints = null,
             Template template = Template.Stream)
         {
-            string requestURL = GenerateURLRequest(options, method, template.GetValue());
+            string requestURL = GenerateRequestURL(options, method, template.GetValue());
 
             if (choices != null)
             {
@@ -312,12 +261,12 @@ namespace EcFeed
                 options.AddOption(Parameter.Constraints, constraints);
             }
 
-            return SendRequest<T>(requestURL, template);
+            return new HandleRequest<T>(SendRequest(requestURL), template);
         }
 
 //-------------------------------------------------------------------------------------------
 
-        private string GenerateURLHealthCheck(string address)
+        private string GenerateHealthCheckURL(string address)
         {
             string request = $"{ address }/{ Endpoint.HealthCheck }";
 
@@ -328,9 +277,9 @@ namespace EcFeed
             return request;
         }
 
-        private string GenerateURLRequest(GeneratorOptions options, string method, string template)
+        private string GenerateRequestURL(GeneratorOptions options, string method, string template)
         {
-            string requestData = $"{ SerializeTestProvider(options, method, template) }";
+            string requestData = $"{ SerializeRequest(options, method, template) }";
             string request = $"{ GeneratorAddress }/{ Endpoint.Generator }?requestType={ GetRequestType(template) }&request={ requestData }";
 
             request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
@@ -345,7 +294,7 @@ namespace EcFeed
             return template.Equals(Template.Stream.GetValue()) ? Request.Data : Request.Export;
         }
 
-        private string SerializeTestProvider(GeneratorOptions options, string method, string template)
+        private string SerializeRequest(GeneratorOptions options, string method, string template)
         {
             if (string.IsNullOrEmpty(Model))
             {
@@ -368,175 +317,197 @@ namespace EcFeed
             return JsonConvert.SerializeObject(parsedRequest);
         }
 
-        private TestQueue<T> SendRequest<T>(string request, Template template)
+        private HttpWebResponse SendRequest(String request)
         {
             X509Certificate2 certificate = null;
-            TestQueue<T> testQueue = new TestQueue<T>();
 
             try 
-            {
-                certificate = new X509Certificate2(KeyStorePath, KeyStorePassword);
+                {
+                    certificate = new X509Certificate2(KeyStorePath, KeyStorePassword);
 
-                HttpWebRequest httpWebRequest = (HttpWebRequest) HttpWebRequest.Create(request);
-                httpWebRequest.ServerCertificateValidationCallback = ValidateServerCertificate;
-                httpWebRequest.ClientCertificates.Add(certificate);
+                    HttpWebRequest httpWebRequest = (HttpWebRequest) HttpWebRequest.Create(request);
+                    httpWebRequest.ServerCertificateValidationCallback = ValidateServerCertificate;
+                    httpWebRequest.ClientCertificates.Add(certificate);
 
-                ProcessResponse(testQueue, (HttpWebResponse) httpWebRequest.GetResponse(), template);
-            }
-            catch (CryptographicException)
-            {
-                string message = $"The keystore password is incorrect. Keystore path: '{ Path.GetFullPath(KeyStorePath) }'";
-                StatusEventArgs statusEventArgs = new StatusEventArgs() { DataRaw = message, StatusCode = HttpStatusCode.BadRequest, IsCompleted = true };
-                
-                throw new TestProviderException(message);
-            }
-            catch (WebException e)
-            {
-                StatusEventArgs statusEventArgs = new StatusEventArgs() { DataRaw = e.Message, StatusCode = ((HttpWebResponse) e.Response).StatusCode, IsCompleted = true };
-                GenerateStatusEvent<T>(testQueue, statusEventArgs);
-
-                throw new TestProviderException(e.Message);
-            }
-            finally
-            {
-                certificate.Dispose();
-            }
-
-            return testQueue;
+                    return (HttpWebResponse) httpWebRequest.GetResponse();
+                }
+                catch (CryptographicException)
+                {
+                    string message = $"The keystore password is incorrect. Keystore path: '{ Path.GetFullPath(KeyStorePath) }'";
+                    throw new TestProviderException(message);
+                }
+                catch (WebException)
+                {
+                    string message = $"The connection could not be established.";
+                    throw new TestProviderException(message);
+                }
+                finally
+                {
+                    certificate.Dispose();
+                }
         }
 
-        private bool ValidateServerCertificate(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors sslPolicyErrors) {
-
+        private bool ValidateServerCertificate(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors sslPolicyErrors) 
+        {
             foreach(X509ChainElement certificate in chain.ChainElements) {
-
                 if (certificate.Certificate.IssuerName.Name.Contains("C=NO, L=Oslo, O=EcFeed AS, OU=EcFeed, CN=ecfeed.com")) {
                     return true;
                 }
-
             }
- 
+    
             return false;
         }
 
-//-------------------------------------------------------------------------------------------   
+//-------------------------------------------------------------------------------------------  
 
-        private async void ProcessResponse<T>(TestQueue<T> testQueue, HttpWebResponse response, Template template) 
+        public class HandleRequest<T> : IEnumerable<T>
         {
-            if (!response.StatusCode.ToString().Equals("OK"))
-            {
-                StatusEventArgs statusEventArgs = new StatusEventArgs() { DataRaw = response.StatusDescription, StatusCode = response.StatusCode, IsCompleted = true };
-                GenerateStatusEvent<T>(testQueue, statusEventArgs);
+            internal BlockingCollection<T> TestQueue { get; set; }
+            internal string[] MethodArgumentNames { get; set; }
+            internal string[] MethodArgumentTypes { get; set; }
 
-                return;
+            public HandleRequest(HttpWebResponse response, Template template)
+            {
+                TestQueue = new BlockingCollection<T>();
+                ProcessResponse(response, template);
             }
 
-            using (StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8)) {
-                string line;
-                
-                while ((line = await reader.ReadLineAsync()) != null) {
-                    ProcessResponseLine<T>(testQueue, line, template);
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
+
+            public IEnumerator<T> GetEnumerator()
+            {
+                while (!TestQueue.IsCompleted)
+                {
+                    T element = default(T);
+
+                    try
+                    {
+                        element = TestQueue.Take();
+                    }
+                    catch (InvalidOperationException) { }
+
+                    if (element != null)
+                    {
+                        yield return element;
+                    }
+                }
+            }
+
+            private async void ProcessResponse(HttpWebResponse response, Template template) 
+            {
+                if (!response.StatusCode.ToString().Equals("OK"))
+                {
+                    GenerateStatusEvent(response.StatusDescription, true);
+                    return;
                 }
 
-                EndTransmission<T>(testQueue);
+                using (StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8)) {
+                    string line;
+                    
+                    while ((line = await reader.ReadLineAsync()) != null) {
+                        ProcessResponseLine(line, template);
+                    }
+
+                    EndTransmission();
+                }
+
             }
 
-        }
-
-        private void ProcessResponseLine<T>(TestQueue<T> testQueue, string line, Template template)
-        {
-            if (template == Template.Stream)
-            {
-                ProcessResponseInfoLine<T>(testQueue, line);
-                ProcessResponseStatusLine<T>(testQueue, line);
-                ProcessResponseDataLine<T>(testQueue, line);
+            private void ProcessResponseLine(string line, Template template)
+            {Console.WriteLine(line);
+                if (template == Template.Stream)
+                {
+                    ProcessResponseInfoLine(line);
+                    ProcessResponseStatusLine(line);
+                    ProcessResponseDataLine(line);
+                }
+                else
+                {
+                    DataEventArgs dataEventArgs = new DataEventArgs() { DataRaw = line};
+                    GenerateTestEvent(dataEventArgs);
+                }
             }
-            else
-            {
-                DataEventArgs dataEventArgs = new DataEventArgs() { DataRaw = line};
-                GenerateTestEvent<T>(testQueue, dataEventArgs);
-            }
-        }
 
-        private void ProcessResponseInfoLine<T>(TestQueue<T> testQueue, string line)
-        {
-            if (line.Contains("'method'"))
+            private void ProcessResponseInfoLine(string line)
             {
+                if (line.Contains("\"info\""))
+                {
+                    try
+                    {
+                        InfoMessage infoMessage = JsonConvert.DeserializeObject<InfoMessage>(line);
+                        MethodArgumentNames = InfoMessageHelper.ExtractArgumentNames(infoMessage);
+                        MethodArgumentTypes = InfoMessageHelper.ExtractArgumentTypes(infoMessage);
+                    }
+                    catch (JsonReaderException) { }
+                    catch (JsonSerializationException) { }
+                }
+            }
+            private void ProcessResponseStatusLine(string line)
+            {
+                if (line.Contains("\"status\""))
+                {
+                    try
+                    {
+                        StatusMessage statusMessage = JsonConvert.DeserializeObject<StatusMessage>(line);
+                        GenerateStatusEvent(line, false);
+                    }
+                    catch (JsonReaderException) { }
+                    catch (JsonSerializationException) { }
+                }
+            }
+
+            private void ProcessResponseDataLine(string line)
+            {
+                DataEventArgs testEventArgs = new DataEventArgs() { DataRaw = line };
+                
                 try
                 {
-                    testQueue.MethodHeader = StreamParser.ParseInfoMessage(line);
-                    testQueue.MethodArgumentNames = InfoMessageHelper.ExtractArgumentNames(testQueue.MethodHeader);
-                    testQueue.MethodArgumentTypes = InfoMessageHelper.ExtractArgumentTypes(testQueue.MethodHeader);
+                    testEventArgs.Schema = StreamParser.ParseTestCase(line);
+
+                    if (testEventArgs.Schema.TestCaseArguments != null)
+                    {
+                        testEventArgs.DataObject = StreamParser.ParseTestCaseToDataType(testEventArgs.Schema, MethodArgumentTypes);
+                        GenerateTestEvent(testEventArgs);
+                        return;
+                    }    
                 }
                 catch (JsonReaderException) { }
                 catch (JsonSerializationException) { }
             }
-        }
-        private void ProcessResponseStatusLine<T>(TestQueue<T> testQueue, string line)
-        {
-            try
-            {
-                StatusEventArgs statusEventArgs = new StatusEventArgs() { DataRaw = line, StatusCode = HttpStatusCode.OK };
-                statusEventArgs.Schema = JsonConvert.DeserializeObject<StatusMessage>(line);
 
-                if (statusEventArgs.Schema.Status != null)
+            private void EndTransmission()
+            {
+                GenerateStatusEvent("END_DATA", true);
+            }
+
+            private void GenerateStatusEvent(string message, bool completed)
+            {
+                if (completed)
                 {
-                    statusEventArgs.IsCompleted = false;       
-                    GenerateStatusEvent<T>(testQueue, statusEventArgs);
+                    TestQueue.CompleteAdding();
                 }
             }
-            catch (JsonReaderException) { }
-            catch (JsonSerializationException) { }
-        }
 
-        private void ProcessResponseDataLine<T>(TestQueue<T> testQueue, string line)
-        {
-            DataEventArgs testEventArgs = new DataEventArgs() { DataRaw = line };
-            
-            try
+            private void GenerateTestEvent(DataEventArgs args)
             {
-                testEventArgs.Schema = StreamParser.ParseTestCase(line);
-
-                if (testEventArgs.Schema.TestCaseArguments != null)
+                if (args.DataRaw != null && args.DataRaw.GetType() == typeof(T))
                 {
-                    testEventArgs.DataObject = StreamParser.ParseTestCaseToDataType(testEventArgs.Schema, testQueue.MethodArgumentTypes);
-                    GenerateTestEvent<T>(testQueue, testEventArgs);
+                    TestQueue.Add((T)(object)args.DataRaw);
                     return;
-                }    
+                }
+                
+                if (args.DataObject != null && args.DataObject.GetType() == typeof(T))
+                {
+                    TestQueue.Add((T)(object)args.DataObject);
+                    return;
+                }
+                
+                throw new TestProviderException("Unknown type.");
             }
-            catch (JsonReaderException) { }
-            catch (JsonSerializationException) { }
-        }
-
-        private void EndTransmission<T>(TestQueue<T> testQueue)
-        {
-            StatusEventArgs statusEventArgs = new StatusEventArgs() { DataRaw = "END_DATA", StatusCode = HttpStatusCode.OK, IsCompleted = true };
-            GenerateStatusEvent<T>(testQueue, statusEventArgs);
-        }
-
-        private void GenerateStatusEvent<T>(TestQueue<T> testQueue, StatusEventArgs args)
-        {
-            if (args.IsCompleted)
-            {
-                testQueue.Fifo.CompleteAdding();
-            }
-        }
-
-        private void GenerateTestEvent<T>(TestQueue<T> testQueue, DataEventArgs args)
-        {
-            if (args.DataRaw != null && args.DataRaw.GetType() == typeof(T))
-            {
-                testQueue.Fifo.Add((T)(object)args.DataRaw);
-                return;
-            }
-            
-            if (args.DataObject != null && args.DataObject.GetType() == typeof(T))
-            {
-                testQueue.Fifo.Add((T)(object)args.DataObject);
-                return;
-            }
-            
-            throw new TestProviderException("Unknown type.");
-        }
+    }
 
 //------------------------------------------------------------------------------------------- 
 

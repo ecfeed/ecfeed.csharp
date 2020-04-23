@@ -15,7 +15,6 @@ namespace Testify.EcFeed.Example
 
             Console.WriteLine($"{ string.Join(", ", testProvider.GetMethodNames(method)) }");
             Console.WriteLine($"{ string.Join(", ", testProvider.GetMethodTypes(method)) }");
-            Console.WriteLine($"{ testProvider.GetMethodHeader(method) }");
 
             Dictionary<string, string[]> testChoices = new Dictionary<string, string[]>();
             testChoices.Add("arg1", new string[] {"choice1", "choice2"});

@@ -15,11 +15,6 @@ namespace EcFeed
             return JsonConvert.DeserializeObject<StatusMessage>(data);
         }
 
-        public static InfoMessage ParseInfoMessage(string data)
-        {
-            return JsonConvert.DeserializeObject<InfoMessage>(data);
-        }
-
         public static object[] ParseTestCaseToDataType(string data, string[] type)
         {
             return ParseTestCaseToDataType(ParseTestCase(data), type);

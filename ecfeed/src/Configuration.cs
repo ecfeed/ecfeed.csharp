@@ -6,7 +6,7 @@ namespace EcFeed
 {
     public enum Template
     {
-        JSON, CSV, Gherkin, XML, Stream, StreamRaw
+        JSON, CSV, Gherkin, XML, Stream
     }
 
     public enum Generator
@@ -25,7 +25,6 @@ namespace EcFeed
                 case Template.Gherkin: return "Gherkin";
                 case Template.XML: return "XML";
                 case Template.Stream: return "Stream";
-                case Template.StreamRaw: return "StreamRaw";
 
             }
             

@@ -2,12 +2,13 @@
 
 using System;
 using System.Diagnostics;
-using System.Reflection;
 using System.IO;
 using System.Text;
 using System.Net;
 using System.Net.Security;
+using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Newtonsoft.Json;
@@ -16,51 +17,64 @@ namespace EcFeed
 {
     public class TestProvider
     {
+//-------------------------------------------------------------------------------------------        
+        private class TestQueue<T> : IEnumerable<T>
+        {
+            internal BlockingCollection<T> Fifo { get; set; }
+            internal InfoMessage MethodHeader { get; set; }
+            internal string[] MethodArgumentNames { get; set; }
+            internal string[] MethodArgumentTypes { get; set; }
+
+            public TestQueue()
+            {
+                Fifo = new BlockingCollection<T>();
+            }
+
+            IEnumerator IEnumerable.GetEnumerator()
+            {
+                return this.GetEnumerator();
+            }
+
+            public IEnumerator<T> GetEnumerator()
+            {
+                while (!Fifo.IsCompleted)
+                {
+                    T element = default(T);
+
+                    try
+                    {
+                        element = Fifo.Take();
+                    }
+                    catch (InvalidOperationException) { }
+
+                    if (element != null)
+                    {
+                        yield return element;
+                    }
+                }
+            }
+        }
+
+//-------------------------------------------------------------------------------------------
+
         static TestProvider()
         {
             System.Net.ServicePointManager.SecurityProtocol = System.Net.SecurityProtocolType.Tls12;
         }
 
+        public string Model { get; set; }
+
         public string KeyStorePath { get; private set; }
         public string KeyStorePassword { get; private set; }
         public string GeneratorAddress { get; private set; }
 
-        public string Model { get; set; }
-
-        private InfoMessage MethodHeader { get; set; }
-        private string[] MethodArgumentNames { get; set; }
-        private string[] MethodArgumentTypes { get; set; }
-
-        private Assembly GlobalAssembly { get; set; }
-        
-        internal event EventHandler<DataEventArgs> TestEventHandler;
-        internal event EventHandler<StatusEventArgs> StatusEventHandler;
-
-        public TestProvider(
-            string model, string keyStorePath = null, string keyStorePassword = null, string generatorAddress = null, bool verify = true)
+        public TestProvider(string model, string keyStorePath = null, string keyStorePassword = null, string generatorAddress = null)
         {
-            KeyStorePath = string.IsNullOrEmpty(keyStorePath) ? SetDefaultKeyStorePath() : keyStorePath;
-            KeyStorePassword = string.IsNullOrEmpty(keyStorePassword) ? SetDefaultKeyStorePassword() : keyStorePassword;;
-            GeneratorAddress = string.IsNullOrEmpty(generatorAddress) ? SetDefaultServiceAddress() : generatorAddress;
-
-            if (verify)
-            {
-                ValidateConnectionSettings();
-            }
-
             Model = model;
 
-            string main = verify ? "verified" : "non-verified | copy";
-            PrintTrace($"CONFIGURATION ({ main })", this.ToString());
-        }
-
-        public TestProvider(TestProvider testProvider) 
-            : this(
-                testProvider.Model, testProvider.KeyStorePath, testProvider.KeyStorePassword, testProvider.GeneratorAddress, false) { }
-
-        internal TestProvider Copy()
-        {
-            return new TestProvider(this);
+            KeyStorePath = string.IsNullOrEmpty(keyStorePath) ? SetDefaultKeyStorePath() : keyStorePath;
+            KeyStorePassword = string.IsNullOrEmpty(keyStorePassword) ? Default.KeyStorePassword : keyStorePassword;;
+            GeneratorAddress = string.IsNullOrEmpty(generatorAddress) ? Default.GeneratorAddress : generatorAddress;
         }
 
         private string SetDefaultKeyStorePath()
@@ -69,10 +83,10 @@ namespace EcFeed
             {
                 try
                 {
-                    KeyStorePath = path;
-
-                    ValidateKeyStorePathSyntax();
-                    ValidateKeyStorePathCorectness();
+                    if (string.IsNullOrEmpty(path) || !File.Exists(path))
+                    {
+                        continue;
+                    }
 
                     return path;
                 }
@@ -83,124 +97,46 @@ namespace EcFeed
             return "";
         }
 
-        private string SetDefaultKeyStorePassword()
-        {
-            return Default.KeyStorePassword;
-        }
-
-        private string SetDefaultServiceAddress()
-        {
-            return Default.GeneratorAddress;
-        }
-
         public void ValidateConnectionSettings() 
         {
-            ValidateKeyStorePathSyntax();
-            ValidateKeyStorePathCorectness();
-
-            ValidateKeyStorePasswordSyntax();
-            ValidateKeyStorePasswordCorectness();
-
-            ValidateServiceAddressSyntax();
-            ValidateServiceAddressCorectness();
-
-            SendRequest(GenerateHealthCheckURL(GeneratorAddress), false);
+            SendRequest<string>(GenerateURLHealthCheck(GeneratorAddress), Template.Stream);
         }
-
-        private void ValidateKeyStorePathSyntax()
-        {
-            if (string.IsNullOrEmpty(KeyStorePath))
-            {
-                throw new TestProviderException("The keystore path is not defined.");
-            }
-        }
-
-        private void ValidateKeyStorePathCorectness()
-        {
-            if (!File.Exists(KeyStorePath)) 
-            {
-                throw new TestProviderException($"The keystore path is incorrect. It does not point to a file. Keystore path: '{ Path.GetFullPath(KeyStorePath) }'");
-            }
-        }
-
-        private void ValidateKeyStorePasswordSyntax()
-        {
-            if (string.IsNullOrEmpty(KeyStorePassword))
-            {
-                throw new TestProviderException("The certificate password is not defined.");
-            }
-        }
-
-        private void ValidateKeyStorePasswordCorectness()
-        {
-            X509Certificate2 certificate = null;
-
-            try 
-            {
-                certificate = new X509Certificate2(KeyStorePath, KeyStorePassword);
-            }
-            catch (CryptographicException)
-            {
-                 throw new TestProviderException($"The certificate password is incorrect. Keystore path: '{ Path.GetFullPath(KeyStorePath) }'");
-            }
-            finally
-            {
-                if (certificate != null)
-                {
-                    certificate.Dispose();
-                }
-            }
-        }
-
-        private void ValidateServiceAddressSyntax()
-        {
-            if (string.IsNullOrEmpty(GeneratorAddress))
-            {
-                throw new TestProviderException("The service address is not defined.");
-            }
-        }
-
-        private void ValidateServiceAddressCorectness() { }
 
 //-------------------------------------------------------------------------------------------
 
         public InfoMessage GetMethodHeader(string method)
         {
-            TestProvider context;
-            SendHeaderRequest(out context, method);
-            return context.MethodHeader;
+            return SendHeaderRequest(method).MethodHeader;
         }
 
         public string[] GetMethodTypes(string method)
         {
-            TestProvider context;
-            SendHeaderRequest(out context, method);
-            return context.MethodArgumentTypes;
+            return SendHeaderRequest(method).MethodArgumentTypes;
         }
 
         public string[] GetMethodNames(string method)
         {
-            TestProvider context;
-            SendHeaderRequest(out context, method);
-            return context.MethodArgumentNames;
+            return SendHeaderRequest(method).MethodArgumentNames;
         }
 
-        private void SendHeaderRequest(out TestProvider context, string method)
+        private TestQueue<string> SendHeaderRequest(string method)
         {
-            context = this.Copy();
-
             GeneratorProperties additionalProperties = new GeneratorProperties();
             additionalProperties.AddProperty(Parameter.Length, "0");
 
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
             additionalOptions.AddOption(Parameter.DataSource, Generator.Random.GetValue());
 
-            foreach(string element in ExportRequest(method, additionalOptions, Template.Stream, context)) { };
+            TestQueue<string> queue = Process<string>(method, additionalOptions, null, null, Template.Stream);
+
+            foreach(string element in queue) { };
+
+            return queue;
         }
 
 //-------------------------------------------------------------------------------------------
 
-        public IEnumerable<string> Export(
+        protected IEnumerable<string> Export(
             string method,
             Generator generator,
             GeneratorOptions generatorOptions,
@@ -208,7 +144,7 @@ namespace EcFeed
         {
             generatorOptions.AddOption(Parameter.DataSource, generator.GetValue());
 
-            return ExportRequest(method, generatorOptions, template);
+            return Process<string>(method, generatorOptions, null, null, template);
         }
 
         public IEnumerable<string> ExportNWise(
@@ -226,17 +162,7 @@ namespace EcFeed
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
             additionalOptions.AddOption(Parameter.DataSource, Generator.NWise.GetValue());
 
-            if (choices != null)
-            {
-                additionalOptions.AddOption(Parameter.Choices, choices);
-            }
-
-            if (constraints != null)
-            {
-                additionalOptions.AddOption(Parameter.Constraints, constraints);
-            }
-
-            return ExportRequest(method, additionalOptions, template);
+            return Process<string>(method, additionalOptions, choices, constraints, template);
         }
 
         public IEnumerable<string> ExportCartesian(
@@ -250,17 +176,7 @@ namespace EcFeed
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
             additionalOptions.AddOption(Parameter.DataSource, Generator.Cartesian.GetValue());
 
-            if (choices != null)
-            {
-                additionalOptions.AddOption(Parameter.Choices, choices);
-            }
-
-            if (constraints != null)
-            {
-                additionalOptions.AddOption(Parameter.Constraints, constraints);
-            }
-
-            return ExportRequest(method, additionalOptions, template);
+            return Process<string>(method, additionalOptions, choices, constraints, template);
         }
 
         public IEnumerable<string> ExportRandom(
@@ -280,17 +196,7 @@ namespace EcFeed
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
             additionalOptions.AddOption(Parameter.DataSource, Generator.Random.GetValue());
 
-            if (choices != null)
-            {
-                additionalOptions.AddOption(Parameter.Choices, choices);
-            }
-
-            if (constraints != null)
-            {
-                additionalOptions.AddOption(Parameter.Constraints, constraints);
-            }
-
-            return ExportRequest(method, additionalOptions, template);
+            return Process<string>(method, additionalOptions, choices, constraints, template);
         }
 
         public IEnumerable<string> ExportStatic(
@@ -306,28 +212,19 @@ namespace EcFeed
             additionalOptions.AddOption(Parameter.DataSource, Generator.Static.GetValue());
             additionalOptions.AddOption(Parameter.TestSuites, updatedTestSuites);
            
-            return ExportRequest(method, additionalOptions, template);
-        }
-
-        private TestProviderQueue<string> ExportRequest(
-            string method, 
-            GeneratorOptions options, 
-            Template template, 
-            TestProvider context = null)
-        {
-            return new TestProviderQueue<string>(context == null ? this.Copy() : context, options, template, method);
+            return Process<string>(method, additionalOptions, null, null, template);
         }
 
 //-------------------------------------------------------------------------------------------
 
-        public IEnumerable<object[]> Generate(
+        protected IEnumerable<object[]> Generate(
             string method,
             Generator generator,
             GeneratorOptions generatorOptions)
         {
             generatorOptions.AddOption(Parameter.DataSource, generator.GetValue());
 
-            return GenerateRequest(method, generatorOptions);
+            return Process<object[]>(method, generatorOptions);
         }
 
         public IEnumerable<object[]> GenerateNWise(
@@ -344,17 +241,7 @@ namespace EcFeed
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
             additionalOptions.AddOption(Parameter.DataSource, Generator.NWise.GetValue());
 
-            if (choices != null)
-            {
-                additionalOptions.AddOption(Parameter.Choices, choices);
-            }
-
-            if (constraints != null)
-            {
-                additionalOptions.AddOption(Parameter.Constraints, constraints);
-            }
-
-            return GenerateRequest(method, additionalOptions);
+            return Process<object[]>(method, additionalOptions, choices, constraints);
         }
 
         public IEnumerable<object[]> GenerateCartesian(
@@ -367,17 +254,7 @@ namespace EcFeed
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
             additionalOptions.AddOption(Parameter.DataSource, Generator.Cartesian.GetValue());
 
-            if (choices != null)
-            {
-                additionalOptions.AddOption(Parameter.Choices, choices);
-            }
-
-            if (constraints != null)
-            {
-                additionalOptions.AddOption(Parameter.Constraints, constraints);
-            }
-
-            return GenerateRequest(method, additionalOptions);
+            return Process<object[]>(method, additionalOptions, choices, constraints);
         }
 
         public IEnumerable<object[]> GenerateRandom(
@@ -396,17 +273,7 @@ namespace EcFeed
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
             additionalOptions.AddOption(Parameter.DataSource, Generator.Random.GetValue());
 
-            if (choices != null)
-            {
-                additionalOptions.AddOption(Parameter.Choices, choices);
-            }
-
-            if (constraints != null)
-            {
-                additionalOptions.AddOption(Parameter.Constraints, constraints);
-            }
-
-            return GenerateRequest(method, additionalOptions);
+            return Process<object[]>(method, additionalOptions, choices, constraints);
         }
 
         public IEnumerable<object[]> GenerateStatic(
@@ -421,80 +288,36 @@ namespace EcFeed
             additionalOptions.AddOption(Parameter.DataSource, Generator.Static.GetValue());
             additionalOptions.AddOption(Parameter.TestSuites, updatedTestSuites);
            
-            return GenerateRequest(method, additionalOptions);
-        }
-
-        private TestProviderQueue<object[]> GenerateRequest(string method, GeneratorOptions options)
-        {
-            return new TestProviderQueue<object[]>(this.Copy(), options, Template.Stream, method);
+            return Process<object[]>(method, additionalOptions);
         }
 
 //-------------------------------------------------------------------------------------------
 
-        internal void StartQueue(string method, GeneratorOptions options, Template template)
+        private TestQueue<T> Process<T>(
+            string method, 
+            GeneratorOptions options, 
+            Dictionary<string, string[]> choices = null,
+            object constraints = null,
+            Template template = Template.Stream)
         {
-            string requestURL = GenerateRequestURL(this, options, method, template.GetValue());
+            string requestURL = GenerateURLRequest(options, method, template.GetValue());
 
-            SendRequest(requestURL, template == Template.Stream);
-        }
-
-//-------------------------------------------------------------------------------------------        
-
-        internal void AddTestEventHandler(EventHandler<DataEventArgs> testEventHandler)
-        {
-            if (TestEventHandler == null)
+            if (choices != null)
             {
-                TestEventHandler += testEventHandler;
+                options.AddOption(Parameter.Choices, choices);
             }
-            else
-            {
-                if (Array.IndexOf(TestEventHandler.GetInvocationList(), testEventHandler) == -1)
-                {
-                    TestEventHandler += testEventHandler;
-                } 
-            }   
-        }
 
-        internal void RemoveTestEventHandler(EventHandler<DataEventArgs> testEventHandler)
-        {
-            if (TestEventHandler != null)
+            if (constraints != null)
             {
-                if (Array.IndexOf(TestEventHandler.GetInvocationList(), testEventHandler) != -1)
-                {
-                    TestEventHandler -= testEventHandler;
-                }
+                options.AddOption(Parameter.Constraints, constraints);
             }
-        }
 
-        internal void AddStatusEventHandler(EventHandler<StatusEventArgs> statusEventHandler)
-        {
-            if (StatusEventHandler == null)
-            {
-                StatusEventHandler += statusEventHandler;
-            }
-            else
-            {
-                if (Array.IndexOf(StatusEventHandler.GetInvocationList(), statusEventHandler) == -1)
-                {
-                    StatusEventHandler += statusEventHandler;
-                } 
-            }   
-        }
-
-        internal void RemoveStatusEventHandler(EventHandler<StatusEventArgs> statusEventHandler)
-        {
-            if (StatusEventHandler != null)
-            {
-                if (Array.IndexOf(StatusEventHandler.GetInvocationList(), statusEventHandler) != -1)
-                {
-                    StatusEventHandler -= statusEventHandler;
-                }
-            }
+            return SendRequest<T>(requestURL, template);
         }
 
 //-------------------------------------------------------------------------------------------
 
-        private string GenerateHealthCheckURL(string address)
+        private string GenerateURLHealthCheck(string address)
         {
             string request = $"{ address }/{ Endpoint.HealthCheck }";
 
@@ -505,9 +328,9 @@ namespace EcFeed
             return request;
         }
 
-        private string GenerateRequestURL(TestProvider provider, GeneratorOptions options, string method, string template)
+        private string GenerateURLRequest(GeneratorOptions options, string method, string template)
         {
-            string requestData = $"{ SerializeTestProvider(options, provider.Model, method, template) }";
+            string requestData = $"{ SerializeTestProvider(options, method, template) }";
             string request = $"{ GeneratorAddress }/{ Endpoint.Generator }?requestType={ GetRequestType(template) }&request={ requestData }";
 
             request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
@@ -519,12 +342,12 @@ namespace EcFeed
 
         private string GetRequestType(string template)
         {
-            return template.Equals(Template.Stream.GetValue()) || template.Equals(Template.StreamRaw.GetValue()) ? Request.Data : Request.Export;
+            return template.Equals(Template.Stream.GetValue()) ? Request.Data : Request.Export;
         }
 
-        private string SerializeTestProvider(GeneratorOptions options, string model, string method, string template)
+        private string SerializeTestProvider(GeneratorOptions options, string method, string template)
         {
-            if (string.IsNullOrEmpty(model))
+            if (string.IsNullOrEmpty(Model))
             {
                 throw new TestProviderException("The model ID is not defined and the default value cannot be used.");
             }
@@ -536,7 +359,7 @@ namespace EcFeed
 
             var parsedRequest = new
             {
-                model = model,
+                model = Model,
                 method = method,
                 template = template,
                 userData = options.ToString()
@@ -545,9 +368,10 @@ namespace EcFeed
             return JsonConvert.SerializeObject(parsedRequest);
         }
 
-        private void SendRequest(string request, bool streamFilter)
+        private TestQueue<T> SendRequest<T>(string request, Template template)
         {
             X509Certificate2 certificate = null;
+            TestQueue<T> testQueue = new TestQueue<T>();
 
             try 
             {
@@ -557,7 +381,7 @@ namespace EcFeed
                 httpWebRequest.ServerCertificateValidationCallback = ValidateServerCertificate;
                 httpWebRequest.ClientCertificates.Add(certificate);
 
-                ProcessResponse((HttpWebResponse) httpWebRequest.GetResponse(), streamFilter);
+                ProcessResponse(testQueue, (HttpWebResponse) httpWebRequest.GetResponse(), template);
             }
             catch (CryptographicException)
             {
@@ -569,7 +393,7 @@ namespace EcFeed
             catch (WebException e)
             {
                 StatusEventArgs statusEventArgs = new StatusEventArgs() { DataRaw = e.Message, StatusCode = ((HttpWebResponse) e.Response).StatusCode, IsCompleted = true };
-                GenerateStatusEvent(statusEventArgs);
+                GenerateStatusEvent<T>(testQueue, statusEventArgs);
 
                 throw new TestProviderException(e.Message);
             }
@@ -577,6 +401,8 @@ namespace EcFeed
             {
                 certificate.Dispose();
             }
+
+            return testQueue;
         }
 
         private bool ValidateServerCertificate(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors sslPolicyErrors) {
@@ -594,12 +420,12 @@ namespace EcFeed
 
 //-------------------------------------------------------------------------------------------   
 
-        private async void ProcessResponse(HttpWebResponse response, bool streamFilter) 
+        private async void ProcessResponse<T>(TestQueue<T> testQueue, HttpWebResponse response, Template template) 
         {
             if (!response.StatusCode.ToString().Equals("OK"))
             {
                 StatusEventArgs statusEventArgs = new StatusEventArgs() { DataRaw = response.StatusDescription, StatusCode = response.StatusCode, IsCompleted = true };
-                GenerateStatusEvent(statusEventArgs);
+                GenerateStatusEvent<T>(testQueue, statusEventArgs);
 
                 return;
             }
@@ -608,36 +434,44 @@ namespace EcFeed
                 string line;
                 
                 while ((line = await reader.ReadLineAsync()) != null) {
-                    ProcessSingleResponse(line, streamFilter);
+                    ProcessResponseLine<T>(testQueue, line, template);
                 }
 
-                EndTransmission();
+                EndTransmission<T>(testQueue);
             }
 
         }
 
-        private void ProcessSingleResponse(string line, bool streamFilter)
+        private void ProcessResponseLine<T>(TestQueue<T> testQueue, string line, Template template)
         {
-            ProcessSingleInfoResponse(line);
-            ProcessSingleStatusResponse(line);
-            ProcessSingleDataResponse(line, streamFilter);
+            if (template == Template.Stream)
+            {
+                ProcessResponseInfoLine<T>(testQueue, line);
+                ProcessResponseStatusLine<T>(testQueue, line);
+                ProcessResponseDataLine<T>(testQueue, line);
+            }
+            else
+            {
+                DataEventArgs dataEventArgs = new DataEventArgs() { DataRaw = line};
+                GenerateTestEvent<T>(testQueue, dataEventArgs);
+            }
         }
 
-        private void ProcessSingleInfoResponse(string line)
+        private void ProcessResponseInfoLine<T>(TestQueue<T> testQueue, string line)
         {
             if (line.Contains("'method'"))
             {
                 try
                 {
-                    MethodHeader = StreamParser.ParseInfoMessage(line);
-                    MethodArgumentNames = InfoMessageHelper.ExtractArgumentNames(MethodHeader);
-                    MethodArgumentTypes = InfoMessageHelper.ExtractArgumentTypes(MethodHeader);
+                    testQueue.MethodHeader = StreamParser.ParseInfoMessage(line);
+                    testQueue.MethodArgumentNames = InfoMessageHelper.ExtractArgumentNames(testQueue.MethodHeader);
+                    testQueue.MethodArgumentTypes = InfoMessageHelper.ExtractArgumentTypes(testQueue.MethodHeader);
                 }
                 catch (JsonReaderException) { }
                 catch (JsonSerializationException) { }
             }
         }
-        private void ProcessSingleStatusResponse(string line)
+        private void ProcessResponseStatusLine<T>(TestQueue<T> testQueue, string line)
         {
             try
             {
@@ -647,14 +481,14 @@ namespace EcFeed
                 if (statusEventArgs.Schema.Status != null)
                 {
                     statusEventArgs.IsCompleted = false;       
-                    GenerateStatusEvent(statusEventArgs);
+                    GenerateStatusEvent<T>(testQueue, statusEventArgs);
                 }
             }
             catch (JsonReaderException) { }
             catch (JsonSerializationException) { }
         }
 
-        private void ProcessSingleDataResponse(string line, bool streamFilter)
+        private void ProcessResponseDataLine<T>(TestQueue<T> testQueue, string line)
         {
             DataEventArgs testEventArgs = new DataEventArgs() { DataRaw = line };
             
@@ -664,40 +498,44 @@ namespace EcFeed
 
                 if (testEventArgs.Schema.TestCaseArguments != null)
                 {
-                    testEventArgs.DataObject = StreamParser.ParseTestCaseToDataType(testEventArgs.Schema, MethodArgumentTypes);
-                    GenerateTestEvent(testEventArgs);
+                    testEventArgs.DataObject = StreamParser.ParseTestCaseToDataType(testEventArgs.Schema, testQueue.MethodArgumentTypes);
+                    GenerateTestEvent<T>(testQueue, testEventArgs);
                     return;
                 }    
             }
             catch (JsonReaderException) { }
             catch (JsonSerializationException) { }
-
-            if (!streamFilter)
-            {
-                 GenerateTestEvent(testEventArgs);
-            }
         }
 
-        private void EndTransmission()
+        private void EndTransmission<T>(TestQueue<T> testQueue)
         {
             StatusEventArgs statusEventArgs = new StatusEventArgs() { DataRaw = "END_DATA", StatusCode = HttpStatusCode.OK, IsCompleted = true };
-            GenerateStatusEvent(statusEventArgs);
+            GenerateStatusEvent<T>(testQueue, statusEventArgs);
         }
 
-        private void GenerateStatusEvent(StatusEventArgs args)
+        private void GenerateStatusEvent<T>(TestQueue<T> testQueue, StatusEventArgs args)
         {
-            if (StatusEventHandler != null && StatusEventHandler.GetInvocationList().Length > 0)
+            if (args.IsCompleted)
             {
-                StatusEventHandler(this, args);
+                testQueue.Fifo.CompleteAdding();
             }
         }
 
-        private void GenerateTestEvent(DataEventArgs args)
+        private void GenerateTestEvent<T>(TestQueue<T> testQueue, DataEventArgs args)
         {
-            if (TestEventHandler != null && TestEventHandler.GetInvocationList().Length > 0)
+            if (args.DataRaw != null && args.DataRaw.GetType() == typeof(T))
             {
-                TestEventHandler(this, args);
+                testQueue.Fifo.Add((T)(object)args.DataRaw);
+                return;
             }
+            
+            if (args.DataObject != null && args.DataObject.GetType() == typeof(T))
+            {
+                testQueue.Fifo.Add((T)(object)args.DataObject);
+                return;
+            }
+            
+            throw new TestProviderException("Unknown type.");
         }
 
 //------------------------------------------------------------------------------------------- 

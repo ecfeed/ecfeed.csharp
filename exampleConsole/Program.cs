@@ -9,13 +9,13 @@ namespace Testify.EcFeed.Example
     {
         public static void Main(string[] args)
         {
-            TestProvider testProvider = new TestProvider("7482-5194-2849-1943-2448");
+            TestProvider testProvider = new TestProvider("8489-0551-2472-1941-3375");
 
-            string method ="com.example.test.Demo.typeInt";
+            string method ="QuickStart.test";
 
-            // Console.WriteLine($"\n{ string.Join(", ", testProvider.GetMethodNames(method)) }");
-            // Console.WriteLine($"\n{ string.Join(", ", testProvider.GetMethodTypes(method)) }");
-            // Console.WriteLine($"\n{ testProvider.GetMethodHeader(method) }");
+            Console.WriteLine($"{ string.Join(", ", testProvider.GetMethodNames(method)) }");
+            Console.WriteLine($"{ string.Join(", ", testProvider.GetMethodTypes(method)) }");
+            Console.WriteLine($"{ testProvider.GetMethodHeader(method) }");
 
             Dictionary<string, string[]> testChoices = new Dictionary<string, string[]>();
             testChoices.Add("arg1", new string[] {"choice1", "choice2"});
@@ -25,7 +25,7 @@ namespace Testify.EcFeed.Example
 
             string[] testSuites = new string[] { "default" };
 
-            foreach(var element in testProvider.ExportCartesian(method, template: Template.JSON))
+            foreach(var element in testProvider.ExportCartesian(method, template: Template.CSV))
             {
                 Console.WriteLine("HANDLER: {0}", element);
                 // Console.WriteLine("HANDLER: [{0}]", string.Join(", ", element));

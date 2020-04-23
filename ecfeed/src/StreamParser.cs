@@ -5,19 +5,9 @@ namespace EcFeed
 {
     static class StreamParser
     {
-        public static TestCase ParseTestCase(string data)
-        {
-            return JsonConvert.DeserializeObject<TestCase>(data);
-        }
-
-        public static StatusMessage ParseStatusMessage(string data)
-        {
-            return JsonConvert.DeserializeObject<StatusMessage>(data);
-        }
-
         public static object[] ParseTestCaseToDataType(string data, string[] type)
         {
-            return ParseTestCaseToDataType(ParseTestCase(data), type);
+            return ParseTestCaseToDataType(JsonConvert.DeserializeObject<TestCase>(data), type);
         }
         public static object[] ParseTestCaseToDataType(TestCase data, string[] type)
         {

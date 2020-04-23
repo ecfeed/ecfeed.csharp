@@ -24,7 +24,7 @@ namespace Testify.EcFeed.Example
 
             string[] testSuites = new string[] { "default" };
 
-            foreach(var element in testProvider.ExportCartesian(method, template: Template.CSV))
+            foreach(var element in testProvider.ExportCartesian(method, template: Template.JSON))
             {
                 Console.WriteLine("HANDLER: {0}", element);
                 // Console.WriteLine("HANDLER: [{0}]", string.Join(", ", element));

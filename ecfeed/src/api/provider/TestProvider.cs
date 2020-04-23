@@ -417,7 +417,7 @@ namespace EcFeed
             }
 
             private void ProcessResponseLine(string line, Template template)
-            {Console.WriteLine(line);
+            {
                 if (template == Template.Stream)
                 {
                     ProcessResponseInfoLine(line);
@@ -426,8 +426,7 @@ namespace EcFeed
                 }
                 else
                 {
-                    DataEventArgs dataEventArgs = new DataEventArgs() { DataRaw = line};
-                    GenerateTestEvent(dataEventArgs);
+                    GenerateTestEvent(line);
                 }
             }
 
@@ -461,21 +460,16 @@ namespace EcFeed
 
             private void ProcessResponseDataLine(string line)
             {
-                DataEventArgs testEventArgs = new DataEventArgs() { DataRaw = line };
-                
-                try
+                if (line.Contains("\"testCase\""))
                 {
-                    testEventArgs.Schema = StreamParser.ParseTestCase(line);
-
-                    if (testEventArgs.Schema.TestCaseArguments != null)
+                    try
                     {
-                        testEventArgs.DataObject = StreamParser.ParseTestCaseToDataType(testEventArgs.Schema, MethodArgumentTypes);
-                        GenerateTestEvent(testEventArgs);
-                        return;
-                    }    
+                        TestCase testCase = JsonConvert.DeserializeObject<TestCase>(line);
+                        GenerateTestEvent(line);
+                    }
+                    catch (JsonReaderException) { }
+                    catch (JsonSerializationException) { }
                 }
-                catch (JsonReaderException) { }
-                catch (JsonSerializationException) { }
             }
 
             private void EndTransmission()
@@ -491,17 +485,17 @@ namespace EcFeed
                 }
             }
 
-            private void GenerateTestEvent(DataEventArgs args)
+            private void GenerateTestEvent(string data)
             {
-                if (args.DataRaw != null && args.DataRaw.GetType() == typeof(T))
+                if (typeof(T).ToString().Equals("System.Object[]"))
                 {
-                    TestQueue.Add((T)(object)args.DataRaw);
+                    TestQueue.Add((T)(object)StreamParser.ParseTestCaseToDataType(data, MethodArgumentTypes));
                     return;
                 }
-                
-                if (args.DataObject != null && args.DataObject.GetType() == typeof(T))
+
+                if (typeof(T).ToString().Equals("System.String"))
                 {
-                    TestQueue.Add((T)(object)args.DataObject);
+                    TestQueue.Add((T)(object)data);
                     return;
                 }
                 

@@ -8,6 +8,5 @@ namespace EcFeed
 
         public override string ToString() => $"Status: { Status }";
     }
-
-    static class StatusMessageHelper { }
+    
 }

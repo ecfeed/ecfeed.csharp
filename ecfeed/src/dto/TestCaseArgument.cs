@@ -10,5 +10,4 @@ namespace EcFeed
         public override string ToString() => $"\t[ { Value.GetType() } : { Name } : { Value } ]";
     }
 
-    static class TestCaseArgumentHelper { }
 }

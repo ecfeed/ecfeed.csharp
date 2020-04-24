@@ -1,4 +1,4 @@
-#define VERBOSE
+// #define VERBOSE
 
 using System;
 using System.Diagnostics;
@@ -6,9 +6,7 @@ using System.IO;
 using System.Text;
 using System.Net;
 using System.Net.Security;
-using System.Collections;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using Newtonsoft.Json;
@@ -51,36 +49,51 @@ namespace EcFeed
             return "";
         }
 
-        public void ValidateConnection() 
+        public string ValidateConnection() 
         {
-            new HandleRequest<string>(SendRequest(GenerateHealthCheckURL(GeneratorAddress)), Template.Stream);
+            HttpWebResponse response = SendRequest(GenerateHealthCheckURL(GeneratorAddress));
+            using (StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8)) {
+                string line;
+                    
+                if ((line = reader.ReadLine()) != null) {
+                    return line;
+                }
+                else
+                {
+                    return "FAILED";
+                }
+            }
+            
         }
 
 //-------------------------------------------------------------------------------------------
 
         public string[] GetMethodTypes(string method)
         {
-            return SendHeaderRequest(method).MethodArgumentTypes;
+            return SendHeaderRequest(method)[0];
         }
 
         public string[] GetMethodNames(string method)
         {
-            return SendHeaderRequest(method).MethodArgumentNames;
+            return SendHeaderRequest(method)[1];
         }
 
-        private HandleRequest<string> SendHeaderRequest(string method)
+        private string[][] SendHeaderRequest(string method)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
-            additionalProperties.AddProperty(Parameter.Length, "0");
+            additionalProperties.AddProperty(Parameter.Length, "1");
 
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
             additionalOptions.AddOption(Parameter.DataSource, Generator.Random.GetValue());
 
-            HandleRequest<string> queue = Process<string>(method, additionalOptions, null, null, Template.Stream);
+            IEnumerable<string[][]> queue = Process<string[][]>(method, additionalOptions, null, null, Template.Stream);
 
-            foreach(string element in queue) { };
+            foreach(string[][] element in queue) 
+            {
+                return element;
+            };
 
-            return queue;
+            return null;
         }
 
 //-------------------------------------------------------------------------------------------
@@ -242,15 +255,13 @@ namespace EcFeed
 
 //-------------------------------------------------------------------------------------------
 
-        private HandleRequest<T> Process<T>(
+        private IEnumerable<T> Process<T>(
             string method, 
             GeneratorOptions options, 
             Dictionary<string, string[]> choices = null,
             object constraints = null,
             Template template = Template.Stream)
         {
-            string requestURL = GenerateRequestURL(options, method, template.GetValue());
-
             if (choices != null)
             {
                 options.AddOption(Parameter.Choices, choices);
@@ -261,7 +272,9 @@ namespace EcFeed
                 options.AddOption(Parameter.Constraints, constraints);
             }
 
-            return new HandleRequest<T>(SendRequest(requestURL), template);
+            string requestURL = GenerateRequestURL(options, method, template.GetValue());
+
+            return ProcessResponse<T>(SendRequest(requestURL), template);
         }
 
 //-------------------------------------------------------------------------------------------
@@ -279,8 +292,9 @@ namespace EcFeed
 
         private string GenerateRequestURL(GeneratorOptions options, string method, string template)
         {
-            string requestData = $"{ SerializeRequest(options, method, template) }";
-            string request = $"{ GeneratorAddress }/{ Endpoint.Generator }?requestType={ GetRequestType(template) }&request={ requestData }";
+            string requestData = $"{ SerializeRequestData(options, method, template) }";
+            string requestType = template.Equals(Template.Stream.GetValue()) ? Request.Data : Request.Export;
+            string request = $"{ GeneratorAddress }/{ Endpoint.Generator }?requestType={ requestType }&request={ requestData }";
 
             request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
 
@@ -289,12 +303,7 @@ namespace EcFeed
             return request;
         }
 
-        private string GetRequestType(string template)
-        {
-            return template.Equals(Template.Stream.GetValue()) ? Request.Data : Request.Export;
-        }
-
-        private string SerializeRequest(GeneratorOptions options, string method, string template)
+        private string SerializeRequestData(GeneratorOptions options, string method, string template)
         {
             if (string.IsNullOrEmpty(Model))
             {
@@ -331,15 +340,15 @@ namespace EcFeed
 
                     return (HttpWebResponse) httpWebRequest.GetResponse();
                 }
-                catch (CryptographicException)
+                catch (CryptographicException e)
                 {
                     string message = $"The keystore password is incorrect. Keystore path: '{ Path.GetFullPath(KeyStorePath) }'";
-                    throw new TestProviderException(message);
+                    throw new TestProviderException(message, e);
                 }
-                catch (WebException)
+                catch (WebException e)
                 {
                     string message = $"The connection could not be established.";
-                    throw new TestProviderException(message);
+                    throw new TestProviderException(message, e);
                 }
                 finally
                 {
@@ -360,148 +369,112 @@ namespace EcFeed
 
 //-------------------------------------------------------------------------------------------  
 
-        public class HandleRequest<T> : IEnumerable<T>
+        private IEnumerable<T> ProcessResponse<T>(HttpWebResponse response, Template template) 
         {
-            internal BlockingCollection<T> TestQueue { get; set; }
-            internal string[] MethodArgumentNames { get; set; }
-            internal string[] MethodArgumentTypes { get; set; }
+            string[] methodArgumentNames = null;
+            string[] methodArgumentTypes = null;
 
-            public HandleRequest(HttpWebResponse response, Template template)
+            if (!response.StatusCode.ToString().Equals("OK"))
             {
-                TestQueue = new BlockingCollection<T>();
-                ProcessResponse(response, template);
+                throw new TestProviderException(response.StatusDescription);
             }
-
-            IEnumerator IEnumerable.GetEnumerator()
+            else
             {
-                return this.GetEnumerator();
-            }
-
-            public IEnumerator<T> GetEnumerator()
-            {
-                while (!TestQueue.IsCompleted)
-                {
-                    T element = default(T);
-
-                    try
-                    {
-                        element = TestQueue.Take();
-                    }
-                    catch (InvalidOperationException) { }
-
-                    if (element != null)
-                    {
-                        yield return element;
-                    }
-                }
-            }
-
-            private async void ProcessResponse(HttpWebResponse response, Template template) 
-            {
-                if (!response.StatusCode.ToString().Equals("OK"))
-                {
-                    GenerateStatusEvent(response.StatusDescription, true);
-                    return;
-                }
-
                 using (StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8)) {
                     string line;
                     
-                    while ((line = await reader.ReadLineAsync()) != null) {
-                        ProcessResponseLine(line, template);
+                    while ((line = reader.ReadLine()) != null) {
+                        T element = ProcessResponseLine<T>(line, template, ref methodArgumentTypes, ref methodArgumentNames);
+                            
+                        if (element != null)
+                        {
+                            yield return element;
+                        }
                     }
-
-                    EndTransmission();
                 }
-
             }
+        }
 
-            private void ProcessResponseLine(string line, Template template)
+        private T ProcessResponseLine<T>(string line, Template template, ref string[] methodArgumentTypes, ref string[] methodArgumentNames)
+        {
+            if (template == Template.Stream)
             {
-                if (template == Template.Stream)
+                ProcessResponseInfoLine(line, ref methodArgumentTypes, ref methodArgumentNames);
+                ProcessResponseStatusLine(line);
+                return ProcessResponseDataLine<T>(line, methodArgumentTypes, methodArgumentNames);
+            }
+            else
+            {
+                return GenerateTestEvent<T>(line);
+            }
+        }
+
+        private void ProcessResponseInfoLine(string line, ref string[] methodArgumentTypes, ref string[] methodArgumentNames)
+        {
+            if (line.Contains("\"info\""))
+            {
+                try
                 {
-                    ProcessResponseInfoLine(line);
-                    ProcessResponseStatusLine(line);
-                    ProcessResponseDataLine(line);
+                    InfoMessage infoMessage = JsonConvert.DeserializeObject<InfoMessage>(line);
+                    methodArgumentNames = InfoMessageHelper.ExtractArgumentNames(infoMessage);
+                    methodArgumentTypes = InfoMessageHelper.ExtractArgumentTypes(infoMessage);
+                    PrintTrace("INFO", string.Join(", ", methodArgumentTypes));
                 }
-                else
+                catch (JsonReaderException) { }
+                catch (JsonSerializationException) { }
+            }
+        }
+
+        private void ProcessResponseStatusLine(string line)
+        {
+            if (line.Contains("\"status\""))
+            {
+                try
                 {
-                    GenerateTestEvent(line);
+                    StatusMessage statusMessage = JsonConvert.DeserializeObject<StatusMessage>(line);
+                    PrintTrace("STATUS", statusMessage.Status);
                 }
+                catch (JsonReaderException) { }
+                catch (JsonSerializationException) { }
+            }
+        }
+
+        private T ProcessResponseDataLine<T>(string line, string[] methodArgumentTypes, string[] methodArgumentNames)
+        {
+            if (line.Contains("\"testCase\""))
+            {
+                try
+                {
+                    TestCase testCase = JsonConvert.DeserializeObject<TestCase>(line);
+                    return GenerateTestEvent<T>(line, methodArgumentTypes, methodArgumentNames);
+                }
+                catch (JsonReaderException) { }
+                catch (JsonSerializationException) { }
+            }
+  
+            return default(T);
+        }
+
+        private T GenerateTestEvent<T>(string data, string[] methodArgumentTypes = null, string[] methodArgumentNames = null)
+        {
+            if (typeof(T).ToString().Equals("System.Object[]"))
+            {
+                return (T)(object)StreamParser.ParseTestCaseToDataType(data, methodArgumentTypes);
             }
 
-            private void ProcessResponseInfoLine(string line)
+            if (typeof(T).ToString().Equals("System.String[][]"))
             {
-                if (line.Contains("\"info\""))
-                {
-                    try
-                    {
-                        InfoMessage infoMessage = JsonConvert.DeserializeObject<InfoMessage>(line);
-                        MethodArgumentNames = InfoMessageHelper.ExtractArgumentNames(infoMessage);
-                        MethodArgumentTypes = InfoMessageHelper.ExtractArgumentTypes(infoMessage);
-                    }
-                    catch (JsonReaderException) { }
-                    catch (JsonSerializationException) { }
-                }
-            }
-            private void ProcessResponseStatusLine(string line)
-            {
-                if (line.Contains("\"status\""))
-                {
-                    try
-                    {
-                        StatusMessage statusMessage = JsonConvert.DeserializeObject<StatusMessage>(line);
-                        GenerateStatusEvent(line, false);
-                    }
-                    catch (JsonReaderException) { }
-                    catch (JsonSerializationException) { }
-                }
+                string[][] response = { methodArgumentTypes, methodArgumentNames };
+                return (T)(object)response;
             }
 
-            private void ProcessResponseDataLine(string line)
+            if (typeof(T).ToString().Equals("System.String"))
             {
-                if (line.Contains("\"testCase\""))
-                {
-                    try
-                    {
-                        TestCase testCase = JsonConvert.DeserializeObject<TestCase>(line);
-                        GenerateTestEvent(line);
-                    }
-                    catch (JsonReaderException) { }
-                    catch (JsonSerializationException) { }
-                }
+                return (T)(object)data;
             }
-
-            private void EndTransmission()
-            {
-                GenerateStatusEvent("END_DATA", true);
-            }
-
-            private void GenerateStatusEvent(string message, bool completed)
-            {
-                if (completed)
-                {
-                    TestQueue.CompleteAdding();
-                }
-            }
-
-            private void GenerateTestEvent(string data)
-            {
-                if (typeof(T).ToString().Equals("System.Object[]"))
-                {
-                    TestQueue.Add((T)(object)StreamParser.ParseTestCaseToDataType(data, MethodArgumentTypes));
-                    return;
-                }
-
-                if (typeof(T).ToString().Equals("System.String"))
-                {
-                    TestQueue.Add((T)(object)data);
-                    return;
-                }
-                
-                throw new TestProviderException("Unknown type.");
-            }
-    }
+   
+            throw new TestProviderException("Unknown type.");
+        }
 
 //------------------------------------------------------------------------------------------- 
 

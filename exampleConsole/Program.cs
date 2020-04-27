@@ -1,125 +1,39 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
+﻿
+using System;
 using System.Collections.Generic;
 using EcFeed;
-using NUnit.Framework;
 
 namespace Testify.EcFeed.Example
 {
     class Runner
     {
-        public static async Task<int> Main(string[] args)
+        public static void Main(string[] args)
         {
-            // SELECT ONE 
-            // return await Synchronous();
-            // return await Asynchronous();
-            return await Event();
-            // ExampleTestQueue();
-            // ExampleTestList();
-
-            return 0;
-        }
-
-        public static async Task<int> Synchronous()
-        {
-            ITestProvider testProvider = new TestProvider();
-            testProvider.Model = "7482-5194-2849-1943-2448";
-            testProvider.Method = "com.example.test.Demo.typeString";
+            TestProvider testProvider = new TestProvider("8489-0551-2472-1941-3375");
             
-            Console.WriteLine(testProvider); // DEBUG
-
-            Console.WriteLine(await testProvider.GenerateNWise(template: Template.CSV));
-
-            return 0;
-        }
-
-        public static async Task<int> Asynchronous()
-        {
-            ITestProvider testProvider = new TestProvider();
-            testProvider.Model = "7482-5194-2849-1943-2448";
-            testProvider.Method = "com.example.test.Demo.typeString";
-            // testProvider.Settings = new Dictionary<string, object> { { "dataSource", "genNWise" }, { "constraints", "NONE" } };
-
-            // Console.WriteLine(testProvider); // DEBUG
-
-            Task<string> response = testProvider.GenerateNWise(template: Template.CSV);
-
-            Console.WriteLine("\nWaiting...\n"); // DEBUG
-
-            Console.WriteLine(await response);
-
-            return 0;
-        }
-
-        public static async Task<int> Event()
-        {
-            ITestProvider testProvider = new TestProvider();
-            testProvider.Model = "7482-5194-2849-1943-2448";
-            testProvider.Method = "com.example.test.Demo.typeString";
+            testProvider.ValidateConnection();
             
-            testProvider.AddTestEventHandler(TestEventHandler);
-            testProvider.AddStatusEventHandler(StatusEventHandler);
+            string method ="QuickStart.test";
 
-            await testProvider.GenerateNWise(template: Template.Stream);
+            Console.WriteLine($"{ string.Join(", ", testProvider.GetMethodNames(method)) }");
+            Console.WriteLine($"{ string.Join(", ", testProvider.GetMethodTypes(method)) }");
 
-            return 0;
-        }
+            Dictionary<string, string[]> testChoices = new Dictionary<string, string[]>();
+            testChoices.Add("arg1", new string[] {"choice1", "choice2"});
+            testChoices.Add("arg2", new string[] {"choice1"});
 
-        public static void ExampleTestQueue()
-        {
-            ITestProvider testProvider = new TestProvider();
-            testProvider.Model = "7482-5194-2849-1943-2448";
-            testProvider.Method = "com.example.test.Demo.typeString";
+            string[] testConstraints = new string[] { "constraint" };
 
-            TestQueue queue = testProvider.QueueNWise();
+            string[] testSuites = new string[] { "default" };
 
-            Console.WriteLine(queue); // DEBUG
-            Thread.Sleep(2000); // DEBUG
-            Console.WriteLine(queue); // DEBUG
-
-            foreach(TestCaseData element in queue)
+            foreach(var element in testProvider.ExportNWise(method, 3, 100, template: Template.JSON, model: "8489-0551-2472-1941-3375"))
+            // foreach(var element in testProvider.GenerateCartesian(method))
             {
-                Console.WriteLine("HANDLER: [{0}]", string.Join(", ", element.Arguments));
+                Console.WriteLine("HANDLER: {0}", element);
+                // Console.WriteLine("HANDLER: [{0}]", string.Join(", ", element));
             }
 
-            Console.WriteLine(queue); // DEBUG
         }
 
-        public static void ExampleTestList()
-        {
-            ITestProvider testProvider = new TestProvider();
-            testProvider.Model = "7482-5194-2849-1943-2448";
-            testProvider.Method = "com.example.test.Demo.typeString";
-
-            TestList list = testProvider.ListNWise();
-
-            Console.WriteLine(list); // DEBUG
-            list.WaitUntilFinished(); // DEBUG
-            Console.WriteLine(list); // DEBUG
-
-            Console.WriteLine(list[0]); // DEBUG
-
-            foreach(TestEventArgs element in list)
-            {
-                Console.WriteLine("HANDLER: [{0}]", string.Join(", ", element));
-            }
-
-            Console.WriteLine(list); // DEBUG
-        }
-
-        static void TestEventHandler(object sender, TestEventArgs args)
-        {
-        //    SELECT ONE 
-        //    Console.WriteLine("TEST HANDLER: " + args);
-        //    Console.WriteLine("TEST HANDLER: " + args.DataRaw);
-        //    Console.WriteLine("TEST HANDLER: " + args.Schema);
-        //    Console.WriteLine("TEST HANDLER: [{0}]", string.Join(", ", args.DataTest.Arguments));
-        }
-
-        static void StatusEventHandler(object sender, StatusEventArgs args)
-        {
-           Console.WriteLine("STATUS HANDLER: " + args.Schema);
-        }
     }
 }

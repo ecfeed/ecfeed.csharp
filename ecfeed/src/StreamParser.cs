@@ -1,31 +1,15 @@
 using Newtonsoft.Json;
-using NUnit.Framework;
 using System;
 
 namespace EcFeed
 {
-    static class StreamParser
+    internal static class StreamParser
     {
-        public static TestCase ParseTestCase(string data)
+        internal static object[] ParseTestCaseToDataType(string data, string[] type)
         {
-            return JsonConvert.DeserializeObject<TestCase>(data);
+            return ParseTestCaseToDataType(JsonConvert.DeserializeObject<TestCase>(data), type);
         }
-
-        public static StatusMessage ParseStatusMessage(string data)
-        {
-            return JsonConvert.DeserializeObject<StatusMessage>(data);
-        }
-
-        public static InfoMessage ParseInfoMessage(string data)
-        {
-            return JsonConvert.DeserializeObject<InfoMessage>(data);
-        }
-
-        public static object[] ParseTestCaseToDataType(string data, string[] type)
-        {
-            return ParseTestCaseToDataType(ParseTestCase(data), type);
-        }
-        public static object[] ParseTestCaseToDataType(TestCase data, string[] type)
+        internal static object[] ParseTestCaseToDataType(TestCase data, string[] type)
         {
             object[] result = new object[data.TestCaseArguments.Length];
 
@@ -68,16 +52,6 @@ namespace EcFeed
                 return value;
             }
             
-        }
-
-        public static TestCaseData ParseTestToNUnit(string data, string[] type)
-        {
-            return ParseTestToNUnit(ParseTestCase(data), type);
-        }
-
-        public static TestCaseData ParseTestToNUnit(TestCase data, string[] type)
-        {
-            return new TestCaseData(ParseTestCaseToDataType(data, type));
         }
 
     }

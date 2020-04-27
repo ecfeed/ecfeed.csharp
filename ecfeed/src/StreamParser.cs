@@ -3,13 +3,13 @@ using System;
 
 namespace EcFeed
 {
-    static class StreamParser
+    internal static class StreamParser
     {
-        public static object[] ParseTestCaseToDataType(string data, string[] type)
+        internal static object[] ParseTestCaseToDataType(string data, string[] type)
         {
             return ParseTestCaseToDataType(JsonConvert.DeserializeObject<TestCase>(data), type);
         }
-        public static object[] ParseTestCaseToDataType(TestCase data, string[] type)
+        internal static object[] ParseTestCaseToDataType(TestCase data, string[] type)
         {
             object[] result = new object[data.TestCaseArguments.Length];
 

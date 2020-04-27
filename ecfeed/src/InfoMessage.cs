@@ -3,14 +3,14 @@ using System.Linq;
 
 namespace EcFeed
 {
-    public struct InfoMessage
+    internal struct InfoMessage
     {
-        [JsonProperty("info", Required = Required.Always)] public string Info { get; set; }
+        [JsonProperty("info", Required = Required.Always)] internal string Info { get; set; }
 
         public override string ToString() => $"Info: { Info }";
     }
 
-    static class InfoMessageHelper 
+    internal static class InfoMessageHelper 
     { 
         internal static string[] ExtractArgumentNames(InfoMessage schema)
         {

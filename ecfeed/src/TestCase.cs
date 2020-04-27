@@ -3,14 +3,14 @@ using Newtonsoft.Json;
 
 namespace EcFeed
 {
-    public struct TestCase
+    internal struct TestCase
     {
-        [JsonProperty("testCase", Required = Required.Always)] public TestCaseArgument[] TestCaseArguments { get; set; }
+        [JsonProperty("testCase", Required = Required.Always)] internal TestCaseArgument[] TestCaseArguments { get; set; }
 
         public override string ToString() => TestCaseHelper.ParseToString(ref this);
     }
 
-    static class TestCaseHelper
+    internal static class TestCaseHelper
     {
         internal static string ParseToString(ref TestCase schema)
         {

@@ -4,16 +4,16 @@ using Newtonsoft.Json;
 
 namespace EcFeed
 {
-    public sealed class GeneratorProperties
+    internal sealed class GeneratorProperties
     {
         internal Dictionary<string, object> Properties = new Dictionary<string, object>();
 
-        public object GetProperty(string key)
+        internal object GetProperty(string key)
         {
             return Properties[key];
         }
 
-        public void AddProperty(string key, object value)
+        internal void AddProperty(string key, object value)
         {
             if (Properties.ContainsKey(key))
             {
@@ -24,7 +24,7 @@ namespace EcFeed
             Properties.Add(key, value);
         }
 
-        public void RemoveProperty(string key)
+        internal void RemoveProperty(string key)
         {
             Properties.Remove(key);
         }

@@ -30,13 +30,21 @@ namespace EcFeed
         {
             Model = model;
 
-            KeyStorePath = string.IsNullOrEmpty(keyStorePath) ? SetDefaultKeyStorePath() : keyStorePath;
+            KeyStorePath = SetDefaultKeyStorePath(keyStorePath);
             KeyStorePassword = string.IsNullOrEmpty(keyStorePassword) ? Default.KeyStorePassword : keyStorePassword;;
             GeneratorAddress = string.IsNullOrEmpty(generatorAddress) ? Default.GeneratorAddress : generatorAddress;
         }
 
-        private string SetDefaultKeyStorePath()
+        private string SetDefaultKeyStorePath(string keyStorePath)
         {
+            if (!string.IsNullOrEmpty(keyStorePath))
+            {
+                if (File.Exists(keyStorePath))
+                {
+                    return keyStorePath;
+                }
+            }
+
             foreach (string path in Default.KeyStorePath)
             {
                 if (File.Exists(path))
@@ -45,23 +53,19 @@ namespace EcFeed
                 }
             }
 
-            Console.WriteLine("The default keystore could not be loaded. In order to use the test generator, please provide a correct path.");
-            return "";
+            throw new TestProviderException("The keystore path could not be verified. In order to use the test generator, please provide a correct path.");
         }
 
-        public string ValidateConnection() 
+        public void ValidateConnection() 
         {
             HttpWebResponse response = SendRequest(GenerateHealthCheckURL(GeneratorAddress));
             using (StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8)) {
                 string line;
                     
-                if ((line = reader.ReadLine()) != null) {
-                    return line;
+                while ((line = reader.ReadLine()) != null) {
+                    PrintTrace("VALIDATE", line);
                 }
-                else
-                {
-                    return "FAILED";
-                }
+               
             }
             
         }
@@ -70,15 +74,15 @@ namespace EcFeed
 
         public string[] GetMethodTypes(string method)
         {
-            return SendHeaderRequest(method)[0];
+            return FetchMethodInfo(method)[0];
         }
 
         public string[] GetMethodNames(string method)
         {
-            return SendHeaderRequest(method)[1];
+            return FetchMethodInfo(method)[1];
         }
 
-        private string[][] SendHeaderRequest(string method)
+        private string[][] FetchMethodInfo(string method)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
             additionalProperties.AddProperty(Parameter.Length, "1");
@@ -86,7 +90,7 @@ namespace EcFeed
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
             additionalOptions.AddOption(Parameter.DataSource, Generator.Random.GetValue());
 
-            IEnumerable<string[][]> queue = Process<string[][]>(method, additionalOptions, null, null, Template.Stream);
+            IEnumerable<string[][]> queue = Process<string[][]>(method, additionalOptions, null, null, null, Template.Stream);
 
             foreach(string[][] element in queue) 
             {
@@ -98,15 +102,16 @@ namespace EcFeed
 
 //-------------------------------------------------------------------------------------------
 
-        protected IEnumerable<string> Export(
+        internal IEnumerable<string> Export(
             string method,
             Generator generator,
             GeneratorOptions generatorOptions,
+            string model = null,
             Template template = Default.ParameterTemplate)
         {
             generatorOptions.AddOption(Parameter.DataSource, generator.GetValue());
 
-            return Process<string>(method, generatorOptions, null, null, template);
+            return Process<string>(method, generatorOptions, null, null, model, template);
         }
 
         public IEnumerable<string> ExportNWise(
@@ -115,6 +120,7 @@ namespace EcFeed
             int coverage = Default.ParameterCoverage,
             Dictionary<string, string[]> choices = null,
             object constraints = null,
+            string model = null,
             Template template = Default.ParameterTemplate)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
@@ -124,13 +130,14 @@ namespace EcFeed
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
             additionalOptions.AddOption(Parameter.DataSource, Generator.NWise.GetValue());
 
-            return Process<string>(method, additionalOptions, choices, constraints, template);
+            return Process<string>(method, additionalOptions, choices, constraints, model, template);
         }
 
         public IEnumerable<string> ExportCartesian(
             string method,
             Dictionary<string, string[]> choices = null,
             object constraints = null,
+            string model = null,
             Template template = Default.ParameterTemplate)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
@@ -138,7 +145,7 @@ namespace EcFeed
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
             additionalOptions.AddOption(Parameter.DataSource, Generator.Cartesian.GetValue());
 
-            return Process<string>(method, additionalOptions, choices, constraints, template);
+            return Process<string>(method, additionalOptions, choices, constraints, model, template);
         }
 
         public IEnumerable<string> ExportRandom(
@@ -148,6 +155,7 @@ namespace EcFeed
             bool adaptive = Default.ParameterAdaptive,
             Dictionary<string, string[]> choices = null,
             object constraints = null,
+            string model = null,
             Template template = Default.ParameterTemplate)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
@@ -158,12 +166,13 @@ namespace EcFeed
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
             additionalOptions.AddOption(Parameter.DataSource, Generator.Random.GetValue());
 
-            return Process<string>(method, additionalOptions, choices, constraints, template);
+            return Process<string>(method, additionalOptions, choices, constraints, model, template);
         }
 
         public IEnumerable<string> ExportStatic(
             string method,
             object testSuites = null,
+            string model = null,
             Template template = Default.ParameterTemplate)
         {
             object updatedTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
@@ -174,19 +183,20 @@ namespace EcFeed
             additionalOptions.AddOption(Parameter.DataSource, Generator.Static.GetValue());
             additionalOptions.AddOption(Parameter.TestSuites, updatedTestSuites);
            
-            return Process<string>(method, additionalOptions, null, null, template);
+            return Process<string>(method, additionalOptions, null, null, model, template);
         }
 
 //-------------------------------------------------------------------------------------------
 
-        protected IEnumerable<object[]> Generate(
+        internal IEnumerable<object[]> Generate(
             string method,
             Generator generator,
-            GeneratorOptions generatorOptions)
+            GeneratorOptions generatorOptions,
+            string model = null)
         {
             generatorOptions.AddOption(Parameter.DataSource, generator.GetValue());
 
-            return Process<object[]>(method, generatorOptions);
+            return Process<object[]>(method, generatorOptions, null, null, model);
         }
 
         public IEnumerable<object[]> GenerateNWise(
@@ -194,7 +204,8 @@ namespace EcFeed
             int n = Default.ParameterN, 
             int coverage = Default.ParameterCoverage,
             Dictionary<string, string[]> choices = null,
-            object constraints = null)
+            object constraints = null,
+            string model = null)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
             additionalProperties.AddProperty(Parameter.N, "" + n);
@@ -203,20 +214,21 @@ namespace EcFeed
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
             additionalOptions.AddOption(Parameter.DataSource, Generator.NWise.GetValue());
 
-            return Process<object[]>(method, additionalOptions, choices, constraints);
+            return Process<object[]>(method, additionalOptions, choices, constraints, model);
         }
 
         public IEnumerable<object[]> GenerateCartesian(
             string method,
             Dictionary<string, string[]> choices = null,
-            object constraints = null)
+            object constraints = null, 
+            string model = null)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
 
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
             additionalOptions.AddOption(Parameter.DataSource, Generator.Cartesian.GetValue());
 
-            return Process<object[]>(method, additionalOptions, choices, constraints);
+            return Process<object[]>(method, additionalOptions, choices, constraints, model);
         }
 
         public IEnumerable<object[]> GenerateRandom(
@@ -225,7 +237,8 @@ namespace EcFeed
             bool duplicates = Default.ParameterDuplicates,
             bool adaptive = Default.ParameterAdaptive,
             Dictionary<string, string[]> choices = null,
-            object constraints = null)
+            object constraints = null,
+            string model = null)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
             additionalProperties.AddProperty(Parameter.Length, "" + length);
@@ -235,12 +248,13 @@ namespace EcFeed
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
             additionalOptions.AddOption(Parameter.DataSource, Generator.Random.GetValue());
 
-            return Process<object[]>(method, additionalOptions, choices, constraints);
+            return Process<object[]>(method, additionalOptions, choices, constraints, null);
         }
 
         public IEnumerable<object[]> GenerateStatic(
             string method,
-            object testSuites = null)
+            object testSuites = null,
+            string model = null)
         {
             object updatedTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
 
@@ -250,7 +264,7 @@ namespace EcFeed
             additionalOptions.AddOption(Parameter.DataSource, Generator.Static.GetValue());
             additionalOptions.AddOption(Parameter.TestSuites, updatedTestSuites);
            
-            return Process<object[]>(method, additionalOptions);
+            return Process<object[]>(method, additionalOptions, null, null, model);
         }
 
 //-------------------------------------------------------------------------------------------
@@ -260,6 +274,7 @@ namespace EcFeed
             GeneratorOptions options, 
             Dictionary<string, string[]> choices = null,
             object constraints = null,
+            string model = null,
             Template template = Template.Stream)
         {
             if (choices != null)
@@ -272,7 +287,7 @@ namespace EcFeed
                 options.AddOption(Parameter.Constraints, constraints);
             }
 
-            string requestURL = GenerateRequestURL(options, method, template.GetValue());
+            string requestURL = GenerateRequestURL(options, model, method, template.GetValue());
 
             return ProcessResponse<T>(SendRequest(requestURL), template);
         }
@@ -290,9 +305,9 @@ namespace EcFeed
             return request;
         }
 
-        private string GenerateRequestURL(GeneratorOptions options, string method, string template)
+        private string GenerateRequestURL(GeneratorOptions options, string model, string method, string template)
         {
-            string requestData = $"{ SerializeRequestData(options, method, template) }";
+            string requestData = $"{ SerializeRequestData(options, model, method, template) }";
             string requestType = template.Equals(Template.Stream.GetValue()) ? Request.Data : Request.Export;
             string request = $"{ GeneratorAddress }/{ Endpoint.Generator }?requestType={ requestType }&request={ requestData }";
 
@@ -303,7 +318,7 @@ namespace EcFeed
             return request;
         }
 
-        private string SerializeRequestData(GeneratorOptions options, string method, string template)
+        private string SerializeRequestData(GeneratorOptions options, string model, string method, string template)
         {
             if (string.IsNullOrEmpty(Model))
             {
@@ -317,7 +332,7 @@ namespace EcFeed
 
             var parsedRequest = new
             {
-                model = Model,
+                model = string.IsNullOrEmpty(model) ? Model : model,
                 method = method,
                 template = template,
                 userData = options.ToString()
@@ -399,9 +414,20 @@ namespace EcFeed
         {
             if (template == Template.Stream)
             {
-                ProcessResponseInfoLine(line, ref methodArgumentTypes, ref methodArgumentNames);
-                ProcessResponseStatusLine(line);
-                return ProcessResponseDataLine<T>(line, methodArgumentTypes, methodArgumentNames);
+                if (line.Contains("\"testCase\""))
+                {
+                    return ProcessResponseDataLine<T>(line, methodArgumentTypes, methodArgumentNames);
+                }
+                if (line.Contains("\"status\""))
+                {
+                    return ProcessResponseStatusLine<T>(line);
+                }
+                if (line.Contains("\"info\""))
+                {
+                    return ProcessResponseInfoLine<T>(line, ref methodArgumentTypes, ref methodArgumentNames);
+                }
+                
+                return default(T);
             }
             else
             {
@@ -409,49 +435,62 @@ namespace EcFeed
             }
         }
 
-        private void ProcessResponseInfoLine(string line, ref string[] methodArgumentTypes, ref string[] methodArgumentNames)
-        {
-            if (line.Contains("\"info\""))
-            {
-                try
-                {
-                    InfoMessage infoMessage = JsonConvert.DeserializeObject<InfoMessage>(line);
-                    methodArgumentNames = InfoMessageHelper.ExtractArgumentNames(infoMessage);
-                    methodArgumentTypes = InfoMessageHelper.ExtractArgumentTypes(infoMessage);
-                    PrintTrace("INFO", string.Join(", ", methodArgumentTypes));
-                }
-                catch (JsonReaderException) { }
-                catch (JsonSerializationException) { }
-            }
-        }
-
-        private void ProcessResponseStatusLine(string line)
-        {
-            if (line.Contains("\"status\""))
-            {
-                try
-                {
-                    StatusMessage statusMessage = JsonConvert.DeserializeObject<StatusMessage>(line);
-                    PrintTrace("STATUS", statusMessage.Status);
-                }
-                catch (JsonReaderException) { }
-                catch (JsonSerializationException) { }
-            }
-        }
-
         private T ProcessResponseDataLine<T>(string line, string[] methodArgumentTypes, string[] methodArgumentNames)
         {
-            if (line.Contains("\"testCase\""))
+            try
             {
-                try
-                {
-                    TestCase testCase = JsonConvert.DeserializeObject<TestCase>(line);
-                    return GenerateTestEvent<T>(line, methodArgumentTypes, methodArgumentNames);
-                }
-                catch (JsonReaderException) { }
-                catch (JsonSerializationException) { }
+                TestCase testCase = JsonConvert.DeserializeObject<TestCase>(line);
+                return GenerateTestEvent<T>(line, methodArgumentTypes, methodArgumentNames);
+            }
+            catch (JsonReaderException e) 
+            { 
+                PrintTrace("PARSE DATA - READ", e.StackTrace);
+            }
+            catch (JsonSerializationException e) 
+            { 
+                PrintTrace("PARSE DATA - SERIALIZATION", e.StackTrace);
             }
   
+            return default(T);
+        }
+
+        private T ProcessResponseStatusLine<T>(string line)
+        {
+            try
+            {
+                StatusMessage statusMessage = JsonConvert.DeserializeObject<StatusMessage>(line);
+                PrintTrace("STATUS", statusMessage.Status);
+            }
+            catch (JsonReaderException e) 
+            { 
+                PrintTrace("PARSE STATUS - READ", e.StackTrace);
+            }
+            catch (JsonSerializationException e) 
+            { 
+                PrintTrace("PARSE STATUS - SERIALIZATION", e.StackTrace);
+            }
+
+            return default(T);
+        }
+
+        private T ProcessResponseInfoLine<T>(string line, ref string[] methodArgumentTypes, ref string[] methodArgumentNames)
+        {
+            try
+            {
+                InfoMessage infoMessage = JsonConvert.DeserializeObject<InfoMessage>(line);
+                methodArgumentNames = InfoMessageHelper.ExtractArgumentNames(infoMessage);
+                methodArgumentTypes = InfoMessageHelper.ExtractArgumentTypes(infoMessage);
+                PrintTrace("INFO", string.Join(", ", methodArgumentTypes));
+            }
+            catch (JsonReaderException e) 
+            { 
+                PrintTrace("PARSE INFO - READ", e.StackTrace);
+            }
+            catch (JsonSerializationException e) 
+            { 
+                PrintTrace("PARSE INFO - SERIALIZATION", e.StackTrace);
+            }
+
             return default(T);
         }
 

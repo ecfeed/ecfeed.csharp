@@ -4,23 +4,23 @@ using Newtonsoft.Json;
 
 namespace EcFeed
 {
-    public sealed class GeneratorOptions
+    internal sealed class GeneratorOptions
     {
         internal Dictionary<string, object> UserData { get; set; }
         internal GeneratorProperties Properties { get; set; }
 
-        public GeneratorOptions(GeneratorProperties properties = null)
+        internal GeneratorOptions(GeneratorProperties properties = null)
         {
             UserData = new Dictionary<string, object>();
             Properties = properties == null ? new GeneratorProperties() : properties;
         }
 
-        public object GetOption(string key)
+        internal object GetOption(string key)
         {
             return UserData[key];
         }
 
-        public void AddOption(string key, object value)
+        internal void AddOption(string key, object value)
         {
             if (UserData.ContainsKey(key))
             {
@@ -31,7 +31,7 @@ namespace EcFeed
             UserData.Add(key, value);
         }
 
-        public void RemoveOption(string key)
+        internal void RemoveOption(string key)
         {
             UserData.Remove(key);
         }

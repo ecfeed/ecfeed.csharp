@@ -116,7 +116,6 @@ Arguments:
 Dictionary<string, string[]> choices = new Dictionary<string, string[]>();
 choices.Add("arg1", new string[] {"choice1", "choice2"});
 choices.Add("arg2", new string[] {"choice1"});
-// Note that "arg3" is missing. It means that all enclosed choices should be uses.
 ```
 - *constraints* - A list of constraints used for the generation. If not provided, all constraints are used. For example: 
 ```C#
@@ -180,11 +179,11 @@ public IEnumerable<string> ExportStatic( ... , Template template);
 
 ## Other methods
 
-The following section describes non-crutial methods.
+The following section describes non-crucial methods.
 
 ### public string ValidateConnection()
 
-Verifies if the connection settings (including the keystore) are correct. If something is wrong, an exception is thrown. The resulting string defines the build number of the generator and can be used for debugging purposes.
+Verifies if the connection settings (including the keystore) are correct. If something is wrong, an exception is thrown.
 
 ### public string[] GetMethodTypes(string method)
 

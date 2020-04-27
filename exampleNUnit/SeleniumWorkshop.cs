@@ -10,10 +10,11 @@ using EcFeed;
 
 namespace exampleNUnit
 {
-    // [Ignore("Some other time")]
     [TestFixture]
     public class SeleniumWorkshop
     {
+        static public IEnumerable DataString = new TestProvider("7482-5194-2849-1943-2448").GenerateNWise("com.example.test.Demo.typeString");
+
         static RemoteWebDriver SeleniumDriver { get; set; }
         static string PageAddress { get; set; }
         static string[] PageFormControl { get; set; }
@@ -98,7 +99,7 @@ namespace exampleNUnit
             SeleniumDriver.Close();
         }
 
-        [TestCaseSource(typeof(FeedWorkshop))]
+        [TestCaseSource("DataString")]
         public void Test(string country, string name, string address, string product, string color, string size, string quantity, string payment, string delivery, string phone, string email)
         {
             string[][] input = new string[2][] { new string[] {name, address, quantity, phone, email}, new string[] {country, product, color, size, payment, delivery} };
@@ -125,15 +126,4 @@ namespace exampleNUnit
         }
     }
 
-    class FeedWorkshop : IEnumerable
-    {
-        public IEnumerator GetEnumerator()
-        {
-            ITestProvider testProvider = new TestProvider();
-            testProvider.Model = "7482-5194-2849-1943-2448";
-            testProvider.Method = "com.example.test.Demo.typeString";
-
-            return testProvider.QueueNWise().GetEnumerator();
-        }
-    }
 }

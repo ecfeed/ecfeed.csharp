@@ -310,7 +310,7 @@ namespace EcFeed
             string requestData = $"{ SerializeRequestData(options, model, method, template) }";
             string requestType = template.Equals(Template.Stream.GetValue()) ? Request.Data : Request.Export;
             string request = $"{ GeneratorAddress }/{ Endpoint.Generator }?requestType={ requestType }&request={ requestData }";
-Console.WriteLine(request);
+
             request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
 
             PrintTrace("DATA REQUEST", request);

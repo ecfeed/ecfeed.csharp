@@ -9,7 +9,7 @@ namespace Testify.EcFeed.Example
     {
         public static void Main(string[] args)
         {
-            TestProvider testProvider = new TestProvider("8489-0551-2472-1941-3375");
+            TestProvider testProvider = new TestProvider("3243-2107-7355-4290-3889");
             
             testProvider.ValidateConnection();
             
@@ -26,11 +26,11 @@ namespace Testify.EcFeed.Example
 
             string[] testSuites = new string[] { "default" };
 
-            foreach(var element in testProvider.ExportNWise(method, 3, 100, template: Template.JSON, model: "8489-0551-2472-1941-3375"))
-            // foreach(var element in testProvider.GenerateCartesian(method))
+            // foreach(var element in testProvider.ExportStatic(method, testSuites: testSuites, template: Template.JSON))
+            foreach(var element in testProvider.GenerateCartesian(method))
             {
-                Console.WriteLine("HANDLER: {0}", element);
-                // Console.WriteLine("HANDLER: [{0}]", string.Join(", ", element));
+                // Console.WriteLine("HANDLER: {0}", element);
+                Console.WriteLine("HANDLER: [{0}]", string.Join(", ", element));
             }
 
         }

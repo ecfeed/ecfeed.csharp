@@ -39,10 +39,10 @@ namespace EcFeed
             return request;
         }
 
-        public static string GenerateRequestURL(GeneratorOptions options, string model, string method, string template, string address, string globalModel, string endpoint = Endpoint.Generator)
+        public static string GenerateRequestURL(SessionData feedback, string address, string endpoint = Endpoint.Generator)
         {
-            string requestData = $"{ SerializeRequestData(options, model, method, template, globalModel) }";
-            string requestType = template.Equals(Template.Stream.GetValue()) ? Request.Data : Request.Export;
+            string requestData = $"{ SerializeRequestData(feedback) }";
+            string requestType = feedback.Template.GetValue().Equals(Template.Stream.GetValue()) ? Request.Data : Request.Export;
             string request = $"{ address }/{ endpoint }?requestType={ requestType }&request={ requestData }";
 
             request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
@@ -52,24 +52,19 @@ namespace EcFeed
             return request;
         }
 
-        private static string SerializeRequestData(GeneratorOptions options, string model, string method, string template, string globalModel)
+        private static string SerializeRequestData(SessionData feedback)
         {
-            if (string.IsNullOrEmpty(globalModel))
-            {
-                throw new TestProviderException("The model ID is not defined and the default value cannot be used.");
-            }
-
-            if (string.IsNullOrEmpty(method))
+            if (string.IsNullOrEmpty(feedback.MethodName))
             {
                 throw new TestProviderException("The method is not defined and the default value cannot be used.");
             }
 
             var parsedRequest = new
             {
-                model = string.IsNullOrEmpty(model) ? globalModel : model,
-                method = method,
-                template = template,
-                userData = options.ToString()
+                model = feedback.ModelId,
+                method = feedback.MethodName,
+                template = feedback.Template.GetValue(),
+                userData = feedback.GeneratorOptions.ToString()
             };
 
             return JsonConvert.SerializeObject(parsedRequest);

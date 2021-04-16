@@ -63,13 +63,18 @@ namespace EcFeed
 
         private string[][] FetchMethodInfo(string method)
         {
-            GeneratorProperties additionalProperties = new GeneratorProperties();
-            additionalProperties.Add(Parameter.Length, "1");
+            GeneratorProperties generatorProperties = new GeneratorProperties();
+            generatorProperties.Add(Parameter.Length, "1");
 
-            GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.Add(Parameter.DataSource, Generator.Random.GetValue());
+            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            generatorOptions.Add(Parameter.DataSource, Generator.Random.GetValue());
 
-            IEnumerable<string[][]> queue = Process<string[][]>(method, additionalOptions, null, null, null, new Feedback(), Template.Stream);
+            SessionData feedback = new SessionData();
+            feedback.GeneratorOptions = generatorOptions;
+            feedback.ModelId = Model;
+            feedback.MethodName = method;
+
+            IEnumerable<string[][]> queue = Process<string[][]>(feedback);
 
             foreach(string[][] element in queue) 
             {
@@ -86,11 +91,23 @@ namespace EcFeed
             Generator generator,
             GeneratorOptions generatorOptions,
             string model = null,
+            Dictionary<string, string> custom = null,
+            string label = null,
+            bool feedback = false,
             Template template = Default.ParameterTemplate)
         {
             generatorOptions.Add(Parameter.DataSource, generator.GetValue());
 
-            return Process<string>(method, generatorOptions, null, null, model, new Feedback(), template);
+            SessionData sessionData = new SessionData();
+            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.ModelId = model == null ? Model : model;
+            sessionData.MethodName = method;
+            sessionData.Template = template;
+            sessionData.Custom = custom;
+            sessionData.Feedback = feedback;
+            sessionData.TestSessionLabel = label;
+
+            return Process<string>(sessionData);
         }
 
         public IEnumerable<string> ExportNWise(
@@ -100,16 +117,30 @@ namespace EcFeed
             Dictionary<string, string[]> choices = null,
             object constraints = null,
             string model = null,
+            Dictionary<string, string> custom = null,
+            string label = null,
+            bool feedback = false,
             Template template = Default.ParameterTemplate)
         {
-            GeneratorProperties additionalProperties = new GeneratorProperties();
-            additionalProperties.Add(Parameter.N, "" + n);
-            additionalProperties.Add(Parameter.Coverage, "" + coverage);
+            GeneratorProperties generatorProperties = new GeneratorProperties();
+            generatorProperties.Add(Parameter.N, "" + n);
+            generatorProperties.Add(Parameter.Coverage, "" + coverage);
 
-            GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.Add(Parameter.DataSource, Generator.NWise.GetValue());
+            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            generatorOptions.Add(Parameter.DataSource, Generator.NWise.GetValue());
+            generatorOptions.Add(Parameter.Choices, choices);
+            generatorOptions.Add(Parameter.Constraints, constraints);
 
-            return Process<string>(method, additionalOptions, choices, constraints, model, new Feedback(), template);
+            SessionData sessionData = new SessionData();
+            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.ModelId = model == null ? Model : model;
+            sessionData.MethodName = method;
+            sessionData.Template = template;
+            sessionData.Custom = custom;
+            sessionData.Feedback = feedback;
+            sessionData.TestSessionLabel = label;
+
+            return Process<string>(sessionData);
         }
 
         public IEnumerable<string> ExportCartesian(
@@ -117,14 +148,28 @@ namespace EcFeed
             Dictionary<string, string[]> choices = null,
             object constraints = null,
             string model = null,
+            Dictionary<string, string> custom = null,
+            string label = null,
+            bool feedback = false,
             Template template = Default.ParameterTemplate)
         {
-            GeneratorProperties additionalProperties = new GeneratorProperties();
+            GeneratorProperties generatorProperties = new GeneratorProperties();
 
-            GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.Add(Parameter.DataSource, Generator.Cartesian.GetValue());
+            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            generatorOptions.Add(Parameter.DataSource, Generator.Cartesian.GetValue());
+            generatorOptions.Add(Parameter.Choices, choices);
+            generatorOptions.Add(Parameter.Constraints, constraints);
 
-            return Process<string>(method, additionalOptions, choices, constraints, model, new Feedback(), template);
+            SessionData sessionData = new SessionData();
+            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.ModelId = model == null ? Model : model;
+            sessionData.MethodName = method;
+            sessionData.Template = template;
+            sessionData.Custom = custom;
+            sessionData.Feedback = feedback;
+            sessionData.TestSessionLabel = label;
+
+            return Process<string>(sessionData);
         }
 
         public IEnumerable<string> ExportRandom(
@@ -135,34 +180,60 @@ namespace EcFeed
             Dictionary<string, string[]> choices = null,
             object constraints = null,
             string model = null,
+            Dictionary<string, string> custom = null,
+            string label = null,
+            bool feedback = false,
             Template template = Default.ParameterTemplate)
         {
-            GeneratorProperties additionalProperties = new GeneratorProperties();
-            additionalProperties.Add(Parameter.Length, "" + length);
-            additionalProperties.Add(Parameter.Duplicates, "" + duplicates);
-            additionalProperties.Add(Parameter.Adaptive, "" + adaptive);
+            GeneratorProperties generatorProperties = new GeneratorProperties();
+            generatorProperties.Add(Parameter.Length, "" + length);
+            generatorProperties.Add(Parameter.Duplicates, "" + duplicates);
+            generatorProperties.Add(Parameter.Adaptive, "" + adaptive);
 
-            GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.Add(Parameter.DataSource, Generator.Random.GetValue());
+            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            generatorOptions.Add(Parameter.DataSource, Generator.Random.GetValue());
+            generatorOptions.Add(Parameter.Choices, choices);
+            generatorOptions.Add(Parameter.Constraints, constraints);
 
-            return Process<string>(method, additionalOptions, choices, constraints, model, new Feedback(), template);
+            SessionData sessionData = new SessionData();
+            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.ModelId = model == null ? Model : model;
+            sessionData.MethodName = method;
+            sessionData.Template = template;
+            sessionData.Custom = custom;
+            sessionData.Feedback = feedback;
+            sessionData.TestSessionLabel = label;
+
+            return Process<string>(sessionData);
         }
 
         public IEnumerable<string> ExportStatic(
             string method,
             object testSuites = null,
             string model = null,
+            Dictionary<string, string> custom = null,
+            string label = null,
+            bool feedback = false,
             Template template = Default.ParameterTemplate)
         {
             object updatedTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
 
-            GeneratorProperties additionalProperties = new GeneratorProperties();
+            GeneratorProperties generatorProperties = new GeneratorProperties();
 
-            GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.Add(Parameter.DataSource, Generator.Static.GetValue());
-            additionalOptions.Add(Parameter.TestSuites, updatedTestSuites);
+            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            generatorOptions.Add(Parameter.DataSource, Generator.Static.GetValue());
+            generatorOptions.Add(Parameter.TestSuites, updatedTestSuites);
            
-            return Process<string>(method, additionalOptions, null, null, model, new Feedback(), template);
+            SessionData sessionData = new SessionData();
+            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.ModelId = model == null ? Model : model;
+            sessionData.MethodName = method;
+            sessionData.Template = template;
+            sessionData.Custom = custom;
+            sessionData.Feedback = feedback;
+            sessionData.TestSessionLabel = label;
+
+            return Process<string>(sessionData);
         }
 
 //-------------------------------------------------------------------------------------------
@@ -171,14 +242,22 @@ namespace EcFeed
             string method,
             Generator generator,
             GeneratorOptions generatorOptions,
-            string model = null)
+            string model = null,
+            Dictionary<string, string> custom = null,
+            string label = null,
+            bool feedback = false)
         {
             generatorOptions.Add(Parameter.DataSource, generator.GetValue());
 
-            Feedback feedback = new Feedback();
-            feedback.GeneratorType = generator.GetValue();
+            SessionData sessionData = new SessionData();
+            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.ModelId = model == null ? Model : model;
+            sessionData.MethodName = method;
+            sessionData.Custom = custom;
+            sessionData.Feedback = feedback;
+            sessionData.TestSessionLabel = label;
 
-            return Process<object[]>(method, generatorOptions, null, null, model, feedback);
+            return Process<object[]>(sessionData);
         }
 
         public IEnumerable<object[]> GenerateNWise(
@@ -187,38 +266,56 @@ namespace EcFeed
             int coverage = Default.ParameterCoverage,
             Dictionary<string, string[]> choices = null,
             object constraints = null,
-            string model = null)
+            string model = null,
+            Dictionary<string, string> custom = null,
+            string label = null,
+            bool feedback = false)
         {
-            GeneratorProperties additionalProperties = new GeneratorProperties();
-            additionalProperties.Add(Parameter.N, "" + n);
-            additionalProperties.Add(Parameter.Coverage, "" + coverage);
+            GeneratorProperties generatorProperties = new GeneratorProperties();
+            generatorProperties.Add(Parameter.N, "" + n);
+            generatorProperties.Add(Parameter.Coverage, "" + coverage);
 
-            GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.Add(Parameter.DataSource, Generator.NWise.GetValue());
+            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            generatorOptions.Add(Parameter.DataSource, Generator.NWise.GetValue());
+            generatorOptions.Add(Parameter.Choices, choices);
+            generatorOptions.Add(Parameter.Constraints, constraints);
 
-            Feedback feedback = new Feedback();
-            feedback.GeneratorOptions = additionalProperties.List();
-            feedback.GeneratorType = Generator.NWise.GetValue();
+            SessionData sessionData = new SessionData();
+            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.ModelId = model == null ? Model : model;
+            sessionData.MethodName = method;
+            sessionData.Custom = custom;
+            sessionData.Feedback = feedback;
+            sessionData.TestSessionLabel = label;
 
-            return Process<object[]>(method, additionalOptions, choices, constraints, model, feedback);
+            return Process<object[]>(sessionData);
         }
 
         public IEnumerable<object[]> GenerateCartesian(
             string method,
             Dictionary<string, string[]> choices = null,
             object constraints = null, 
-            string model = null)
+            string model = null,
+            Dictionary<string, string> custom = null,
+            string label = null,
+            bool feedback = false)
         {
-            GeneratorProperties additionalProperties = new GeneratorProperties();
+            GeneratorProperties generatorProperties = new GeneratorProperties();
 
-            GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.Add(Parameter.DataSource, Generator.Cartesian.GetValue());
+            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            generatorOptions.Add(Parameter.DataSource, Generator.Cartesian.GetValue());
+            generatorOptions.Add(Parameter.Choices, choices);
+            generatorOptions.Add(Parameter.Constraints, constraints);
 
-            Feedback feedback = new Feedback();
-            feedback.GeneratorOptions = additionalProperties.List();
-            feedback.GeneratorType = Generator.Cartesian.GetValue();
+            SessionData sessionData = new SessionData();
+            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.ModelId = model == null ? Model : model;
+            sessionData.MethodName = method;
+            sessionData.Custom = custom;
+            sessionData.Feedback = feedback;
+            sessionData.TestSessionLabel = label;
 
-            return Process<object[]>(method, additionalOptions, choices, constraints, model, feedback);
+            return Process<object[]>(sessionData);
         }
 
         public IEnumerable<object[]> GenerateRandom(
@@ -228,82 +325,71 @@ namespace EcFeed
             bool adaptive = Default.ParameterAdaptive,
             Dictionary<string, string[]> choices = null,
             object constraints = null,
-            string model = null)
+            string model = null,
+            Dictionary<string, string> custom = null,
+            string label = null,
+            bool feedback = false)
         {
-            GeneratorProperties additionalProperties = new GeneratorProperties();
-            additionalProperties.Add(Parameter.Length, "" + length);
-            additionalProperties.Add(Parameter.Duplicates, "" + duplicates);
-            additionalProperties.Add(Parameter.Adaptive, "" + adaptive);
+            GeneratorProperties generatorProperties = new GeneratorProperties();
+            generatorProperties.Add(Parameter.Length, "" + length);
+            generatorProperties.Add(Parameter.Duplicates, "" + duplicates);
+            generatorProperties.Add(Parameter.Adaptive, "" + adaptive);
 
-            GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.Add(Parameter.DataSource, Generator.Random.GetValue());
+            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            generatorOptions.Add(Parameter.DataSource, Generator.Random.GetValue());
+            generatorOptions.Add(Parameter.Choices, choices);
+            generatorOptions.Add(Parameter.Constraints, constraints);
 
-            Feedback feedback = new Feedback();
-            feedback.GeneratorOptions = additionalProperties.List();
-            feedback.GeneratorType = Generator.Random.GetValue();
+            SessionData sessionData = new SessionData();
+            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.ModelId = model == null ? Model : model;
+            sessionData.MethodName = method;
+            sessionData.Custom = custom;
+            sessionData.Feedback = feedback;
+            sessionData.TestSessionLabel = label;
 
-            return Process<object[]>(method, additionalOptions, choices, constraints, null, feedback);
+            return Process<object[]>(sessionData);
         }
 
         public IEnumerable<object[]> GenerateStatic(
             string method,
             object testSuites = null,
-            string model = null)
+            string model = null,
+            Dictionary<string, string> custom = null,
+            string label = null,
+            bool feedback = false)
         {
             object updatedTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
 
-            GeneratorProperties additionalProperties = new GeneratorProperties();
+            GeneratorProperties generatorProperties = new GeneratorProperties();
 
-            GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.Add(Parameter.DataSource, Generator.Static.GetValue());
-            additionalOptions.Add(Parameter.TestSuites, updatedTestSuites);
+            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            generatorOptions.Add(Parameter.DataSource, Generator.Static.GetValue());
+            generatorOptions.Add(Parameter.TestSuites, updatedTestSuites);
            
+            SessionData sessionData = new SessionData();
+            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.ModelId = model == null ? Model : model;
+            sessionData.MethodName = method;
+            sessionData.Custom = custom;
+            sessionData.Feedback = feedback;
+            sessionData.TestSessionLabel = label;
 
-            Feedback feedback = new Feedback();
-            feedback.GeneratorOptions = additionalProperties.List();
-            feedback.GeneratorType = Generator.Static.GetValue();
-            feedback.TestSuites = updatedTestSuites;
-
-            return Process<object[]>(method, additionalOptions, null, null, model, feedback);
+            return Process<object[]>(sessionData);
         }
 
 //-------------------------------------------------------------------------------------------
 
-        private IEnumerable<T> Process<T>(
-            string method, 
-            GeneratorOptions options, 
-            Dictionary<string, string[]> choices = null,
-            object constraints = null,
-            string model = null,
-            Feedback feedback = null,
-            Template template = Template.Stream
-            )
+        private IEnumerable<T> Process<T>(SessionData feedback)
         {
-            if (choices != null)
-            {
-                options.Add(Parameter.Choices, choices);
-            }
+            string requestURL = HelperRequest.GenerateRequestURL(feedback, GeneratorAddress);
 
-            if (constraints != null)
-            {
-                options.Add(Parameter.Constraints, constraints);
-            }
-
-            feedback.Framework = "C#";
-            feedback.MethodName = method;
-            feedback.ModelId = model == null ? Model : model;
-            feedback.Choices = choices;
-            feedback.Constraints = constraints;
-            feedback.GeneratorType = (string)options.Get(Parameter.DataSource);
-
-            string requestURL = HelperRequest.GenerateRequestURL(options, model, method, template.GetValue(), GeneratorAddress, Model);
-
-            return ProcessResponse<T>(HelperRequest.SendRequest(requestURL, KeyStorePath, KeyStorePassword), template, feedback);
+            return ProcessResponse<T>(feedback, HelperRequest.SendRequest(requestURL, KeyStorePath, KeyStorePassword));
         }
 
 //-------------------------------------------------------------------------------------------  
 
-        private IEnumerable<T> ProcessResponse<T>(HttpWebResponse response, Template template, Feedback feedback) 
+        private IEnumerable<T> ProcessResponse<T>(SessionData feedback, HttpWebResponse response) 
         {
             if (!response.StatusCode.ToString().Equals("OK"))
             {
@@ -315,7 +401,7 @@ namespace EcFeed
                     string line;
                     
                     while ((line = reader.ReadLine()) != null) {
-                        T element = ProcessResponseLine<T>(line, template, ref feedback);
+                        T element = ProcessResponseLine<T>(line, ref feedback);
                             
                         if (element != null)
                         {
@@ -326,9 +412,9 @@ namespace EcFeed
             }
         }
 
-        private T ProcessResponseLine<T>(string line, Template template, ref Feedback feedback)
+        private T ProcessResponseLine<T>(string line, ref SessionData feedback)
         {
-            if (template == Template.Stream)
+            if (feedback.Template == Template.Stream)
             {
                 if (line.Contains("\"testCase\""))
                 {
@@ -351,7 +437,7 @@ namespace EcFeed
             }
         }
 
-        private T ProcessResponseDataLine<T>(string line, Feedback feedback)
+        private T ProcessResponseDataLine<T>(string line, SessionData feedback)
         {
             try
             {
@@ -389,7 +475,7 @@ namespace EcFeed
             return default(T);
         }
 
-        private T ProcessResponseInfoLine<T>(string line, ref Feedback feedback)
+        private T ProcessResponseInfoLine<T>(string line, ref SessionData feedback)
         {
             try
             {    
@@ -408,7 +494,7 @@ namespace EcFeed
             return default(T);
         }
 
-        private T GenerateTestEvent<T>(string data, Feedback feedback)
+        private T GenerateTestEvent<T>(string data, SessionData feedback)
         {
             if (typeof(T).ToString().Equals("System.Object[]"))
             {

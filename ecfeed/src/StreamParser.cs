@@ -5,20 +5,20 @@ namespace EcFeed
 {
     internal static class StreamParser
     {
-        internal static object[] ParseTestCaseToDataType(string data, Feedback testHeader)
+        internal static object[] ParseTestCaseToDataType(string data, SessionData feedback)
         {
-            return ParseTestCaseToDataType(JsonConvert.DeserializeObject<TestCase>(data), testHeader);
+            return ParseTestCaseToDataType(JsonConvert.DeserializeObject<TestCase>(data), feedback);
         }
-        internal static object[] ParseTestCaseToDataType(TestCase data, Feedback testHeader)
+        internal static object[] ParseTestCaseToDataType(TestCase data, SessionData feedback)
         {
             object[] result = new object[data.TestCaseArguments.Length + 1];
 
             for (int i=0 ; i < data.TestCaseArguments.Length ; i++)
             {
-                result[i] = CastType(data.TestCaseArguments[i].Value, testHeader.MethodArgumentTypes[i]);
+                result[i] = CastType(data.TestCaseArguments[i].Value, feedback.MethodArgumentTypes[i]);
             }
 
-            result[result.Length - 1] = testHeader;
+            result[result.Length - 1] = feedback;
 
             return result;
         }

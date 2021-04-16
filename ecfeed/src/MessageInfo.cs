@@ -12,7 +12,7 @@ namespace EcFeed
 
     internal static class MessageInfoHelper 
     { 
-        internal static void ParseInfoMessage(string line, ref Feedback feedback)
+        internal static void ParseInfoMessage(string line, ref SessionData feedback)
         {
             MessageInfo infoMessage = JsonConvert.DeserializeObject<MessageInfo>(line);
                 

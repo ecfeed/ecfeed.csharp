@@ -2,8 +2,17 @@ using System.Collections.Generic;
 
 namespace EcFeed
 {
-    public class Feedback
+    public class SessionData
     {
+        public SessionData()
+        {
+            Framework = "C#";
+            Template = Template.Stream;
+            TestResults = new Dictionary<string, FeedbackTest>();
+        }
+        
+        public bool Feedback { get; set; }
+        public Template Template { get; set; }
         public string ModelId { get; set; }
         public string TestSessionId { get; set; }
         public string MethodName { get; set; }
@@ -14,11 +23,7 @@ namespace EcFeed
         public string TestSessionLabel { get; set; }
         public string Framework { get; set; }
         public int Timestamp { get; set; }
-        public string GeneratorType { get; set; }
-        public string GeneratorOptions { get; set; }
-        public object Constraints { get; set; }
-        public object Choices { get; set; }
-        public object TestSuites { get; set; }
+        internal GeneratorOptions GeneratorOptions { get; set; }
         public Dictionary<string, string> Custom { get; set; }
     }
 

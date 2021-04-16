@@ -20,7 +20,7 @@ namespace exampleNUnit
         // static public IEnumerable DataMix = new TestProvider("IMHL-K0DU-2U0I-J532-25J9").GenerateNWise("com.example.test.Demo.typeMix");
 
         [TestCaseSource("DataString")]
-        public void TestString(string a, string b, string c, string d, string e, string f, string g, string h, string i, string j, Feedback ecfeed)
+        public void TestString(string a, string b, string c, string d, string e, string f, string g, string h, string i, string j, SessionData ecfeed)
         {
             NUnit.Framework.TestContext.Progress.WriteLine(ecfeed.TestSessionId);
             // Assert.That(false, Is.True);

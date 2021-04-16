@@ -22,6 +22,11 @@ namespace EcFeed
 
         internal void Add(string key, object value)
         {
+            if (value == null)
+            {
+                return;
+            }
+            
             if (UserData.ContainsKey(key))
             {
                 UserData[key] = value;

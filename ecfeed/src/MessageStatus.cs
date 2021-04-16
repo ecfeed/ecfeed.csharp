@@ -2,7 +2,7 @@ using Newtonsoft.Json;
 
 namespace EcFeed
 {
-    internal struct StatusMessage
+    internal struct MessageStatus
     {
         [JsonProperty("status", Required = Required.Always)] internal string Status { get; set; }
 

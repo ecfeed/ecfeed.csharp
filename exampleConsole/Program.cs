@@ -11,8 +11,6 @@ namespace Testify.EcFeed.Example
         {
             TestProvider testProvider = new TestProvider("3243-2107-7355-4290-3889");
             
-            testProvider.ValidateConnection();
-            
             string method ="QuickStart.test";
 
             Console.WriteLine($"{ string.Join(", ", testProvider.GetMethodNames(method)) }");

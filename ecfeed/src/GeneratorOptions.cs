@@ -15,12 +15,12 @@ namespace EcFeed
             Properties = properties == null ? new GeneratorProperties() : properties;
         }
 
-        internal object GetOption(string key)
+        internal object Get(string key)
         {
             return UserData[key];
         }
 
-        internal void AddOption(string key, object value)
+        internal void Add(string key, object value)
         {
             if (UserData.ContainsKey(key))
             {
@@ -31,29 +31,29 @@ namespace EcFeed
             UserData.Add(key, value);
         }
 
-        internal void RemoveOption(string key)
-        {
-            UserData.Remove(key);
-        }
-
-        internal GeneratorOptions MergeInto(GeneratorOptions settings)
+        internal GeneratorOptions Merge(GeneratorOptions settings)
         {
             GeneratorOptions settingsTo = new GeneratorOptions();
             GeneratorOptions settingsFrom = settings == null ? new GeneratorOptions() : settings;
 
-            this.UserData.ToList().ForEach(x => settingsTo.AddOption(x.Key, x.Value));
-            settingsFrom.UserData.ToList().ForEach(x => settingsTo.AddOption(x.Key, x.Value));
+            this.UserData.ToList().ForEach(x => settingsTo.Add(x.Key, x.Value));
+            settingsFrom.UserData.ToList().ForEach(x => settingsTo.Add(x.Key, x.Value));
 
-            settingsTo.Properties = settingsTo.Properties.MergeInto(settings.Properties);
+            settingsTo.Properties = settingsTo.Properties.Merge(settings.Properties);
 
             return settingsTo;
         }
 
+        public string List()
+        {
+            return string.Join(", ", UserData.ToList().Select(x => x.Key + " = " + x.Value));
+        }
+        
         public override string ToString()
         {
             GeneratorOptions settings = new GeneratorOptions();
-            this.UserData.ToList().ForEach(x => settings.AddOption(x.Key, x.Value));
-            settings.AddOption("properties", Properties.Properties);
+            this.UserData.ToList().ForEach(x => settings.Add(x.Key, x.Value));
+            settings.Add("properties", Properties.Properties);
 
             return JsonConvert.SerializeObject(settings.UserData, Formatting.None)
                 .Replace("\"", "\'")

@@ -6,14 +6,14 @@ namespace EcFeed
 {
     internal sealed class GeneratorProperties
     {
-        internal Dictionary<string, object> Properties = new Dictionary<string, object>();
+        internal Dictionary<string, object> Properties;
 
-        internal object GetProperty(string key)
+        internal GeneratorProperties()
         {
-            return Properties[key];
+            Properties = new Dictionary<string, object>();
         }
 
-        internal void AddProperty(string key, object value)
+        internal void Add(string key, object value)
         {
             if (Properties.ContainsKey(key))
             {
@@ -24,27 +24,27 @@ namespace EcFeed
             Properties.Add(key, value);
         }
 
-        internal void RemoveProperty(string key)
-        {
-            Properties.Remove(key);
-        }
-
-        internal GeneratorProperties MergeInto(GeneratorProperties settings)
+        internal GeneratorProperties Merge(GeneratorProperties settings)
         {
             GeneratorProperties settingsTo = new GeneratorProperties();
             GeneratorProperties settingsFrom = settings == null ? new GeneratorProperties() : settings;
 
-            this.Properties.ToList().ForEach(x => settingsTo.AddProperty(x.Key, x.Value));
-            settingsFrom.Properties.ToList().ForEach(x => settingsTo.AddProperty(x.Key, x.Value));
+            this.Properties.ToList().ForEach(x => settingsTo.Add(x.Key, x.Value));
+            settingsFrom.Properties.ToList().ForEach(x => settingsTo.Add(x.Key, x.Value));
 
             return settingsTo;
+        }
+
+        public string List()
+        {
+            return string.Join(", ", Properties.ToList().Select(x => x.Key + " = " + x.Value));
         }
 
         public override string ToString()
         {
             return JsonConvert.SerializeObject(Properties, Formatting.None)
                 .Replace("\"", "\'")
-                 .Replace("':'True'", "':'true'")
+                .Replace("':'True'", "':'true'")
                 .Replace("':'False'", "':'false'");
         }
     } 

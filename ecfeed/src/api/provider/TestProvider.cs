@@ -1,14 +1,7 @@
-// #define VERBOSE
-
-using System;
-using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Net;
-using System.Net.Security;
 using System.Collections.Generic;
-using System.Security.Cryptography;
-using System.Security.Cryptography.X509Certificates;
 using Newtonsoft.Json;
 
 namespace EcFeed
@@ -56,20 +49,6 @@ namespace EcFeed
             throw new TestProviderException("The keystore path could not be verified. In order to use the test generator, please provide a correct path.");
         }
 
-        public void ValidateConnection() 
-        {
-            HttpWebResponse response = SendRequest(GenerateHealthCheckURL(GeneratorAddress));
-            using (StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8)) {
-                string line;
-                    
-                while ((line = reader.ReadLine()) != null) {
-                    PrintTrace("VALIDATE", line);
-                }
-               
-            }
-            
-        }
-
 //-------------------------------------------------------------------------------------------
 
         public string[] GetMethodTypes(string method)
@@ -85,12 +64,12 @@ namespace EcFeed
         private string[][] FetchMethodInfo(string method)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
-            additionalProperties.AddProperty(Parameter.Length, "1");
+            additionalProperties.Add(Parameter.Length, "1");
 
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.AddOption(Parameter.DataSource, Generator.Random.GetValue());
+            additionalOptions.Add(Parameter.DataSource, Generator.Random.GetValue());
 
-            IEnumerable<string[][]> queue = Process<string[][]>(method, additionalOptions, null, null, null, Template.Stream);
+            IEnumerable<string[][]> queue = Process<string[][]>(method, additionalOptions, null, null, null, new Feedback(), Template.Stream);
 
             foreach(string[][] element in queue) 
             {
@@ -109,9 +88,9 @@ namespace EcFeed
             string model = null,
             Template template = Default.ParameterTemplate)
         {
-            generatorOptions.AddOption(Parameter.DataSource, generator.GetValue());
+            generatorOptions.Add(Parameter.DataSource, generator.GetValue());
 
-            return Process<string>(method, generatorOptions, null, null, model, template);
+            return Process<string>(method, generatorOptions, null, null, model, new Feedback(), template);
         }
 
         public IEnumerable<string> ExportNWise(
@@ -124,13 +103,13 @@ namespace EcFeed
             Template template = Default.ParameterTemplate)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
-            additionalProperties.AddProperty(Parameter.N, "" + n);
-            additionalProperties.AddProperty(Parameter.Coverage, "" + coverage);
+            additionalProperties.Add(Parameter.N, "" + n);
+            additionalProperties.Add(Parameter.Coverage, "" + coverage);
 
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.AddOption(Parameter.DataSource, Generator.NWise.GetValue());
+            additionalOptions.Add(Parameter.DataSource, Generator.NWise.GetValue());
 
-            return Process<string>(method, additionalOptions, choices, constraints, model, template);
+            return Process<string>(method, additionalOptions, choices, constraints, model, new Feedback(), template);
         }
 
         public IEnumerable<string> ExportCartesian(
@@ -143,9 +122,9 @@ namespace EcFeed
             GeneratorProperties additionalProperties = new GeneratorProperties();
 
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.AddOption(Parameter.DataSource, Generator.Cartesian.GetValue());
+            additionalOptions.Add(Parameter.DataSource, Generator.Cartesian.GetValue());
 
-            return Process<string>(method, additionalOptions, choices, constraints, model, template);
+            return Process<string>(method, additionalOptions, choices, constraints, model, new Feedback(), template);
         }
 
         public IEnumerable<string> ExportRandom(
@@ -159,14 +138,14 @@ namespace EcFeed
             Template template = Default.ParameterTemplate)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
-            additionalProperties.AddProperty(Parameter.Length, "" + length);
-            additionalProperties.AddProperty(Parameter.Duplicates, "" + duplicates);
-            additionalProperties.AddProperty(Parameter.Adaptive, "" + adaptive);
+            additionalProperties.Add(Parameter.Length, "" + length);
+            additionalProperties.Add(Parameter.Duplicates, "" + duplicates);
+            additionalProperties.Add(Parameter.Adaptive, "" + adaptive);
 
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.AddOption(Parameter.DataSource, Generator.Random.GetValue());
+            additionalOptions.Add(Parameter.DataSource, Generator.Random.GetValue());
 
-            return Process<string>(method, additionalOptions, choices, constraints, model, template);
+            return Process<string>(method, additionalOptions, choices, constraints, model, new Feedback(), template);
         }
 
         public IEnumerable<string> ExportStatic(
@@ -180,10 +159,10 @@ namespace EcFeed
             GeneratorProperties additionalProperties = new GeneratorProperties();
 
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.AddOption(Parameter.DataSource, Generator.Static.GetValue());
-            additionalOptions.AddOption(Parameter.TestSuites, updatedTestSuites);
+            additionalOptions.Add(Parameter.DataSource, Generator.Static.GetValue());
+            additionalOptions.Add(Parameter.TestSuites, updatedTestSuites);
            
-            return Process<string>(method, additionalOptions, null, null, model, template);
+            return Process<string>(method, additionalOptions, null, null, model, new Feedback(), template);
         }
 
 //-------------------------------------------------------------------------------------------
@@ -194,9 +173,12 @@ namespace EcFeed
             GeneratorOptions generatorOptions,
             string model = null)
         {
-            generatorOptions.AddOption(Parameter.DataSource, generator.GetValue());
+            generatorOptions.Add(Parameter.DataSource, generator.GetValue());
 
-            return Process<object[]>(method, generatorOptions, null, null, model);
+            Feedback feedback = new Feedback();
+            feedback.GeneratorType = generator.GetValue();
+
+            return Process<object[]>(method, generatorOptions, null, null, model, feedback);
         }
 
         public IEnumerable<object[]> GenerateNWise(
@@ -208,13 +190,17 @@ namespace EcFeed
             string model = null)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
-            additionalProperties.AddProperty(Parameter.N, "" + n);
-            additionalProperties.AddProperty(Parameter.Coverage, "" + coverage);
+            additionalProperties.Add(Parameter.N, "" + n);
+            additionalProperties.Add(Parameter.Coverage, "" + coverage);
 
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.AddOption(Parameter.DataSource, Generator.NWise.GetValue());
+            additionalOptions.Add(Parameter.DataSource, Generator.NWise.GetValue());
 
-            return Process<object[]>(method, additionalOptions, choices, constraints, model);
+            Feedback feedback = new Feedback();
+            feedback.GeneratorOptions = additionalProperties.List();
+            feedback.GeneratorType = Generator.NWise.GetValue();
+
+            return Process<object[]>(method, additionalOptions, choices, constraints, model, feedback);
         }
 
         public IEnumerable<object[]> GenerateCartesian(
@@ -226,9 +212,13 @@ namespace EcFeed
             GeneratorProperties additionalProperties = new GeneratorProperties();
 
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.AddOption(Parameter.DataSource, Generator.Cartesian.GetValue());
+            additionalOptions.Add(Parameter.DataSource, Generator.Cartesian.GetValue());
 
-            return Process<object[]>(method, additionalOptions, choices, constraints, model);
+            Feedback feedback = new Feedback();
+            feedback.GeneratorOptions = additionalProperties.List();
+            feedback.GeneratorType = Generator.Cartesian.GetValue();
+
+            return Process<object[]>(method, additionalOptions, choices, constraints, model, feedback);
         }
 
         public IEnumerable<object[]> GenerateRandom(
@@ -241,14 +231,18 @@ namespace EcFeed
             string model = null)
         {
             GeneratorProperties additionalProperties = new GeneratorProperties();
-            additionalProperties.AddProperty(Parameter.Length, "" + length);
-            additionalProperties.AddProperty(Parameter.Duplicates, "" + duplicates);
-            additionalProperties.AddProperty(Parameter.Adaptive, "" + adaptive);
+            additionalProperties.Add(Parameter.Length, "" + length);
+            additionalProperties.Add(Parameter.Duplicates, "" + duplicates);
+            additionalProperties.Add(Parameter.Adaptive, "" + adaptive);
 
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.AddOption(Parameter.DataSource, Generator.Random.GetValue());
+            additionalOptions.Add(Parameter.DataSource, Generator.Random.GetValue());
 
-            return Process<object[]>(method, additionalOptions, choices, constraints, null);
+            Feedback feedback = new Feedback();
+            feedback.GeneratorOptions = additionalProperties.List();
+            feedback.GeneratorType = Generator.Random.GetValue();
+
+            return Process<object[]>(method, additionalOptions, choices, constraints, null, feedback);
         }
 
         public IEnumerable<object[]> GenerateStatic(
@@ -261,10 +255,16 @@ namespace EcFeed
             GeneratorProperties additionalProperties = new GeneratorProperties();
 
             GeneratorOptions additionalOptions = new GeneratorOptions(additionalProperties);
-            additionalOptions.AddOption(Parameter.DataSource, Generator.Static.GetValue());
-            additionalOptions.AddOption(Parameter.TestSuites, updatedTestSuites);
+            additionalOptions.Add(Parameter.DataSource, Generator.Static.GetValue());
+            additionalOptions.Add(Parameter.TestSuites, updatedTestSuites);
            
-            return Process<object[]>(method, additionalOptions, null, null, model);
+
+            Feedback feedback = new Feedback();
+            feedback.GeneratorOptions = additionalProperties.List();
+            feedback.GeneratorType = Generator.Static.GetValue();
+            feedback.TestSuites = updatedTestSuites;
+
+            return Process<object[]>(method, additionalOptions, null, null, model, feedback);
         }
 
 //-------------------------------------------------------------------------------------------
@@ -275,120 +275,36 @@ namespace EcFeed
             Dictionary<string, string[]> choices = null,
             object constraints = null,
             string model = null,
-            Template template = Template.Stream)
+            Feedback feedback = null,
+            Template template = Template.Stream
+            )
         {
             if (choices != null)
             {
-                options.AddOption(Parameter.Choices, choices);
+                options.Add(Parameter.Choices, choices);
             }
 
             if (constraints != null)
             {
-                options.AddOption(Parameter.Constraints, constraints);
+                options.Add(Parameter.Constraints, constraints);
             }
 
-            string requestURL = GenerateRequestURL(options, model, method, template.GetValue());
+            feedback.Framework = "C#";
+            feedback.MethodName = method;
+            feedback.ModelId = model == null ? Model : model;
+            feedback.Choices = choices;
+            feedback.Constraints = constraints;
+            feedback.GeneratorType = (string)options.Get(Parameter.DataSource);
 
-            return ProcessResponse<T>(SendRequest(requestURL), template);
-        }
+            string requestURL = HelperRequest.GenerateRequestURL(options, model, method, template.GetValue(), GeneratorAddress, Model);
 
-//-------------------------------------------------------------------------------------------
-
-        private string GenerateHealthCheckURL(string address)
-        {
-            string request = $"{ address }/{ Endpoint.HealthCheck }";
-
-            request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
-
-            PrintTrace("HEALTH CHECK REQUEST", request);
-
-            return request;
-        }
-
-        private string GenerateRequestURL(GeneratorOptions options, string model, string method, string template)
-        {
-            string requestData = $"{ SerializeRequestData(options, model, method, template) }";
-            string requestType = template.Equals(Template.Stream.GetValue()) ? Request.Data : Request.Export;
-            string request = $"{ GeneratorAddress }/{ Endpoint.Generator }?requestType={ requestType }&request={ requestData }";
-
-            request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
-
-            PrintTrace("DATA REQUEST", request);
-
-            return request;
-        }
-
-        private string SerializeRequestData(GeneratorOptions options, string model, string method, string template)
-        {
-            if (string.IsNullOrEmpty(Model))
-            {
-                throw new TestProviderException("The model ID is not defined and the default value cannot be used.");
-            }
-
-            if (string.IsNullOrEmpty(method))
-            {
-                throw new TestProviderException("The method is not defined and the default value cannot be used.");
-            }
-
-            var parsedRequest = new
-            {
-                model = string.IsNullOrEmpty(model) ? Model : model,
-                method = method,
-                template = template,
-                userData = options.ToString()
-            };
-
-            return JsonConvert.SerializeObject(parsedRequest);
-        }
-
-        private HttpWebResponse SendRequest(String request)
-        {
-            X509Certificate2 certificate = null;
-
-            try 
-                {
-                    certificate = new X509Certificate2(KeyStorePath, KeyStorePassword);
-
-                    HttpWebRequest httpWebRequest = (HttpWebRequest) HttpWebRequest.Create(request);
-                    httpWebRequest.ServerCertificateValidationCallback = ValidateServerCertificate;
-                    httpWebRequest.ClientCertificates.Add(certificate);
-
-                    return (HttpWebResponse) httpWebRequest.GetResponse();
-                }
-                catch (CryptographicException e)
-                {
-                    string message = $"The keystore password is incorrect. Keystore path: '{ Path.GetFullPath(KeyStorePath) }'";
-                    throw new TestProviderException(message, e);
-                }
-                catch (WebException e)
-                {
-                    string message = $"The connection could not be established.";
-                    throw new TestProviderException(message, e);
-                }
-                finally
-                {
-                    certificate.Dispose();
-                }
-        }
-
-        private bool ValidateServerCertificate(object sender, X509Certificate cert, X509Chain chain, SslPolicyErrors sslPolicyErrors) 
-        {
-            foreach(X509ChainElement certificate in chain.ChainElements) {
-                if (certificate.Certificate.IssuerName.Name.Contains("C=NO, L=Oslo, O=EcFeed AS, OU=EcFeed, CN=ecfeed.com")) {
-                    return true;
-                }
-            }
-    
-            return false;
+            return ProcessResponse<T>(HelperRequest.SendRequest(requestURL, KeyStorePath, KeyStorePassword), template, feedback);
         }
 
 //-------------------------------------------------------------------------------------------  
 
-        private IEnumerable<T> ProcessResponse<T>(HttpWebResponse response, Template template) 
+        private IEnumerable<T> ProcessResponse<T>(HttpWebResponse response, Template template, Feedback feedback) 
         {
-            string[] methodArgumentNames = null;
-            string[] methodArgumentTypes = null;
-
             if (!response.StatusCode.ToString().Equals("OK"))
             {
                 throw new TestProviderException(response.StatusDescription);
@@ -399,7 +315,7 @@ namespace EcFeed
                     string line;
                     
                     while ((line = reader.ReadLine()) != null) {
-                        T element = ProcessResponseLine<T>(line, template, ref methodArgumentTypes, ref methodArgumentNames);
+                        T element = ProcessResponseLine<T>(line, template, ref feedback);
                             
                         if (element != null)
                         {
@@ -410,13 +326,13 @@ namespace EcFeed
             }
         }
 
-        private T ProcessResponseLine<T>(string line, Template template, ref string[] methodArgumentTypes, ref string[] methodArgumentNames)
+        private T ProcessResponseLine<T>(string line, Template template, ref Feedback feedback)
         {
             if (template == Template.Stream)
             {
                 if (line.Contains("\"testCase\""))
                 {
-                    return ProcessResponseDataLine<T>(line, methodArgumentTypes, methodArgumentNames);
+                    return ProcessResponseDataLine<T>(line, feedback);
                 }
                 if (line.Contains("\"status\""))
                 {
@@ -424,31 +340,31 @@ namespace EcFeed
                 }
                 if (line.Contains("\"info\""))
                 {
-                    return ProcessResponseInfoLine<T>(line, ref methodArgumentTypes, ref methodArgumentNames);
+                    return ProcessResponseInfoLine<T>(line, ref feedback);
                 }
                 
                 return default(T);
             }
             else
             {
-                return GenerateTestEvent<T>(line);
+                return GenerateTestEvent<T>(line, feedback);
             }
         }
 
-        private T ProcessResponseDataLine<T>(string line, string[] methodArgumentTypes, string[] methodArgumentNames)
+        private T ProcessResponseDataLine<T>(string line, Feedback feedback)
         {
             try
             {
                 TestCase testCase = JsonConvert.DeserializeObject<TestCase>(line);
-                return GenerateTestEvent<T>(line, methodArgumentTypes, methodArgumentNames);
+                return GenerateTestEvent<T>(line, feedback);
             }
             catch (JsonReaderException e) 
             { 
-                PrintTrace("PARSE DATA - READ", e.StackTrace);
+                HelperDebug.PrintTrace("PARSE DATA - READ", e.StackTrace);
             }
             catch (JsonSerializationException e) 
             { 
-                PrintTrace("PARSE DATA - SERIALIZATION", e.StackTrace);
+                HelperDebug.PrintTrace("PARSE DATA - SERIALIZATION", e.StackTrace);
             }
   
             return default(T);
@@ -458,52 +374,50 @@ namespace EcFeed
         {
             try
             {
-                StatusMessage statusMessage = JsonConvert.DeserializeObject<StatusMessage>(line);
-                PrintTrace("STATUS", statusMessage.Status);
+                MessageStatus messageStatus = JsonConvert.DeserializeObject<MessageStatus>(line);
+                HelperDebug.PrintTrace("STATUS", messageStatus.Status);
             }
             catch (JsonReaderException e) 
             { 
-                PrintTrace("PARSE STATUS - READ", e.StackTrace);
+                HelperDebug.PrintTrace("PARSE STATUS - READ", e.StackTrace);
             }
             catch (JsonSerializationException e) 
             { 
-                PrintTrace("PARSE STATUS - SERIALIZATION", e.StackTrace);
+                HelperDebug.PrintTrace("PARSE STATUS - SERIALIZATION", e.StackTrace);
             }
 
             return default(T);
         }
 
-        private T ProcessResponseInfoLine<T>(string line, ref string[] methodArgumentTypes, ref string[] methodArgumentNames)
+        private T ProcessResponseInfoLine<T>(string line, ref Feedback feedback)
         {
             try
-            {
-                InfoMessage infoMessage = JsonConvert.DeserializeObject<InfoMessage>(line);
-                methodArgumentNames = InfoMessageHelper.ExtractArgumentNames(infoMessage);
-                methodArgumentTypes = InfoMessageHelper.ExtractArgumentTypes(infoMessage);
-                PrintTrace("INFO", string.Join(", ", methodArgumentTypes));
+            {    
+                MessageInfoHelper.ParseInfoMessage(line, ref feedback);
+                HelperDebug.PrintTrace("INFO", string.Join(", ", feedback.MethodArgumentTypes));
             }
             catch (JsonReaderException e) 
             { 
-                PrintTrace("PARSE INFO - READ", e.StackTrace);
+                HelperDebug.PrintTrace("PARSE INFO - READ", e.StackTrace);
             }
             catch (JsonSerializationException e) 
             { 
-                PrintTrace("PARSE INFO - SERIALIZATION", e.StackTrace);
+                HelperDebug.PrintTrace("PARSE INFO - SERIALIZATION", e.StackTrace);
             }
 
             return default(T);
         }
 
-        private T GenerateTestEvent<T>(string data, string[] methodArgumentTypes = null, string[] methodArgumentNames = null)
+        private T GenerateTestEvent<T>(string data, Feedback feedback)
         {
             if (typeof(T).ToString().Equals("System.Object[]"))
             {
-                return (T)(object)StreamParser.ParseTestCaseToDataType(data, methodArgumentTypes);
+                return (T)(object)StreamParser.ParseTestCaseToDataType(data, feedback);
             }
 
             if (typeof(T).ToString().Equals("System.String[][]"))
             {
-                string[][] response = { methodArgumentTypes, methodArgumentNames };
+                string[][] response = { feedback.MethodArgumentTypes, feedback.MethodArgumentNames };
                 return (T)(object)response;
             }
 
@@ -516,12 +430,6 @@ namespace EcFeed
         }
 
 //------------------------------------------------------------------------------------------- 
-
-        [Conditional("VERBOSE")]
-        private void PrintTrace(string header, string trace)
-        {
-            Console.WriteLine($"{ DateTime.Now.ToString()} - { header }\n{ trace }\n");
-        }
 
         public override string ToString()
         { 

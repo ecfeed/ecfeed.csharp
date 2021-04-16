@@ -69,12 +69,12 @@ namespace EcFeed
             GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
             generatorOptions.Add(Parameter.DataSource, Generator.Random.GetValue());
 
-            SessionData feedback = new SessionData();
-            feedback.GeneratorOptions = generatorOptions;
-            feedback.ModelId = Model;
-            feedback.MethodName = method;
+            SessionData sessionData = new SessionData();
+            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.ModelId = Model;
+            sessionData.MethodName = method;
 
-            IEnumerable<string[][]> queue = Process<string[][]>(feedback);
+            IEnumerable<string[][]> queue = Process<string[][]>(sessionData);
 
             foreach(string[][] element in queue) 
             {
@@ -380,16 +380,16 @@ namespace EcFeed
 
 //-------------------------------------------------------------------------------------------
 
-        private IEnumerable<T> Process<T>(SessionData feedback)
+        private IEnumerable<T> Process<T>(SessionData sessionData)
         {
-            string requestURL = HelperRequest.GenerateRequestURL(feedback, GeneratorAddress);
+            string requestURL = HelperRequest.GenerateRequestURL(sessionData, GeneratorAddress);
 
-            return ProcessResponse<T>(feedback, HelperRequest.SendRequest(requestURL, KeyStorePath, KeyStorePassword));
+            return ProcessResponse<T>(sessionData, HelperRequest.SendRequest(requestURL, KeyStorePath, KeyStorePassword));
         }
 
 //-------------------------------------------------------------------------------------------  
 
-        private IEnumerable<T> ProcessResponse<T>(SessionData feedback, HttpWebResponse response) 
+        private IEnumerable<T> ProcessResponse<T>(SessionData sessionData, HttpWebResponse response) 
         {
             if (!response.StatusCode.ToString().Equals("OK"))
             {
@@ -401,7 +401,7 @@ namespace EcFeed
                     string line;
                     
                     while ((line = reader.ReadLine()) != null) {
-                        T element = ProcessResponseLine<T>(line, ref feedback);
+                        T element = ProcessResponseLine<T>(line, ref sessionData);
                             
                         if (element != null)
                         {
@@ -412,13 +412,13 @@ namespace EcFeed
             }
         }
 
-        private T ProcessResponseLine<T>(string line, ref SessionData feedback)
+        private T ProcessResponseLine<T>(string line, ref SessionData sessionData)
         {
-            if (feedback.Template == Template.Stream)
+            if (sessionData.Template == Template.Stream)
             {
                 if (line.Contains("\"testCase\""))
                 {
-                    return ProcessResponseDataLine<T>(line, feedback);
+                    return ProcessResponseDataLine<T>(line, sessionData);
                 }
                 if (line.Contains("\"status\""))
                 {
@@ -426,23 +426,23 @@ namespace EcFeed
                 }
                 if (line.Contains("\"info\""))
                 {
-                    return ProcessResponseInfoLine<T>(line, ref feedback);
+                    return ProcessResponseInfoLine<T>(line, ref sessionData);
                 }
                 
                 return default(T);
             }
             else
             {
-                return GenerateTestEvent<T>(line, feedback);
+                return GenerateTestEvent<T>(line, sessionData);
             }
         }
 
-        private T ProcessResponseDataLine<T>(string line, SessionData feedback)
+        private T ProcessResponseDataLine<T>(string line, SessionData sessionData)
         {
             try
             {
                 TestCase testCase = JsonConvert.DeserializeObject<TestCase>(line);
-                return GenerateTestEvent<T>(line, feedback);
+                return GenerateTestEvent<T>(line, sessionData);
             }
             catch (JsonReaderException e) 
             { 
@@ -475,12 +475,12 @@ namespace EcFeed
             return default(T);
         }
 
-        private T ProcessResponseInfoLine<T>(string line, ref SessionData feedback)
+        private T ProcessResponseInfoLine<T>(string line, ref SessionData sessionData)
         {
             try
             {    
-                MessageInfoHelper.ParseInfoMessage(line, ref feedback);
-                HelperDebug.PrintTrace("INFO", string.Join(", ", feedback.MethodArgumentTypes));
+                MessageInfoHelper.ParseInfoMessage(line, ref sessionData);
+                HelperDebug.PrintTrace("INFO", string.Join(", ", sessionData.MethodArgumentTypes));
             }
             catch (JsonReaderException e) 
             { 
@@ -494,16 +494,16 @@ namespace EcFeed
             return default(T);
         }
 
-        private T GenerateTestEvent<T>(string data, SessionData feedback)
+        private T GenerateTestEvent<T>(string data, SessionData sessionData)
         {
             if (typeof(T).ToString().Equals("System.Object[]"))
             {
-                return (T)(object)StreamParser.ParseTestCaseToDataType(data, feedback);
+                return (T)(object)StreamParser.ParseTestCaseToDataType(data, sessionData);
             }
 
             if (typeof(T).ToString().Equals("System.String[][]"))
             {
-                string[][] response = { feedback.MethodArgumentTypes, feedback.MethodArgumentNames };
+                string[][] response = { sessionData.MethodArgumentTypes, sessionData.MethodArgumentNames };
                 return (T)(object)response;
             }
 

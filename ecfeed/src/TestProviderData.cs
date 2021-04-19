@@ -22,7 +22,7 @@ namespace EcFeed
             this.id = id;
         }
 
-        public void register(bool status, int? duration = null, string comment = null, Dictionary<string, string> custom = null)
+        public void feedback(bool status, int? duration = null, string comment = null, Dictionary<string, string> custom = null)
         {
             this.status = status ? "P" : "F";
             this.duration = duration;

@@ -1,4 +1,6 @@
 
+// #define VERBOSE
+
 using System;
 using System.IO;
 using System.Text;
@@ -6,27 +8,26 @@ using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using System.Diagnostics;
 using Newtonsoft.Json;
 
 namespace EcFeed
 {
-    internal static class HelperRequest {
-
+    internal static class RequestHelper 
+    {
         public static void ValidateConnection(string generatorAddress, string keyStorePath, string keyStorePassword) 
         {
-            HttpWebResponse response = HelperRequest.SendRequest(HelperRequest.GenerateHealthCheckURL(generatorAddress), keyStorePath, keyStorePassword);
+            HttpWebResponse response = RequestHelper.SendRequest(RequestHelper.GenerateHealthCheckURL(generatorAddress), keyStorePath, keyStorePassword);
             using (StreamReader reader = new StreamReader(response.GetResponseStream(), Encoding.UTF8)) {
                 string line;
                     
                 while ((line = reader.ReadLine()) != null) {
-                    HelperDebug.PrintTrace("VALIDATE", line);
+                    DebugHelper.PrintTrace("VALIDATE", line);
                 }
                
             }
             
-        }
-
-//-------------------------------------------------------------------------------------------        
+        }  
 
         public static string GenerateHealthCheckURL(string address, string endpoint = Endpoint.HealthCheck)
         {
@@ -34,7 +35,7 @@ namespace EcFeed
 
             request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
 
-            HelperDebug.PrintTrace("HEALTH CHECK REQUEST", request);
+            DebugHelper.PrintTrace("HEALTH CHECK REQUEST", request);
 
             return request;
         }
@@ -47,7 +48,7 @@ namespace EcFeed
 
             request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
 
-            HelperDebug.PrintTrace("DATA REQUEST", request);
+            DebugHelper.PrintTrace("DATA REQUEST", request);
 
             return request;
         }
@@ -68,9 +69,7 @@ namespace EcFeed
             };
 
             return JsonConvert.SerializeObject(parsedRequest);
-        }
-
-//-------------------------------------------------------------------------------------------       
+        } 
 
         public static HttpWebResponse SendRequest(String request, string keyStorePath, string keyStorePassword)
         {
@@ -112,5 +111,14 @@ namespace EcFeed
     
             return false;
         }
+    }
+    internal static class DebugHelper
+    {
+        [Conditional("VERBOSE")]
+        public static void PrintTrace(string header, string trace)
+        {
+            Console.WriteLine($"{ DateTime.Now.ToString()} - { header }\n{ trace }\n");
+        }
+        
     }
 }

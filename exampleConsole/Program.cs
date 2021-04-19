@@ -29,7 +29,7 @@ namespace Testify.EcFeed.Example
             {
                 // Console.WriteLine("HANDLER: {0}", element);
                 TestData testData = (TestData)element[element.Length - 1];
-                testData.register(true);
+                testData.feedback(true);
                 Console.WriteLine("HANDLER: [{0}]", string.Join(", ", element));
                 
             }

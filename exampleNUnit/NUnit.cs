@@ -22,7 +22,7 @@ namespace exampleNUnit
         [TestCaseSource("DataString")]
         public void TestString(string a, string b, string c, string d, string e, string f, string g, string h, string i, string j, TestData ecfeed)
         {
-            ecfeed.register(true);
+            ecfeed.feedback(true);
             // NUnit.Framework.TestContext.Progress.WriteLine(ecfeed.TestCasesParsed +"/" + ecfeed.TestCasesTotal);
             // Assert.That(false, Is.True);
         }

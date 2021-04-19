@@ -382,9 +382,9 @@ namespace EcFeed
 
         private IEnumerable<T> Process<T>(SessionData sessionData)
         {
-            string requestURL = HelperRequest.GenerateRequestURL(sessionData, GeneratorAddress);
+            string requestURL = RequestHelper.GenerateRequestURL(sessionData, GeneratorAddress);
 
-            return ProcessResponse<T>(sessionData, HelperRequest.SendRequest(requestURL, KeyStorePath, KeyStorePassword));
+            return ProcessResponse<T>(sessionData, RequestHelper.SendRequest(requestURL, KeyStorePath, KeyStorePassword));
         }
 
 //-------------------------------------------------------------------------------------------  
@@ -446,11 +446,11 @@ namespace EcFeed
             }
             catch (JsonReaderException e) 
             { 
-                HelperDebug.PrintTrace("PARSE DATA - READ", e.StackTrace);
+                DebugHelper.PrintTrace("PARSE DATA - READ", e.StackTrace);
             }
             catch (JsonSerializationException e) 
             { 
-                HelperDebug.PrintTrace("PARSE DATA - SERIALIZATION", e.StackTrace);
+                DebugHelper.PrintTrace("PARSE DATA - SERIALIZATION", e.StackTrace);
             }
   
             return default(T);
@@ -467,15 +467,15 @@ namespace EcFeed
                     sessionData.FinishTransmission();
                 }
 
-                HelperDebug.PrintTrace("STATUS", messageStatus.Status);
+                DebugHelper.PrintTrace("STATUS", messageStatus.Status);
             }
             catch (JsonReaderException e) 
             { 
-                HelperDebug.PrintTrace("PARSE STATUS - READ", e.StackTrace);
+                DebugHelper.PrintTrace("PARSE STATUS - READ", e.StackTrace);
             }
             catch (JsonSerializationException e) 
             { 
-                HelperDebug.PrintTrace("PARSE STATUS - SERIALIZATION", e.StackTrace);
+                DebugHelper.PrintTrace("PARSE STATUS - SERIALIZATION", e.StackTrace);
             }
 
             return default(T);
@@ -486,15 +486,15 @@ namespace EcFeed
             try
             {    
                 MessageInfoHelper.ParseInfoMessage(line, ref sessionData);
-                HelperDebug.PrintTrace("INFO", string.Join(", ", sessionData.MethodArgumentTypes));
+                DebugHelper.PrintTrace("INFO", string.Join(", ", sessionData.MethodArgumentTypes));
             }
             catch (JsonReaderException e) 
             { 
-                HelperDebug.PrintTrace("PARSE INFO - READ", e.StackTrace);
+                DebugHelper.PrintTrace("PARSE INFO - READ", e.StackTrace);
             }
             catch (JsonSerializationException e) 
             { 
-                HelperDebug.PrintTrace("PARSE INFO - SERIALIZATION", e.StackTrace);
+                DebugHelper.PrintTrace("PARSE INFO - SERIALIZATION", e.StackTrace);
             }
 
             return default(T);

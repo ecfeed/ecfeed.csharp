@@ -66,11 +66,11 @@ namespace EcFeed
             GeneratorProperties generatorProperties = new GeneratorProperties();
             generatorProperties.Add(Parameter.Length, "1");
 
-            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
             generatorOptions.Add(Parameter.DataSource, Generator.Random.GetValue());
 
             SessionData sessionData = new SessionData();
-            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = Model;
             sessionData.MethodName = method;
 
@@ -89,7 +89,7 @@ namespace EcFeed
         internal IEnumerable<string> Export(
             string method,
             Generator generator,
-            GeneratorOptions generatorOptions,
+            GeneratorData generatorOptions,
             string model = null,
             Dictionary<string, string> custom = null,
             string label = null,
@@ -99,12 +99,12 @@ namespace EcFeed
             generatorOptions.Add(Parameter.DataSource, generator.GetValue());
 
             SessionData sessionData = new SessionData();
-            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
             sessionData.Template = template;
             sessionData.Custom = custom;
-            sessionData.Feedback = feedback;
+            sessionData.SendFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<string>(sessionData);
@@ -126,18 +126,18 @@ namespace EcFeed
             generatorProperties.Add(Parameter.N, "" + n);
             generatorProperties.Add(Parameter.Coverage, "" + coverage);
 
-            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
             generatorOptions.Add(Parameter.DataSource, Generator.NWise.GetValue());
             generatorOptions.Add(Parameter.Choices, choices);
             generatorOptions.Add(Parameter.Constraints, constraints);
 
             SessionData sessionData = new SessionData();
-            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
             sessionData.Template = template;
             sessionData.Custom = custom;
-            sessionData.Feedback = feedback;
+            sessionData.SendFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<string>(sessionData);
@@ -155,18 +155,18 @@ namespace EcFeed
         {
             GeneratorProperties generatorProperties = new GeneratorProperties();
 
-            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
             generatorOptions.Add(Parameter.DataSource, Generator.Cartesian.GetValue());
             generatorOptions.Add(Parameter.Choices, choices);
             generatorOptions.Add(Parameter.Constraints, constraints);
 
             SessionData sessionData = new SessionData();
-            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
             sessionData.Template = template;
             sessionData.Custom = custom;
-            sessionData.Feedback = feedback;
+            sessionData.SendFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<string>(sessionData);
@@ -190,18 +190,18 @@ namespace EcFeed
             generatorProperties.Add(Parameter.Duplicates, "" + duplicates);
             generatorProperties.Add(Parameter.Adaptive, "" + adaptive);
 
-            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
             generatorOptions.Add(Parameter.DataSource, Generator.Random.GetValue());
             generatorOptions.Add(Parameter.Choices, choices);
             generatorOptions.Add(Parameter.Constraints, constraints);
 
             SessionData sessionData = new SessionData();
-            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
             sessionData.Template = template;
             sessionData.Custom = custom;
-            sessionData.Feedback = feedback;
+            sessionData.SendFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<string>(sessionData);
@@ -220,17 +220,17 @@ namespace EcFeed
 
             GeneratorProperties generatorProperties = new GeneratorProperties();
 
-            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
             generatorOptions.Add(Parameter.DataSource, Generator.Static.GetValue());
             generatorOptions.Add(Parameter.TestSuites, updatedTestSuites);
            
             SessionData sessionData = new SessionData();
-            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
             sessionData.Template = template;
             sessionData.Custom = custom;
-            sessionData.Feedback = feedback;
+            sessionData.SendFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<string>(sessionData);
@@ -241,7 +241,7 @@ namespace EcFeed
         internal IEnumerable<object[]> Generate(
             string method,
             Generator generator,
-            GeneratorOptions generatorOptions,
+            GeneratorData generatorOptions,
             string model = null,
             Dictionary<string, string> custom = null,
             string label = null,
@@ -250,11 +250,11 @@ namespace EcFeed
             generatorOptions.Add(Parameter.DataSource, generator.GetValue());
 
             SessionData sessionData = new SessionData();
-            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
             sessionData.Custom = custom;
-            sessionData.Feedback = feedback;
+            sessionData.SendFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<object[]>(sessionData);
@@ -275,17 +275,17 @@ namespace EcFeed
             generatorProperties.Add(Parameter.N, "" + n);
             generatorProperties.Add(Parameter.Coverage, "" + coverage);
 
-            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
             generatorOptions.Add(Parameter.DataSource, Generator.NWise.GetValue());
             generatorOptions.Add(Parameter.Choices, choices);
             generatorOptions.Add(Parameter.Constraints, constraints);
 
             SessionData sessionData = new SessionData();
-            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
             sessionData.Custom = custom;
-            sessionData.Feedback = feedback;
+            sessionData.SendFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<object[]>(sessionData);
@@ -302,17 +302,17 @@ namespace EcFeed
         {
             GeneratorProperties generatorProperties = new GeneratorProperties();
 
-            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
             generatorOptions.Add(Parameter.DataSource, Generator.Cartesian.GetValue());
             generatorOptions.Add(Parameter.Choices, choices);
             generatorOptions.Add(Parameter.Constraints, constraints);
 
             SessionData sessionData = new SessionData();
-            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
             sessionData.Custom = custom;
-            sessionData.Feedback = feedback;
+            sessionData.SendFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<object[]>(sessionData);
@@ -335,17 +335,17 @@ namespace EcFeed
             generatorProperties.Add(Parameter.Duplicates, "" + duplicates);
             generatorProperties.Add(Parameter.Adaptive, "" + adaptive);
 
-            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
             generatorOptions.Add(Parameter.DataSource, Generator.Random.GetValue());
             generatorOptions.Add(Parameter.Choices, choices);
             generatorOptions.Add(Parameter.Constraints, constraints);
 
             SessionData sessionData = new SessionData();
-            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
             sessionData.Custom = custom;
-            sessionData.Feedback = feedback;
+            sessionData.SendFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<object[]>(sessionData);
@@ -363,16 +363,16 @@ namespace EcFeed
 
             GeneratorProperties generatorProperties = new GeneratorProperties();
 
-            GeneratorOptions generatorOptions = new GeneratorOptions(generatorProperties);
+            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
             generatorOptions.Add(Parameter.DataSource, Generator.Static.GetValue());
             generatorOptions.Add(Parameter.TestSuites, updatedTestSuites);
            
             SessionData sessionData = new SessionData();
-            sessionData.GeneratorOptions = generatorOptions;
+            sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
             sessionData.Custom = custom;
-            sessionData.Feedback = feedback;
+            sessionData.SendFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<object[]>(sessionData);
@@ -422,7 +422,7 @@ namespace EcFeed
                 }
                 if (line.Contains("\"status\""))
                 {
-                    return ProcessResponseStatusLine<T>(line);
+                    return ProcessResponseStatusLine<T>(line, sessionData);
                 }
                 if (line.Contains("\"info\""))
                 {
@@ -456,11 +456,17 @@ namespace EcFeed
             return default(T);
         }
 
-        private T ProcessResponseStatusLine<T>(string line)
+        private T ProcessResponseStatusLine<T>(string line, SessionData sessionData)
         {
             try
             {
                 MessageStatus messageStatus = JsonConvert.DeserializeObject<MessageStatus>(line);
+
+                if (messageStatus.IsTransmissionFinished())
+                {
+                    sessionData.FinishTransmission();
+                }
+
                 HelperDebug.PrintTrace("STATUS", messageStatus.Status);
             }
             catch (JsonReaderException e) 

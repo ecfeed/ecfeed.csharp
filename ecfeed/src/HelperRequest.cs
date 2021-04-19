@@ -64,7 +64,7 @@ namespace EcFeed
                 model = feedback.ModelId,
                 method = feedback.MethodName,
                 template = feedback.Template.GetValue(),
-                userData = feedback.GeneratorOptions.ToString()
+                userData = feedback.GeneratorData.ToString()
             };
 
             return JsonConvert.SerializeObject(parsedRequest);

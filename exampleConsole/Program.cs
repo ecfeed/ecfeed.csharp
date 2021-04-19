@@ -25,10 +25,13 @@ namespace Testify.EcFeed.Example
             string[] testSuites = new string[] { "default" };
 
             // foreach(var element in testProvider.ExportStatic(method, testSuites: testSuites, template: Template.JSON))
-            foreach(var element in testProvider.GenerateCartesian(method))
+            foreach(object[] element in testProvider.GenerateNWise(method))
             {
                 // Console.WriteLine("HANDLER: {0}", element);
+                TestData testData = (TestData)element[element.Length - 1];
+                testData.register(true);
                 Console.WriteLine("HANDLER: [{0}]", string.Join(", ", element));
+                
             }
 
         }

@@ -4,12 +4,12 @@ using Newtonsoft.Json;
 
 namespace EcFeed
 {
-    internal sealed class GeneratorOptions
+    internal sealed class GeneratorData
     {
         internal Dictionary<string, object> UserData { get; set; }
         internal GeneratorProperties Properties { get; set; }
 
-        internal GeneratorOptions(GeneratorProperties properties = null)
+        internal GeneratorData(GeneratorProperties properties = null)
         {
             UserData = new Dictionary<string, object>();
             Properties = properties == null ? new GeneratorProperties() : properties;
@@ -36,10 +36,10 @@ namespace EcFeed
             UserData.Add(key, value);
         }
 
-        internal GeneratorOptions Merge(GeneratorOptions settings)
+        internal GeneratorData Merge(GeneratorData settings)
         {
-            GeneratorOptions settingsTo = new GeneratorOptions();
-            GeneratorOptions settingsFrom = settings == null ? new GeneratorOptions() : settings;
+            GeneratorData settingsTo = new GeneratorData();
+            GeneratorData settingsFrom = settings == null ? new GeneratorData() : settings;
 
             this.UserData.ToList().ForEach(x => settingsTo.Add(x.Key, x.Value));
             settingsFrom.UserData.ToList().ForEach(x => settingsTo.Add(x.Key, x.Value));
@@ -56,7 +56,7 @@ namespace EcFeed
         
         public override string ToString()
         {
-            GeneratorOptions settings = new GeneratorOptions();
+            GeneratorData settings = new GeneratorData();
             this.UserData.ToList().ForEach(x => settings.Add(x.Key, x.Value));
             settings.Add("properties", Properties.Properties);
 

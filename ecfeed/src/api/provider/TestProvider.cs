@@ -63,11 +63,11 @@ namespace EcFeed
 
         private string[][] FetchMethodInfo(string method)
         {
-            GeneratorProperties generatorProperties = new GeneratorProperties();
-            generatorProperties.Add(Parameter.Length, "1");
+            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
+            generatorProperties.Set(Parameter.Length, "1");
 
             GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Add(Parameter.DataSource, Generator.Random.GetValue());
+            generatorOptions.Set(Parameter.DataSource, Generator.Random.GetValue());
 
             SessionData sessionData = new SessionData();
             sessionData.GeneratorData = generatorOptions;
@@ -96,7 +96,7 @@ namespace EcFeed
             bool feedback = false,
             Template template = Default.ParameterTemplate)
         {
-            generatorOptions.Add(Parameter.DataSource, generator.GetValue());
+            generatorOptions.Set(Parameter.DataSource, generator.GetValue());
 
             SessionData sessionData = new SessionData();
             sessionData.GeneratorData = generatorOptions;
@@ -122,14 +122,14 @@ namespace EcFeed
             bool feedback = false,
             Template template = Default.ParameterTemplate)
         {
-            GeneratorProperties generatorProperties = new GeneratorProperties();
-            generatorProperties.Add(Parameter.N, "" + n);
-            generatorProperties.Add(Parameter.Coverage, "" + coverage);
+            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
+            generatorProperties.Set(Parameter.N, "" + n);
+            generatorProperties.Set(Parameter.Coverage, "" + coverage);
 
             GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Add(Parameter.DataSource, Generator.NWise.GetValue());
-            generatorOptions.Add(Parameter.Choices, choices);
-            generatorOptions.Add(Parameter.Constraints, constraints);
+            generatorOptions.Set(Parameter.DataSource, Generator.NWise.GetValue());
+            generatorOptions.Set(Parameter.Choices, choices);
+            generatorOptions.Set(Parameter.Constraints, constraints);
 
             SessionData sessionData = new SessionData();
             sessionData.GeneratorData = generatorOptions;
@@ -153,12 +153,12 @@ namespace EcFeed
             bool feedback = false,
             Template template = Default.ParameterTemplate)
         {
-            GeneratorProperties generatorProperties = new GeneratorProperties();
+            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
 
             GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Add(Parameter.DataSource, Generator.Cartesian.GetValue());
-            generatorOptions.Add(Parameter.Choices, choices);
-            generatorOptions.Add(Parameter.Constraints, constraints);
+            generatorOptions.Set(Parameter.DataSource, Generator.Cartesian.GetValue());
+            generatorOptions.Set(Parameter.Choices, choices);
+            generatorOptions.Set(Parameter.Constraints, constraints);
 
             SessionData sessionData = new SessionData();
             sessionData.GeneratorData = generatorOptions;
@@ -185,15 +185,15 @@ namespace EcFeed
             bool feedback = false,
             Template template = Default.ParameterTemplate)
         {
-            GeneratorProperties generatorProperties = new GeneratorProperties();
-            generatorProperties.Add(Parameter.Length, "" + length);
-            generatorProperties.Add(Parameter.Duplicates, "" + duplicates);
-            generatorProperties.Add(Parameter.Adaptive, "" + adaptive);
+            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
+            generatorProperties.Set(Parameter.Length, "" + length);
+            generatorProperties.Set(Parameter.Duplicates, "" + duplicates);
+            generatorProperties.Set(Parameter.Adaptive, "" + adaptive);
 
             GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Add(Parameter.DataSource, Generator.Random.GetValue());
-            generatorOptions.Add(Parameter.Choices, choices);
-            generatorOptions.Add(Parameter.Constraints, constraints);
+            generatorOptions.Set(Parameter.DataSource, Generator.Random.GetValue());
+            generatorOptions.Set(Parameter.Choices, choices);
+            generatorOptions.Set(Parameter.Constraints, constraints);
 
             SessionData sessionData = new SessionData();
             sessionData.GeneratorData = generatorOptions;
@@ -218,11 +218,11 @@ namespace EcFeed
         {
             object updatedTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
 
-            GeneratorProperties generatorProperties = new GeneratorProperties();
+            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
 
             GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Add(Parameter.DataSource, Generator.Static.GetValue());
-            generatorOptions.Add(Parameter.TestSuites, updatedTestSuites);
+            generatorOptions.Set(Parameter.DataSource, Generator.Static.GetValue());
+            generatorOptions.Set(Parameter.TestSuites, updatedTestSuites);
            
             SessionData sessionData = new SessionData();
             sessionData.GeneratorData = generatorOptions;
@@ -247,7 +247,7 @@ namespace EcFeed
             string label = null,
             bool feedback = false)
         {
-            generatorOptions.Add(Parameter.DataSource, generator.GetValue());
+            generatorOptions.Set(Parameter.DataSource, generator.GetValue());
 
             SessionData sessionData = new SessionData();
             sessionData.GeneratorData = generatorOptions;
@@ -271,14 +271,14 @@ namespace EcFeed
             string label = null,
             bool feedback = false)
         {
-            GeneratorProperties generatorProperties = new GeneratorProperties();
-            generatorProperties.Add(Parameter.N, "" + n);
-            generatorProperties.Add(Parameter.Coverage, "" + coverage);
+            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
+            generatorProperties.Set(Parameter.N, "" + n);
+            generatorProperties.Set(Parameter.Coverage, "" + coverage);
 
             GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Add(Parameter.DataSource, Generator.NWise.GetValue());
-            generatorOptions.Add(Parameter.Choices, choices);
-            generatorOptions.Add(Parameter.Constraints, constraints);
+            generatorOptions.Set(Parameter.DataSource, Generator.NWise.GetValue());
+            generatorOptions.Set(Parameter.Choices, choices);
+            generatorOptions.Set(Parameter.Constraints, constraints);
 
             SessionData sessionData = new SessionData();
             sessionData.GeneratorData = generatorOptions;
@@ -300,12 +300,12 @@ namespace EcFeed
             string label = null,
             bool feedback = false)
         {
-            GeneratorProperties generatorProperties = new GeneratorProperties();
+            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
 
             GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Add(Parameter.DataSource, Generator.Cartesian.GetValue());
-            generatorOptions.Add(Parameter.Choices, choices);
-            generatorOptions.Add(Parameter.Constraints, constraints);
+            generatorOptions.Set(Parameter.DataSource, Generator.Cartesian.GetValue());
+            generatorOptions.Set(Parameter.Choices, choices);
+            generatorOptions.Set(Parameter.Constraints, constraints);
 
             SessionData sessionData = new SessionData();
             sessionData.GeneratorData = generatorOptions;
@@ -330,15 +330,15 @@ namespace EcFeed
             string label = null,
             bool feedback = false)
         {
-            GeneratorProperties generatorProperties = new GeneratorProperties();
-            generatorProperties.Add(Parameter.Length, "" + length);
-            generatorProperties.Add(Parameter.Duplicates, "" + duplicates);
-            generatorProperties.Add(Parameter.Adaptive, "" + adaptive);
+            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
+            generatorProperties.Set(Parameter.Length, "" + length);
+            generatorProperties.Set(Parameter.Duplicates, "" + duplicates);
+            generatorProperties.Set(Parameter.Adaptive, "" + adaptive);
 
             GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Add(Parameter.DataSource, Generator.Random.GetValue());
-            generatorOptions.Add(Parameter.Choices, choices);
-            generatorOptions.Add(Parameter.Constraints, constraints);
+            generatorOptions.Set(Parameter.DataSource, Generator.Random.GetValue());
+            generatorOptions.Set(Parameter.Choices, choices);
+            generatorOptions.Set(Parameter.Constraints, constraints);
 
             SessionData sessionData = new SessionData();
             sessionData.GeneratorData = generatorOptions;
@@ -361,11 +361,11 @@ namespace EcFeed
         {
             object updatedTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
 
-            GeneratorProperties generatorProperties = new GeneratorProperties();
+            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
 
             GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Add(Parameter.DataSource, Generator.Static.GetValue());
-            generatorOptions.Add(Parameter.TestSuites, updatedTestSuites);
+            generatorOptions.Set(Parameter.DataSource, Generator.Static.GetValue());
+            generatorOptions.Set(Parameter.TestSuites, updatedTestSuites);
            
             SessionData sessionData = new SessionData();
             sessionData.GeneratorData = generatorOptions;
@@ -462,7 +462,7 @@ namespace EcFeed
             {
                 MessageStatus messageStatus = JsonConvert.DeserializeObject<MessageStatus>(line);
 
-                if (messageStatus.IsTransmissionFinished())
+                if (MessageStatusHelper.IsTransmissionFinished(messageStatus))
                 {
                     sessionData.FinishTransmission();
                 }

@@ -9,6 +9,12 @@ namespace EcFeed
 
         public override string ToString() => $"Info: { Info }";
     }
+    internal struct MessageStatus
+    {
+        [JsonProperty("status", Required = Required.Always)] internal string Status { get; set; }
+
+        public override string ToString() => $"Status: { Status }";
+    }
 
     internal static class MessageInfoHelper 
     { 
@@ -22,7 +28,7 @@ namespace EcFeed
             feedback.Timestamp = MessageInfoHelper.ExtractTimestamp(infoMessage);
             feedback.TestSessionId = MessageInfoHelper.ExtractTestSessionId(infoMessage);
         }
-        internal static string[] ExtractArgumentNames(MessageInfo schema)
+        private static string[] ExtractArgumentNames(MessageInfo schema)
         {
             string method = ExtractMethodName(schema);
             int leftBracket = method.IndexOf("(");
@@ -32,7 +38,7 @@ namespace EcFeed
             return argumentsString.Split(",").Select(argument => argument.Trim().Split(" ")[1]).ToArray();
         }
 
-        internal static string[] ExtractArgumentTypes(MessageInfo schema)
+        private static string[] ExtractArgumentTypes(MessageInfo schema)
         {
             string method = ExtractMethodName(schema);
             int leftBracket = method.IndexOf("(");
@@ -42,25 +48,32 @@ namespace EcFeed
             return argumentsString.Split(",").Select(argument => argument.Trim().Split(" ")[0]).ToArray();
         }
 
-        internal static string ExtractMethodName(MessageInfo schema)
+        private static string ExtractMethodName(MessageInfo schema)
         {
             dynamic data = JsonConvert.DeserializeObject(schema.Info);
 
             return data.method;
         }
 
-        internal static int ExtractTimestamp(MessageInfo schema)
+        private static int ExtractTimestamp(MessageInfo schema)
         {
             dynamic data = JsonConvert.DeserializeObject(schema.Info);
 
             return data.timestamp;
         }
 
-        internal static string ExtractTestSessionId(MessageInfo schema)
+        private static string ExtractTestSessionId(MessageInfo schema)
         {
             dynamic data = JsonConvert.DeserializeObject(schema.Info);
 
             return data.testSessionId;
+        }
+    }
+    internal static class MessageStatusHelper
+    {
+        internal static bool IsTransmissionFinished(MessageStatus messageStatus)
+        {
+            return messageStatus.Status.Contains("END_DATA");
         }
     }
 }

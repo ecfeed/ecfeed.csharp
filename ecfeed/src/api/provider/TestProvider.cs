@@ -104,7 +104,7 @@ namespace EcFeed
             sessionData.MethodName = method;
             sessionData.Template = template;
             sessionData.Custom = custom;
-            sessionData.SendFeedback = feedback;
+            sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<string>(sessionData);
@@ -137,7 +137,7 @@ namespace EcFeed
             sessionData.MethodName = method;
             sessionData.Template = template;
             sessionData.Custom = custom;
-            sessionData.SendFeedback = feedback;
+            sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<string>(sessionData);
@@ -166,7 +166,7 @@ namespace EcFeed
             sessionData.MethodName = method;
             sessionData.Template = template;
             sessionData.Custom = custom;
-            sessionData.SendFeedback = feedback;
+            sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<string>(sessionData);
@@ -201,7 +201,7 @@ namespace EcFeed
             sessionData.MethodName = method;
             sessionData.Template = template;
             sessionData.Custom = custom;
-            sessionData.SendFeedback = feedback;
+            sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<string>(sessionData);
@@ -230,7 +230,7 @@ namespace EcFeed
             sessionData.MethodName = method;
             sessionData.Template = template;
             sessionData.Custom = custom;
-            sessionData.SendFeedback = feedback;
+            sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<string>(sessionData);
@@ -254,7 +254,7 @@ namespace EcFeed
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
             sessionData.Custom = custom;
-            sessionData.SendFeedback = feedback;
+            sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<object[]>(sessionData);
@@ -285,7 +285,7 @@ namespace EcFeed
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
             sessionData.Custom = custom;
-            sessionData.SendFeedback = feedback;
+            sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<object[]>(sessionData);
@@ -312,7 +312,7 @@ namespace EcFeed
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
             sessionData.Custom = custom;
-            sessionData.SendFeedback = feedback;
+            sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<object[]>(sessionData);
@@ -345,7 +345,7 @@ namespace EcFeed
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
             sessionData.Custom = custom;
-            sessionData.SendFeedback = feedback;
+            sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<object[]>(sessionData);
@@ -372,7 +372,7 @@ namespace EcFeed
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
             sessionData.Custom = custom;
-            sessionData.SendFeedback = feedback;
+            sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
 
             return Process<object[]>(sessionData);
@@ -382,6 +382,9 @@ namespace EcFeed
 
         private IEnumerable<T> Process<T>(SessionData sessionData)
         {
+            sessionData.KeyStorePath = KeyStorePath;
+            sessionData.KeyStorePassword = KeyStorePassword;
+
             string requestURL = RequestHelper.GenerateRequestURL(sessionData, GeneratorAddress);
 
             return ProcessResponse<T>(sessionData, RequestHelper.SendRequest(requestURL, KeyStorePath, KeyStorePassword));

@@ -8,14 +8,22 @@ namespace EcFeed
         internal static object[] ParseTestCaseToDataType(string data, SessionData sessionData)
         {
             TestCase parsedData = JsonConvert.DeserializeObject<TestCase>(data);
-            object[] result = new object[parsedData.TestCaseArguments.Length + 1];
+            object[] result;
+
+            if (sessionData.BuildFeedback)
+            {
+                result = new object[parsedData.TestCaseArguments.Length + 1];
+                result[result.Length - 1] = new TestData(sessionData, data, sessionData.IncrementTestCasesTotal());
+            }
+            else
+            {
+                result = new object[parsedData.TestCaseArguments.Length];
+            }
 
             for (int i=0 ; i < parsedData.TestCaseArguments.Length ; i++)
             {
                 result[i] = CastType(parsedData.TestCaseArguments[i].Value, sessionData.MethodArgumentTypes[i]);
             }
-
-            result[result.Length - 1] = new TestData(sessionData, data, sessionData.IncrementTestCasesTotal());
 
             return result;
         }

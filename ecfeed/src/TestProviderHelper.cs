@@ -40,15 +40,27 @@ namespace EcFeed
             return request;
         }
 
-        public static string GenerateRequestURL(SessionData feedback, string address, string endpoint = Endpoint.Generator)
+        public static string GenerateRequestURL(SessionData sessionData, string address, string endpoint = Endpoint.Generator)
         {
-            string requestData = $"{ SerializeRequestData(feedback) }";
-            string requestType = feedback.Template.GetValue().Equals(Template.Stream.GetValue()) ? Request.Data : Request.Export;
+            string requestData = $"{ SerializeRequestData(sessionData) }";
+            string requestType = sessionData.Template.GetValue().Equals(Template.Stream.GetValue()) ? Request.Data : Request.Export;
             string request = $"{ address }/{ endpoint }?requestType={ requestType }&request={ requestData }";
 
             request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
 
             DebugHelper.PrintTrace("DATA REQUEST", request);
+
+            return request;
+        }
+
+        public static string GenerateFeedbackURL(SessionData sessionData, string address, string endpoint = Endpoint.Feedback)
+        {
+            string requestData = $"{ SerializeFeedbackData(sessionData) }";
+            string request = $"{ address }/{ endpoint }?client=C#";
+
+            request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
+
+            DebugHelper.PrintTrace("FEEDFACK REQUEST", request);
 
             return request;
         }
@@ -71,7 +83,12 @@ namespace EcFeed
             return JsonConvert.SerializeObject(parsedRequest);
         } 
 
-        public static HttpWebResponse SendRequest(String request, string keyStorePath, string keyStorePassword)
+        private static string SerializeFeedbackData(SessionData sessionData)
+        {
+            return sessionData.ToString();
+        }
+        
+        public static HttpWebResponse SendRequest(String request, string keyStorePath, string keyStorePassword, string body = null)
         {
             X509Certificate2 certificate = null;
 
@@ -82,6 +99,15 @@ namespace EcFeed
                     HttpWebRequest httpWebRequest = (HttpWebRequest) HttpWebRequest.Create(request);
                     httpWebRequest.ServerCertificateValidationCallback = ValidateServerCertificate;
                     httpWebRequest.ClientCertificates.Add(certificate);
+
+                    if (body != null) {
+                        byte[] byteArray = Encoding.UTF8.GetBytes(body);
+                        httpWebRequest.Method = "PUT";
+                        httpWebRequest.ContentLength = byteArray.Length;
+                        Stream dataStream = httpWebRequest.GetRequestStream();
+                        dataStream.Write(byteArray, 0, byteArray.Length);
+                        dataStream.Close();
+                    } 
 
                     return (HttpWebResponse) httpWebRequest.GetResponse();
                 }

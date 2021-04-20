@@ -9,11 +9,11 @@ namespace EcFeed
     {
         [JsonIgnore] private readonly SessionData sessionData;
         [JsonIgnore] private readonly string id;
-        [JsonProperty("data")] private string data;
-        [JsonProperty("status")] private string status;
-        [JsonProperty("duration")] private int? duration;
-        [JsonProperty("comment")] private string comment;
-        [JsonProperty("custom")] private Dictionary<string, string> custom;
+        [JsonProperty(Feedback.Data)] private string data;
+        [JsonProperty(Feedback.Status)] private string status;
+        [JsonProperty(Feedback.Duration)] private int? duration;
+        [JsonProperty(Feedback.Comment)] private string comment;
+        [JsonProperty(Feedback.Custom)] private Dictionary<string, string> custom;
 
         internal TestData(SessionData sessionData, string data, string id)
         {
@@ -24,7 +24,7 @@ namespace EcFeed
 
         public void feedback(bool status, int? duration = null, string comment = null, Dictionary<string, string> custom = null)
         {
-            this.status = status ? "P" : "F";
+            this.status = status ? Feedback.StatusPassed : Feedback.StatusFailed;
             this.duration = duration;
             this.comment = comment;
             this.custom = custom;
@@ -49,7 +49,9 @@ namespace EcFeed
                 _generatorData = value;
             } 
         }
-        [JsonIgnore] internal bool SendFeedback { get; set; }
+        [JsonIgnore] internal string KeyStorePath { get; set; }
+        [JsonIgnore] internal string KeyStorePassword { get; set; }
+        [JsonIgnore] internal bool BuildFeedback { get; set; }
         [JsonIgnore] internal Template Template { get; set; }
         [JsonIgnore] internal string MethodName { get; set; }
         [JsonIgnore] internal string[] MethodArgumentTypes { get; set; }
@@ -57,16 +59,16 @@ namespace EcFeed
         [JsonIgnore] internal int TestCasesTotal { get; set; }
         [JsonIgnore] internal int TestCasesParsed { get; set; }
         [JsonIgnore] internal bool TransmissionFinished { get; set; }
-        [JsonProperty("generatorType")] internal string GeneratorType { get; set; }
-        [JsonProperty("generatorOptions")] internal string GeneratorOptions { get; set; }
-        [JsonProperty("modelId")] internal string ModelId { get; set; }
-        [JsonProperty("testSessionId")] internal string TestSessionId { get; set; }
-        [JsonProperty("methodInfo")] internal string MethodNameQualified { get; set; }
-        [JsonProperty("testResults")] internal Dictionary<string, TestData> TestResults { get; set; }
-        [JsonProperty("testSessionLabel")] internal string TestSessionLabel { get; set; }
-        [JsonProperty("framework")] internal string Framework { get; set; }
-        [JsonProperty("timestamp")] internal int Timestamp { get; set; }
-        [JsonProperty("custom")] internal Dictionary<string, string> Custom { get; set; }
+        [JsonProperty(Feedback.GeneratorType)] internal string GeneratorType { get; set; }
+        [JsonProperty(Feedback.GeneratorOptions)] internal string GeneratorOptions { get; set; }
+        [JsonProperty(Feedback.ModelId)] internal string ModelId { get; set; }
+        [JsonProperty(Feedback.TestSessionId)] internal string TestSessionId { get; set; }
+        [JsonProperty(Feedback.MethodInfo)] internal string MethodNameQualified { get; set; }
+        [JsonProperty(Feedback.TestResults)] internal Dictionary<string, TestData> TestResults { get; set; }
+        [JsonProperty(Feedback.TestSessionLabel)] internal string TestSessionLabel { get; set; }
+        [JsonProperty(Feedback.Framework)] internal string Framework { get; set; }
+        [JsonProperty(Feedback.Timestamp)] internal int Timestamp { get; set; }
+        [JsonProperty(Feedback.Custom)] internal Dictionary<string, string> Custom { get; set; }
 
         internal SessionData()
         {
@@ -83,7 +85,7 @@ namespace EcFeed
 
             if (TestCasesParsed == TestCasesTotal && TransmissionFinished)
             {
-                LastResort();
+                SendFeedback();
             }
         }
 
@@ -98,14 +100,14 @@ namespace EcFeed
 
             if (TestCasesParsed == TestCasesTotal)
             {
-                LastResort();
+                SendFeedback();
             }
         }
 
-        internal void LastResort()
+        internal void SendFeedback()
         {
-            Console.WriteLine(ToString());
-            Console.WriteLine("End of stream");
+            string data = RequestHelper.GenerateFeedbackURL(this, Default.GeneratorAddress);
+            RequestHelper.SendRequest(data, KeyStorePath, KeyStorePassword, ToString());
         }
 
         public override string ToString()

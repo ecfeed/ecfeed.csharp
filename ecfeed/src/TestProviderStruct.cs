@@ -1,5 +1,6 @@
 using Newtonsoft.Json;
 using System.Linq;
+using System.Text;
 
 namespace EcFeed
 {
@@ -15,7 +16,20 @@ namespace EcFeed
 
         public override string ToString() => $"Status: { Status }";
     }
+    internal struct TestCase
+    {
+        [JsonProperty("testCase", Required = Required.Always)] internal TestCaseArgument[] TestCaseArguments { get; set; }
 
+        public override string ToString() => TestCaseHelper.ParseToString(ref this);
+    }
+    internal struct TestCaseArgument
+    {
+        [JsonProperty("name", Required = Required.AllowNull)] internal string Name { get; set; }
+        [JsonProperty("value", Required = Required.AllowNull)] internal object Value { get; set; }
+
+        public override string ToString() => $"\t[ { Value.GetType() } : { Name } : { Value } ]";
+    }
+    
     internal static class MessageInfoHelper 
     { 
         internal static void ParseInfoMessage(string line, ref SessionData feedback)
@@ -74,6 +88,27 @@ namespace EcFeed
         internal static bool IsTransmissionFinished(MessageStatus messageStatus)
         {
             return messageStatus.Status.Contains("END_DATA");
+        }
+    }
+    internal static class TestCaseHelper
+    {
+        internal static string ParseToString(ref TestCase schema)
+        {
+            if (schema.TestCaseArguments == null)
+            {
+                return "NOT PARSABLE";
+            }
+
+            StringBuilder description = new StringBuilder("");
+
+            description.AppendLine($"Number of arguments: { schema.TestCaseArguments.Length }.");
+
+            foreach (TestCaseArgument testArgument in schema.TestCaseArguments)
+            {
+                description.AppendLine(testArgument.ToString());
+            }
+
+            return description.ToString();
         }
     }
 }

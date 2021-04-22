@@ -9,7 +9,7 @@ namespace Testify.EcFeed.Example
     {
         public static void Main(string[] args)
         {
-            TestProvider testProvider = new TestProvider("3243-2107-7355-4290-3889");
+            TestProvider testProvider = new TestProvider("LRXC-015K-GJB0-2A9F-CGA2");
             
             string method ="QuickStart.test";
 
@@ -29,7 +29,7 @@ namespace Testify.EcFeed.Example
             {
                 // Console.WriteLine("HANDLER: {0}", element);
                 TestData testData = (TestData)element[element.Length - 1];
-                testData.feedback(true);
+                testData.feedback(true, custom:new Dictionary<string, string>{{"first", "uno"}, {"second", "dos"}});
                 Console.WriteLine("HANDLER: [{0}]", string.Join(", ", element));
                 
             }

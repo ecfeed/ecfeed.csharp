@@ -47,7 +47,7 @@ namespace EcFeed
             string method = ExtractMethodName(schema);
             int leftBracket = method.IndexOf("(");
             int rightBracket = method.IndexOf(")");
-            string argumentsString = method.Substring(leftBracket + 1, (rightBracket - leftBracket - 1)) + ", TestHeader ecfeed";
+            string argumentsString = method.Substring(leftBracket + 1, (rightBracket - leftBracket - 1)) + ", TestData ecfeed";
             
             return argumentsString.Split(",").Select(argument => argument.Trim().Split(" ")[1]).ToArray();
         }
@@ -57,7 +57,7 @@ namespace EcFeed
             string method = ExtractMethodName(schema);
             int leftBracket = method.IndexOf("(");
             int rightBracket = method.IndexOf(")");
-            string argumentsString = method.Substring(leftBracket + 1, (rightBracket - leftBracket)) + ", TestHeader ecfeed";
+            string argumentsString = method.Substring(leftBracket + 1, (rightBracket - leftBracket)) + ", TestData ecfeed";
             
             return argumentsString.Split(",").Select(argument => argument.Trim().Split(" ")[0]).ToArray();
         }

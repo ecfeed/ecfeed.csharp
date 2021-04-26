@@ -60,7 +60,8 @@ namespace EcFeed
         public const string Adaptive = "adaptive";
     }
 
-    public static class Feedback{
+    public static class Feedback
+    {
         public const string GeneratorType = "generatorType";
         public const string GeneratorOptions = "generatorOptions";
         public const string ModelId = "modelId";

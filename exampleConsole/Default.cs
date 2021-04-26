@@ -27,7 +27,6 @@ namespace Testify.EcFeed.Example
             // foreach(var element in testProvider.ExportStatic(method, testSuites: testSuites, template: Template.JSON))
             foreach(object[] element in testProvider.GenerateNWise(method, feedback:true))
             {
-                // Console.WriteLine("HANDLER: {0}", element);
                 TestData testData = (TestData)element[element.Length - 1];
                 testData.feedback(true, custom:new Dictionary<string, string>{{"first", "uno"}, {"second", "dos"}});
                 Console.WriteLine("HANDLER: [{0}]", string.Join(", ", element));

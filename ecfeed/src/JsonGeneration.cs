@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Newtonsoft.Json;
@@ -106,8 +105,11 @@ namespace EcFeed
 
         internal void SendFeedback()
         {
-            string data = RequestHelper.GenerateFeedbackURL(this, Default.GeneratorAddress);
-            RequestHelper.SendRequest(data, KeyStorePath, KeyStorePassword, ToString());
+            if (BuildFeedback)
+            {
+                string data = RequestHelper.GenerateFeedbackURL(this, Default.GeneratorAddress);
+                RequestHelper.SendRequest(data, KeyStorePath, KeyStorePassword, ToString());
+            }
         }
 
         public override string ToString()

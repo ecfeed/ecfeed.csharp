@@ -1,34 +1,49 @@
 using System.Collections.Generic;
 using System.Linq;
+using System;
 using Newtonsoft.Json;
 
 namespace EcFeed
 {
-    [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)] public sealed class TestData
+    [JsonObject(ItemNullValueHandling = NullValueHandling.Ignore)] public sealed class TestHandle
     {
         [JsonIgnore] private readonly SessionData sessionData;
         [JsonIgnore] private readonly string id;
+        [JsonIgnore] private bool pending;
         [JsonProperty(Feedback.Data)] private string data;
         [JsonProperty(Feedback.Status)] private string status;
         [JsonProperty(Feedback.Duration)] private int? duration;
         [JsonProperty(Feedback.Comment)] private string comment;
         [JsonProperty(Feedback.Custom)] private Dictionary<string, string> custom;
 
-        internal TestData(SessionData sessionData, string data, string id)
+        internal TestHandle(SessionData sessionData, string data, string id)
         {
             this.sessionData = sessionData;
             this.data = data;
             this.id = id;
+            this.pending = true;
         }
 
-        public void feedback(bool status, int? duration = null, string comment = null, Dictionary<string, string> custom = null)
+        ~TestHandle()
         {
-            this.status = status ? Feedback.StatusPassed : Feedback.StatusFailed;
-            this.duration = duration;
-            this.comment = comment;
-            this.custom = custom;
+            Console.WriteLine("OKO");
+        }
 
-            sessionData.AddTest(id, this);
+        public string addFeedback(bool status, int? duration = null, string comment = null, Dictionary<string, string> custom = null)
+        {
+            if (this.pending)
+            {
+                this.status = status ? Feedback.StatusPassed : Feedback.StatusFailed;
+                this.duration = duration;
+                this.comment = comment;
+                this.custom = custom;
+
+                sessionData.AddTest(id, this);
+
+                this.pending = false;
+            }
+
+            return comment != null ? comment : "feedback";
         }
 
     }
@@ -63,7 +78,7 @@ namespace EcFeed
         [JsonProperty(Feedback.ModelId)] internal string ModelId { get; set; }
         [JsonProperty(Feedback.TestSessionId)] internal string TestSessionId { get; set; }
         [JsonProperty(Feedback.MethodInfo)] internal string MethodNameQualified { get; set; }
-        [JsonProperty(Feedback.TestResults)] internal Dictionary<string, TestData> TestResults { get; set; }
+        [JsonProperty(Feedback.TestResults)] internal Dictionary<string, TestHandle> TestResults { get; set; }
         [JsonProperty(Feedback.TestSessionLabel)] internal string TestSessionLabel { get; set; }
         [JsonProperty(Feedback.Framework)] internal string Framework { get; set; }
         [JsonProperty(Feedback.Timestamp)] internal int Timestamp { get; set; }
@@ -73,11 +88,11 @@ namespace EcFeed
         {
             Framework = "C#";
             Template = Template.Stream;
-            TestResults = new Dictionary<string, TestData>();
+            TestResults = new Dictionary<string, TestHandle>();
             TransmissionFinished = false;
         }
 
-        public void AddTest(string id, TestData testData)
+        public void AddTest(string id, TestHandle testData)
         {
             TestCasesParsed++;
             TestResults.Add(id, testData);

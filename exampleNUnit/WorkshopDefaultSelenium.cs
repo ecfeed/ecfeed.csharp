@@ -83,17 +83,17 @@
 //             return response;
 //         }
 
-//         private void HandleInputError(string message, TestData ecfeed)
+//         private void HandleInputError(string message, TestHandle ecfeed)
 //         {
-//             ecfeed.feedback(false, comment:message, custom:new Dictionary<string, string>{{"Error type", "Input"}});
+//             ecfeed.addFeedback(false, comment:message, custom:new Dictionary<string, string>{{"Error type", "Input"}});
 //             Assert.Fail();
 //         }
 
-//         private void HandleOutputError(string message, int duration, TestData ecfeed)
+//         private void HandleOutputError(string message, int duration, TestHandle ecfeed)
 //         {
 //             if (!message.Contains("Request accepted"))
 //             {
-//                 ecfeed.feedback(false, comment:message, duration:duration, custom:new Dictionary<string, string>{{"Error type", "Output"}});
+//                 ecfeed.addFeedback(false, comment:message, duration:duration, custom:new Dictionary<string, string>{{"Error type", "Output"}});
 //                 Assert.Fail();
 //             }
 //         }
@@ -116,7 +116,7 @@
 //         }
 
 //         [TestCaseSource("dataString")]
-//         public void Test(string country, string name, string address, string product, string color, string size, string quantity, string payment, string delivery, string phone, string email, TestData ecfeed)
+//         public void Test(string country, string name, string address, string product, string color, string size, string quantity, string payment, string delivery, string phone, string email, TestHandle ecfeed)
 //         {
 //             string[][] input = new string[2][] { new string[] {name, address, quantity, phone, email}, new string[] {country, product, color, size, payment, delivery} };
 
@@ -139,7 +139,7 @@
 
 //             HandleOutputError(response, duration, ecfeed);
             
-//             ecfeed.feedback(true, duration:duration, comment:response);
+//             ecfeed.addFeedback(true, duration:duration, comment:response);
 //         }
 //     }
 

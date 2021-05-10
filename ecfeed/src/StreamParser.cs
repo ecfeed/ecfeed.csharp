@@ -13,7 +13,7 @@ namespace EcFeed
             if (sessionData.BuildFeedback)
             {
                 result = new object[parsedData.TestCaseArguments.Length + 1];
-                result[result.Length - 1] = new TestData(sessionData, data, sessionData.IncrementTestCasesTotal());
+                result[result.Length - 1] = new TestHandle(sessionData, data, sessionData.IncrementTestCasesTotal());
             }
             else
             {

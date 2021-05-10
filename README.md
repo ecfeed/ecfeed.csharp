@@ -44,7 +44,7 @@ namespace Example
 ```
 To execute the code, type 'dotnet run' in the terminal.  
 
-Don't hesitate to experiment with the code and modify the welcome model. It can be recreted easily and there is no better way to learn than hands-on excercises.  
+Don't hesitate to experiment with the code and modify the welcome model. It can be recreated easily and there is no better way to learn than hands-on exercises.  
 
 However, have in mind that the ID of every model is unique. If you want to copy and paste the example, be sure to change it accordingly.  
 
@@ -94,7 +94,7 @@ testProvider.Model = "XXXXX-XXXXX-XXXXX-XXXXX";
 - *keyStorePassword* - The password for the keystore. The default value is 'changeit' and this is the password used to encrypt the keystore downloaded from the 'ecfeed.com' page.
 - *generatorAddress* - The URL of the ecfeed generator service. By default it is 'gen.ecfeed.com'.
 
-Createing a TestProvider object can look like this:
+Creating a TestProvider object can look like this:
 ```C#
 TestProvider testProvider = new TestProvider("8489-0551-2472-1941-3375");
 ```
@@ -192,3 +192,47 @@ Gets the types of the method parameters in the on-line model.
 ### public string[] GetMethodNames(string method)
 
 Gets the names of the method parameters in the on-line model.
+
+## Feedback
+
+To send feedback, you need to have a BASIC account type or be a member of a TEAM.  
+
+An example looks as follows:
+```C#
+static internal TestProvider testProvider = new TestProvider("LRXC-015K-GJB0-2A9F-CGA2");
+static internal string method = "com.example.test.Playground.size_10x10";
+
+static public IEnumerable Method1a = testProvider.GenerateNWise(method1, feedback:true);
+
+[TestCaseSource("Method1a")]
+public void MethodTest(string a, string b, string c, string d, string e, string f, string g, string h, string i, string j, TestHandle testHandle)
+{
+    Assert.AreNotEqual(a, "a0"));
+}
+
+[TearDown]
+public void TearDown()
+{
+    TestHandle ecfeed = TestContext.CurrentContext.Test.Arguments[^1] as TestHandle; 
+            
+    ecfeed.addFeedback(
+        TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Passed,
+        comment:TestContext.CurrentContext.Result.Message
+    );
+}
+```
+
+To the generation method an additional argument, i.e. 'TestHandle testHandle', must be added. The class consists of one public method, namely 'addFeedback'. The required argument denotes the result of the test, everything else is optional.  
+
+```C#
+testHandle.addFeedback(True, comment: 'Passed', duration: 1000, custom)
+```
+
+_status_ - The result of the test.
+_comment_ - The optional description of the execution.
+_duration_ - The optional execution time in milliseconds.
+_custom_ - The optional dictionary of custom key-value pairs.
+
+Note, that each test must return a feedback, regardless whether it has passed or failed. One solution to overcome this problem is to create a 'tear down' method, as in the example. However, it can also be done manually. Only the first execution of the 'addFeedback' takes effect. All subsequent executions are neglected.  
+
+Additionally, to the test generation method one optional argument can be added, namely 'label'. It provides a short description of the generated test suite.  

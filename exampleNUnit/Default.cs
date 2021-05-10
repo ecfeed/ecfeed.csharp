@@ -1,59 +1,59 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using NUnit.Framework;
-using EcFeed;
+// using System;
+// using System.Collections;
+// using System.Collections.Generic;
+// using NUnit.Framework;
+// using EcFeed;
 
-// NUnit.Framework.TestContext.Progress.WriteLine("Test");
+// // NUnit.Framework.TestContext.Progress.WriteLine("Test");
 
-namespace exampleNUnit
-{
+// namespace exampleNUnit
+// {
 
-    public enum CSharpEnum { Uno, Dos, Tres }
+//     public enum CSharpEnum { Uno, Dos, Tres }
 
-    [TestFixture]
-    public class UnitTest
-    {
-        static private TestProvider testProvider = new TestProvider("LRXC-015K-GJB0-2A9F-CGA2");
-        static private string method1 = "com.example.test.Playground.size_10x10";
+//     [TestFixture]
+//     public class UnitTest
+//     {
+//         static private TestProvider testProvider = new TestProvider("LRXC-015K-GJB0-2A9F-CGA2");
+//         static private string method1 = "com.example.test.Playground.size_10x10";
 
-        static private IEnumerable Method1a = testProvider.GenerateNWise(method1, feedback:true);
-        static private IEnumerable Method1b = testProvider.GenerateRandom(method1, feedback:true, length:1/*(int)(new Random().Next(100, 500))*/);
-        static private IEnumerable Method1c = testProvider.GenerateRandom(method1, feedback:true, length:(int)(new Random().Next(50, 100)), adaptive:false);
-        static private IEnumerable Method1d = testProvider.GenerateRandom(method1, feedback:true, length:(int)(new Random().Next(50, 100)), adaptive:true, duplicates:true);
-        static private IEnumerable Method1e = testProvider.GenerateRandom(method1, feedback:true, length:(int)(new Random().Next(2000, 5000)));
+//         static private IEnumerable Method1a = testProvider.GenerateNWise(method1, feedback:true);
+//         static private IEnumerable Method1b = testProvider.GenerateRandom(method1, feedback:true, length:(int)(new Random().Next(100, 500)));
+//         static private IEnumerable Method1c = testProvider.GenerateRandom(method1, feedback:true, length:(int)(new Random().Next(50, 100)), adaptive:false);
+//         static private IEnumerable Method1d = testProvider.GenerateRandom(method1, feedback:true, length:(int)(new Random().Next(50, 100)), adaptive:true, duplicates:true);
+//         static private IEnumerable Method1e = testProvider.GenerateRandom(method1, feedback:true, length:(int)(new Random().Next(2000, 5000)));
 
-        internal void ValidateMethod1(string a, string b, string c, string d, string e, string f, string g, string h, string i, string j, TestHandle ecfeed)
-        {
-            Assert.AreNotEqual(a, "a0", ecfeed.addFeedback(false, comment:"Failed1"));
-            Assert.AreNotEqual(b, "b1", ecfeed.addFeedback(false, comment:"Failed2"));
-            Assert.AreNotEqual(h, "h6", ecfeed.addFeedback(false, comment:"Failed3"));
+//         internal void ValidateMethod1(string a, string b, string c, string d, string e, string f, string g, string h, string i, string j, TestHandle ecfeed)
+//         {
+//             Assert.AreNotEqual(a, "a0", ecfeed.addFeedback(false, comment:"Failed1"));
+//             Assert.AreNotEqual(b, "b1", ecfeed.addFeedback(false, comment:"Failed2"));
+//             Assert.AreNotEqual(h, "h6", ecfeed.addFeedback(false, comment:"Failed3"));
  
-            ecfeed.addFeedback(true, comment:"OK");
-        }
+//             ecfeed.addFeedback(true, comment:"OK");
+//         }
 
-        [TearDown]
-        public void TearDown()
-        {
-            TestHandle ecfeed = TestContext.CurrentContext.Test.Arguments[^1] as TestHandle; 
+//         [TearDown]
+//         public void TearDown()
+//         {
+//             TestHandle ecfeed = TestContext.CurrentContext.Test.Arguments[^1] as TestHandle; 
             
-            ecfeed.addFeedback(
-                TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Passed,
-                comment:TestContext.CurrentContext.Result.Message
-            );
-        }
+//             ecfeed.addFeedback(
+//                 TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Passed,
+//                 comment:TestContext.CurrentContext.Result.Message
+//             );
+//         }
 
-        // [TestCaseSource("Method1a")]
-        // public void Method1aTest(string a, string b, string c, string d, string e, string f, string g, string h, string i, string j, TestHandle ecfeed)
-        // {
-        //     ValidateMethod1(a, b, c, d, e, f, g, h, i, j, ecfeed);
-        // }
+//         [TestCaseSource("Method1a")]
+//         public void Method1aTest(string a, string b, string c, string d, string e, string f, string g, string h, string i, string j, TestHandle ecfeed)
+//         {
+//             ValidateMethod1(a, b, c, d, e, f, g, h, i, j, ecfeed);
+//         }
 
-        [TestCaseSource("Method1b")]
-        public void Method1bTest(string a, string b, string c, string d, string e, string f, string g, string h, string i, string j, TestHandle ecfeed)
-        {
-            ValidateMethod1(a, b, c, d, e, f, g, h, i, j, ecfeed);
-        }
+//         [TestCaseSource("Method1b")]
+//         public void Method1bTest(string a, string b, string c, string d, string e, string f, string g, string h, string i, string j, TestHandle ecfeed)
+//         {
+//             ValidateMethod1(a, b, c, d, e, f, g, h, i, j, ecfeed);
+//         }
 
 //         [TestCaseSource("Method1c")]
 //         public void Method1cTest(string a, string b, string c, string d, string e, string f, string g, string h, string i, string j, TestHandle ecfeed)
@@ -196,6 +196,6 @@ namespace exampleNUnit
 //         {
 //             ValidateMethod3(a, b, ecfeed);
 //         }
-    }
+//     }
 
-}
+// }

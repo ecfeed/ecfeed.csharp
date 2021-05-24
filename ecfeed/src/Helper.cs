@@ -60,7 +60,7 @@ namespace EcFeed
 
             request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
 
-            DebugHelper.PrintTrace("FEEDFACK REQUEST", request);
+            DebugHelper.PrintTrace("FEEDBACK REQUEST", request);
 
             return request;
         }

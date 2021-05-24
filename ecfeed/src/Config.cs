@@ -78,6 +78,9 @@ namespace EcFeed
         public const string StatusFailed = "F";
         public const string Duration = "duration";
         public const string Comment = "comment";
+        public const string TestSuites = "testSuites";
+        public const string Constraints = "constraints";
+        public const string Choices = "choices";
     }
 
     public static class Request
@@ -98,7 +101,7 @@ namespace EcFeed
         #if DEVELOP
             internal const string GeneratorAddress = "https://develop-gen.ecfeed.com";
         #else
-            internal const string GeneratorAddress = "https://gen.ecfeed.com";
+            internal const string GeneratorAddress = "https://develop-gen.ecfeed.com";
         #endif
 
         internal const string KeyStorePassword = "changeit";

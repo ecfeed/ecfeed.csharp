@@ -24,11 +24,6 @@ namespace EcFeed
             this.pending = true;
         }
 
-        ~TestHandle()
-        {
-            Console.WriteLine("OKO");
-        }
-
         public string addFeedback(bool status, int? duration = null, string comment = null, Dictionary<string, string> custom = null)
         {
             if (this.pending)
@@ -83,6 +78,9 @@ namespace EcFeed
         [JsonProperty(Feedback.Framework)] internal string Framework { get; set; }
         [JsonProperty(Feedback.Timestamp)] internal int Timestamp { get; set; }
         [JsonProperty(Feedback.Custom)] internal Dictionary<string, string> Custom { get; set; }
+        [JsonProperty(Feedback.TestSuites)] internal Object TestSuites { get; set; }
+        [JsonProperty(Feedback.Constraints)] internal Object Constraints { get; set; }
+        [JsonProperty(Feedback.Choices)] internal Object Choices { get; set; }
 
         internal SessionData()
         {

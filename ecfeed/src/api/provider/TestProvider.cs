@@ -139,6 +139,8 @@ namespace EcFeed
             sessionData.Custom = custom;
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
+            sessionData.Constraints = constraints;
+            sessionData.Choices = choices;
 
             return Process<string>(sessionData);
         }
@@ -168,6 +170,8 @@ namespace EcFeed
             sessionData.Custom = custom;
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
+            sessionData.Constraints = constraints;
+            sessionData.Choices = choices;
 
             return Process<string>(sessionData);
         }
@@ -203,6 +207,8 @@ namespace EcFeed
             sessionData.Custom = custom;
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
+            sessionData.Constraints = constraints;
+            sessionData.Choices = choices;
 
             return Process<string>(sessionData);
         }
@@ -232,6 +238,7 @@ namespace EcFeed
             sessionData.Custom = custom;
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
+            sessionData.TestSuites = updatedTestSuites;
 
             return Process<string>(sessionData);
         }
@@ -287,6 +294,8 @@ namespace EcFeed
             sessionData.Custom = custom;
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
+            sessionData.Constraints = constraints;
+            sessionData.Choices = choices;
 
             return Process<object[]>(sessionData);
         }
@@ -314,6 +323,8 @@ namespace EcFeed
             sessionData.Custom = custom;
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
+            sessionData.Constraints = constraints;
+            sessionData.Choices = choices;
 
             return Process<object[]>(sessionData);
         }
@@ -347,6 +358,8 @@ namespace EcFeed
             sessionData.Custom = custom;
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
+            sessionData.Constraints = constraints;
+            sessionData.Choices = choices;
 
             return Process<object[]>(sessionData);
         }
@@ -374,6 +387,7 @@ namespace EcFeed
             sessionData.Custom = custom;
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
+            sessionData.TestSuites = updatedTestSuites;
 
             return Process<object[]>(sessionData);
         }

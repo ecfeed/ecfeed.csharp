@@ -8,7 +8,6 @@ using System.Net;
 using System.Net.Security;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
-using System.Diagnostics;
 using Newtonsoft.Json;
 
 namespace EcFeed
@@ -29,7 +28,7 @@ namespace EcFeed
             
         }  
 
-        public static string GenerateHealthCheckURL(string address, string endpoint = Endpoint.HealthCheck)
+        public static string GenerateHealthCheckURL(string address, string endpoint = RequestEndpoint.HealthCheck)
         {
             string request = $"{ address }/{ endpoint }";
 
@@ -40,10 +39,10 @@ namespace EcFeed
             return request;
         }
 
-        public static string GenerateRequestURL(SessionData sessionData, string address, string endpoint = Endpoint.Generator)
+        public static string GenerateRequestURL(DataSession sessionData, string address, string endpoint = RequestEndpoint.Generator)
         {
             string requestData = $"{ SerializeRequestData(sessionData) }";
-            string requestType = sessionData.Template.GetValue().Equals(Template.Stream.GetValue()) ? Request.Data : Request.Export;
+            string requestType = sessionData.Template.GetValue().Equals(Template.Stream.GetValue()) ? RequestTestType.Data : RequestTestType.Export;
             string request = $"{ address }/{ endpoint }?requestType={ requestType }&request={ requestData }";
 
             request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
@@ -53,7 +52,7 @@ namespace EcFeed
             return request;
         }
 
-        public static string GenerateFeedbackURL(SessionData sessionData, string address, string endpoint = Endpoint.Feedback)
+        public static string GenerateFeedbackURL(DataSession sessionData, string address, string endpoint = RequestEndpoint.Feedback)
         {
             string requestData = $"{ SerializeFeedbackData(sessionData) }";
             string request = $"{ address }/{ endpoint }?client=C#";
@@ -65,7 +64,7 @@ namespace EcFeed
             return request;
         }
 
-        private static string SerializeRequestData(SessionData feedback)
+        private static string SerializeRequestData(DataSession feedback)
         {
             if (string.IsNullOrEmpty(feedback.MethodName))
             {
@@ -83,7 +82,7 @@ namespace EcFeed
             return JsonConvert.SerializeObject(parsedRequest);
         } 
 
-        private static string SerializeFeedbackData(SessionData sessionData)
+        private static string SerializeFeedbackData(DataSession sessionData)
         {
             return sessionData.ToString();
         }
@@ -137,14 +136,5 @@ namespace EcFeed
     
             return false;
         }
-    }
-    internal static class DebugHelper
-    {
-        [Conditional("VERBOSE")]
-        public static void PrintTrace(string header, string trace)
-        {
-            Console.WriteLine($"{ DateTime.Now.ToString()} - { header }\n{ trace }\n");
-        }
-        
     }
 }

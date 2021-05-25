@@ -3,9 +3,9 @@ using System;
 
 namespace EcFeed
 {
-    internal static class StreamParser
+    internal static class ChunkParser
     {
-        internal static object[] ParseTestCaseToDataType(string data, SessionData sessionData)
+        internal static object[] ParseTestCaseToDataType(string data, DataSession sessionData)
         {
             TestCase parsedData = JsonConvert.DeserializeObject<TestCase>(data);
             object[] result;

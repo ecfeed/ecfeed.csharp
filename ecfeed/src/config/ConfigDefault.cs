@@ -4,48 +4,13 @@ using System;
 
 namespace EcFeed
 {
-    public enum Template
+    public static class RequestTestType
     {
-        JSON, CSV, Gherkin, XML, Stream
+        public const string Data = "requestData";
+        public const string Export = "requestExport";
     }
 
-    public enum Generator
-    {
-        Cartesian, NWise, Random, Static
-    }
-
-    static class EnumExtensions
-    {
-        public static string GetValue(this Template template)
-        {
-            switch (template)
-            {
-                case Template.JSON: return "JSON";
-                case Template.CSV: return "CSV";
-                case Template.Gherkin: return "Gherkin";
-                case Template.XML: return "XML";
-                case Template.Stream: return "Stream";
-
-            }
-            
-            throw new TestProviderException("Invalid export type");
-        }
-
-        public static string GetValue(this Generator generator)
-        {
-            switch (generator)
-            {
-                case Generator.Cartesian: return "genCartesian";
-                case Generator.NWise: return "genNWise";
-                case Generator.Random: return "genRandom";
-                case Generator.Static: return "static";
-            }
-
-            throw new TestProviderException("Invalid generator type");
-        }
-    }
-
-    public static class Parameter
+    public static class RequestTestParameter
     {
         public const string DataSource = "dataSource";
         public const string N = "n";
@@ -60,7 +25,7 @@ namespace EcFeed
         public const string Adaptive = "adaptive";
     }
 
-    public static class Feedback
+    public static class RequestFeedbackBody
     {
         public const string GeneratorType = "generatorType";
         public const string GeneratorOptions = "generatorOptions";
@@ -83,13 +48,7 @@ namespace EcFeed
         public const string Choices = "choices";
     }
 
-    public static class Request
-    {
-        public const string Data = "requestData";
-        public const string Export = "requestExport";
-    }
-
-    public static class Endpoint
+    public static class RequestEndpoint
     {
         internal const string HealthCheck = "genServiceVersion";
         internal const string Generator = "testCaseService";

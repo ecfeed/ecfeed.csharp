@@ -63,13 +63,13 @@ namespace EcFeed
 
         private string[][] FetchMethodInfo(string method)
         {
-            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
-            generatorProperties.Set(Parameter.Length, "1");
+            DataGeneratorProperties generatorProperties = new DataGeneratorProperties();
+            generatorProperties.Set(RequestTestParameter.Length, "1");
 
-            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Set(Parameter.DataSource, Generator.Random.GetValue());
+            DataGenerator generatorOptions = new DataGenerator(generatorProperties);
+            generatorOptions.Set(RequestTestParameter.DataSource, Generator.Random.GetValue());
 
-            SessionData sessionData = new SessionData();
+            DataSession sessionData = new DataSession();
             sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = Model;
             sessionData.MethodName = method;
@@ -89,16 +89,16 @@ namespace EcFeed
         internal IEnumerable<string> Export(
             string method,
             Generator generator,
-            GeneratorData generatorOptions,
+            DataGenerator generatorOptions,
             string model = null,
             Dictionary<string, string> custom = null,
             string label = null,
             bool feedback = false,
             Template template = Default.ParameterTemplate)
         {
-            generatorOptions.Set(Parameter.DataSource, generator.GetValue());
+            generatorOptions.Set(RequestTestParameter.DataSource, generator.GetValue());
 
-            SessionData sessionData = new SessionData();
+            DataSession sessionData = new DataSession();
             sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
@@ -122,16 +122,16 @@ namespace EcFeed
             bool feedback = false,
             Template template = Default.ParameterTemplate)
         {
-            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
-            generatorProperties.Set(Parameter.N, "" + n);
-            generatorProperties.Set(Parameter.Coverage, "" + coverage);
+            DataGeneratorProperties generatorProperties = new DataGeneratorProperties();
+            generatorProperties.Set(RequestTestParameter.N, "" + n);
+            generatorProperties.Set(RequestTestParameter.Coverage, "" + coverage);
 
-            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Set(Parameter.DataSource, Generator.NWise.GetValue());
-            generatorOptions.Set(Parameter.Choices, choices);
-            generatorOptions.Set(Parameter.Constraints, constraints);
+            DataGenerator generatorOptions = new DataGenerator(generatorProperties);
+            generatorOptions.Set(RequestTestParameter.DataSource, Generator.NWise.GetValue());
+            generatorOptions.Set(RequestTestParameter.Choices, choices);
+            generatorOptions.Set(RequestTestParameter.Constraints, constraints);
 
-            SessionData sessionData = new SessionData();
+            DataSession sessionData = new DataSession();
             sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
@@ -155,14 +155,14 @@ namespace EcFeed
             bool feedback = false,
             Template template = Default.ParameterTemplate)
         {
-            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
+            DataGeneratorProperties generatorProperties = new DataGeneratorProperties();
 
-            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Set(Parameter.DataSource, Generator.Cartesian.GetValue());
-            generatorOptions.Set(Parameter.Choices, choices);
-            generatorOptions.Set(Parameter.Constraints, constraints);
+            DataGenerator generatorOptions = new DataGenerator(generatorProperties);
+            generatorOptions.Set(RequestTestParameter.DataSource, Generator.Cartesian.GetValue());
+            generatorOptions.Set(RequestTestParameter.Choices, choices);
+            generatorOptions.Set(RequestTestParameter.Constraints, constraints);
 
-            SessionData sessionData = new SessionData();
+            DataSession sessionData = new DataSession();
             sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
@@ -189,17 +189,17 @@ namespace EcFeed
             bool feedback = false,
             Template template = Default.ParameterTemplate)
         {
-            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
-            generatorProperties.Set(Parameter.Length, "" + length);
-            generatorProperties.Set(Parameter.Duplicates, "" + duplicates);
-            generatorProperties.Set(Parameter.Adaptive, "" + adaptive);
+            DataGeneratorProperties generatorProperties = new DataGeneratorProperties();
+            generatorProperties.Set(RequestTestParameter.Length, "" + length);
+            generatorProperties.Set(RequestTestParameter.Duplicates, "" + duplicates);
+            generatorProperties.Set(RequestTestParameter.Adaptive, "" + adaptive);
 
-            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Set(Parameter.DataSource, Generator.Random.GetValue());
-            generatorOptions.Set(Parameter.Choices, choices);
-            generatorOptions.Set(Parameter.Constraints, constraints);
+            DataGenerator generatorOptions = new DataGenerator(generatorProperties);
+            generatorOptions.Set(RequestTestParameter.DataSource, Generator.Random.GetValue());
+            generatorOptions.Set(RequestTestParameter.Choices, choices);
+            generatorOptions.Set(RequestTestParameter.Constraints, constraints);
 
-            SessionData sessionData = new SessionData();
+            DataSession sessionData = new DataSession();
             sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
@@ -224,13 +224,13 @@ namespace EcFeed
         {
             object updatedTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
 
-            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
+            DataGeneratorProperties generatorProperties = new DataGeneratorProperties();
 
-            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Set(Parameter.DataSource, Generator.Static.GetValue());
-            generatorOptions.Set(Parameter.TestSuites, updatedTestSuites);
+            DataGenerator generatorOptions = new DataGenerator(generatorProperties);
+            generatorOptions.Set(RequestTestParameter.DataSource, Generator.Static.GetValue());
+            generatorOptions.Set(RequestTestParameter.TestSuites, updatedTestSuites);
            
-            SessionData sessionData = new SessionData();
+            DataSession sessionData = new DataSession();
             sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
@@ -248,15 +248,15 @@ namespace EcFeed
         internal IEnumerable<object[]> Generate(
             string method,
             Generator generator,
-            GeneratorData generatorOptions,
+            DataGenerator generatorOptions,
             string model = null,
             Dictionary<string, string> custom = null,
             string label = null,
             bool feedback = false)
         {
-            generatorOptions.Set(Parameter.DataSource, generator.GetValue());
+            generatorOptions.Set(RequestTestParameter.DataSource, generator.GetValue());
 
-            SessionData sessionData = new SessionData();
+            DataSession sessionData = new DataSession();
             sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
@@ -278,16 +278,16 @@ namespace EcFeed
             string label = null,
             bool feedback = false)
         {
-            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
-            generatorProperties.Set(Parameter.N, "" + n);
-            generatorProperties.Set(Parameter.Coverage, "" + coverage);
+            DataGeneratorProperties generatorProperties = new DataGeneratorProperties();
+            generatorProperties.Set(RequestTestParameter.N, "" + n);
+            generatorProperties.Set(RequestTestParameter.Coverage, "" + coverage);
 
-            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Set(Parameter.DataSource, Generator.NWise.GetValue());
-            generatorOptions.Set(Parameter.Choices, choices);
-            generatorOptions.Set(Parameter.Constraints, constraints);
+            DataGenerator generatorOptions = new DataGenerator(generatorProperties);
+            generatorOptions.Set(RequestTestParameter.DataSource, Generator.NWise.GetValue());
+            generatorOptions.Set(RequestTestParameter.Choices, choices);
+            generatorOptions.Set(RequestTestParameter.Constraints, constraints);
 
-            SessionData sessionData = new SessionData();
+            DataSession sessionData = new DataSession();
             sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
@@ -309,14 +309,14 @@ namespace EcFeed
             string label = null,
             bool feedback = false)
         {
-            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
+            DataGeneratorProperties generatorProperties = new DataGeneratorProperties();
 
-            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Set(Parameter.DataSource, Generator.Cartesian.GetValue());
-            generatorOptions.Set(Parameter.Choices, choices);
-            generatorOptions.Set(Parameter.Constraints, constraints);
+            DataGenerator generatorOptions = new DataGenerator(generatorProperties);
+            generatorOptions.Set(RequestTestParameter.DataSource, Generator.Cartesian.GetValue());
+            generatorOptions.Set(RequestTestParameter.Choices, choices);
+            generatorOptions.Set(RequestTestParameter.Constraints, constraints);
 
-            SessionData sessionData = new SessionData();
+            DataSession sessionData = new DataSession();
             sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
@@ -341,17 +341,17 @@ namespace EcFeed
             string label = null,
             bool feedback = false)
         {
-            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
-            generatorProperties.Set(Parameter.Length, "" + length);
-            generatorProperties.Set(Parameter.Duplicates, "" + duplicates);
-            generatorProperties.Set(Parameter.Adaptive, "" + adaptive);
+            DataGeneratorProperties generatorProperties = new DataGeneratorProperties();
+            generatorProperties.Set(RequestTestParameter.Length, "" + length);
+            generatorProperties.Set(RequestTestParameter.Duplicates, "" + duplicates);
+            generatorProperties.Set(RequestTestParameter.Adaptive, "" + adaptive);
 
-            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Set(Parameter.DataSource, Generator.Random.GetValue());
-            generatorOptions.Set(Parameter.Choices, choices);
-            generatorOptions.Set(Parameter.Constraints, constraints);
+            DataGenerator generatorOptions = new DataGenerator(generatorProperties);
+            generatorOptions.Set(RequestTestParameter.DataSource, Generator.Random.GetValue());
+            generatorOptions.Set(RequestTestParameter.Choices, choices);
+            generatorOptions.Set(RequestTestParameter.Constraints, constraints);
 
-            SessionData sessionData = new SessionData();
+            DataSession sessionData = new DataSession();
             sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
@@ -374,13 +374,13 @@ namespace EcFeed
         {
             object updatedTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
 
-            GeneratorPropertiesData generatorProperties = new GeneratorPropertiesData();
+            DataGeneratorProperties generatorProperties = new DataGeneratorProperties();
 
-            GeneratorData generatorOptions = new GeneratorData(generatorProperties);
-            generatorOptions.Set(Parameter.DataSource, Generator.Static.GetValue());
-            generatorOptions.Set(Parameter.TestSuites, updatedTestSuites);
+            DataGenerator generatorOptions = new DataGenerator(generatorProperties);
+            generatorOptions.Set(RequestTestParameter.DataSource, Generator.Static.GetValue());
+            generatorOptions.Set(RequestTestParameter.TestSuites, updatedTestSuites);
            
-            SessionData sessionData = new SessionData();
+            DataSession sessionData = new DataSession();
             sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = model == null ? Model : model;
             sessionData.MethodName = method;
@@ -394,7 +394,7 @@ namespace EcFeed
 
 //-------------------------------------------------------------------------------------------
 
-        private IEnumerable<T> Process<T>(SessionData sessionData)
+        private IEnumerable<T> Process<T>(DataSession sessionData)
         {
             sessionData.KeyStorePath = KeyStorePath;
             sessionData.KeyStorePassword = KeyStorePassword;
@@ -406,7 +406,7 @@ namespace EcFeed
 
 //-------------------------------------------------------------------------------------------  
 
-        private IEnumerable<T> ProcessResponse<T>(SessionData sessionData, HttpWebResponse response) 
+        private IEnumerable<T> ProcessResponse<T>(DataSession sessionData, HttpWebResponse response) 
         {
             if (!response.StatusCode.ToString().Equals("OK"))
             {
@@ -429,7 +429,7 @@ namespace EcFeed
             }
         }
 
-        private T ProcessResponseLine<T>(string line, ref SessionData sessionData)
+        private T ProcessResponseLine<T>(string line, ref DataSession sessionData)
         {
             if (sessionData.Template == Template.Stream)
             {
@@ -454,7 +454,7 @@ namespace EcFeed
             }
         }
 
-        private T ProcessResponseDataLine<T>(string line, SessionData sessionData)
+        private T ProcessResponseDataLine<T>(string line, DataSession sessionData)
         {
             try
             {
@@ -473,13 +473,13 @@ namespace EcFeed
             return default(T);
         }
 
-        private T ProcessResponseStatusLine<T>(string line, SessionData sessionData)
+        private T ProcessResponseStatusLine<T>(string line, DataSession sessionData)
         {
             try
             {
                 MessageStatus messageStatus = JsonConvert.DeserializeObject<MessageStatus>(line);
 
-                if (MessageStatusHelper.IsTransmissionFinished(messageStatus))
+                if (HelperMessageStatus.IsTransmissionFinished(messageStatus))
                 {
                     sessionData.FinishTransmission();
                 }
@@ -498,11 +498,11 @@ namespace EcFeed
             return default(T);
         }
 
-        private T ProcessResponseInfoLine<T>(string line, ref SessionData sessionData)
+        private T ProcessResponseInfoLine<T>(string line, ref DataSession sessionData)
         {
             try
             {    
-                MessageInfoHelper.ParseInfoMessage(line, ref sessionData);
+                HelperMessageInfo.ParseInfoMessage(line, ref sessionData);
                 DebugHelper.PrintTrace("INFO", string.Join(", ", sessionData.MethodArgumentTypes));
             }
             catch (JsonReaderException e) 
@@ -517,11 +517,11 @@ namespace EcFeed
             return default(T);
         }
 
-        private T GenerateTestEvent<T>(string data, SessionData sessionData)
+        private T GenerateTestEvent<T>(string data, DataSession sessionData)
         {
             if (typeof(T).ToString().Equals("System.Object[]"))
             {
-                return (T)(object)StreamParser.ParseTestCaseToDataType(data, sessionData);
+                return (T)(object)ChunkParser.ParseTestCaseToDataType(data, sessionData);
             }
 
             if (typeof(T).ToString().Equals("System.String[][]"))

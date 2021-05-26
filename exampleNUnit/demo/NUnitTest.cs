@@ -42,6 +42,8 @@ namespace exampleNUnit
             testSuites:"ALL", label:"Static - All");
          static private IEnumerable GenStaticSelected = ConfigDefault.TestProvider.GenerateStatic(ConfigDefault.F_TEST, feedback:true, 
             testSuites:new string[]{"suite1"}, label:"Static - Selected");
+        static private IEnumerable GenNWiseFeedback = ConfigDefault.TestProvider.GenerateNWise(ConfigDefault.F_TEST, feedback:true, 
+            label:"NWise / Feedback");
 
         [TearDown]
         public void TearDown()
@@ -66,88 +68,94 @@ namespace exampleNUnit
             Oracle.ValidateFTest(arg1, arg2, arg3, ecfeed);
         }
 
-         [TestCaseSource("GenRandomQuantityLong")]
+        [TestCaseSource("GenRandomQuantityLong")]
         public void GenRandomQuantityLongTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
             Oracle.ValidateFTest(arg1, arg2, arg3, ecfeed);
         }
 
-         [TestCaseSource("GenRandom")]
+        [TestCaseSource("GenRandom")]
         public void GenRandomTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
             Oracle.ValidateFTest(arg1, arg2, arg3, ecfeed);
         }
 
-         [TestCaseSource("GenRandomAdaptive")]
+        [TestCaseSource("GenRandomAdaptive")]
         public void GenRandomAdaptiveTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
             Oracle.ValidateFTest(arg1, arg2, arg3, ecfeed);
         }
 
-         [TestCaseSource("GenRandomDuplicates")]
+        [TestCaseSource("GenRandomDuplicates")]
         public void GenRandomDuplicatesTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
             Oracle.ValidateFTest(arg1, arg2, arg3, ecfeed);
         }
 
-         [TestCaseSource("GenNWise")]
+        [TestCaseSource("GenNWise")]
         public void GenNWiseTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
             Oracle.ValidateFTest(arg1, arg2, arg3, ecfeed);
         }
 
-         [TestCaseSource("GenNWiseN")]
+        [TestCaseSource("GenNWiseN")]
         public void GenNWiseNTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
             Oracle.ValidateFTest(arg1, arg2, arg3, ecfeed);
         }
 
-         [TestCaseSource("GenNWiseCoverage")]
+        [TestCaseSource("GenNWiseCoverage")]
         public void GenNWiseCoverageTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
             Oracle.ValidateFTest(arg1, arg2, arg3, ecfeed);
         }
 
-         [TestCaseSource("GenNWiseConstraintsNone")]
+        [TestCaseSource("GenNWiseConstraintsNone")]
         public void GenNWiseConstraintsNoneTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
             Oracle.ValidateFTest(arg1, arg2, arg3, ecfeed);
         }
 
-         [TestCaseSource("GenNWiseConstraintsSelected")]
+        [TestCaseSource("GenNWiseConstraintsSelected")]
         public void GenNWiseConstraintsSelectedTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
             Oracle.ValidateFTest(arg1, arg2, arg3, ecfeed);
         }
 
-         [TestCaseSource("GenNWiseChoicesSelected")]
+        [TestCaseSource("GenNWiseChoicesSelected")]
         public void GenNWiseChoicesSelectedTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
             Oracle.ValidateFTest(arg1, arg2, arg3, ecfeed);
         }
 
-         [TestCaseSource("GenCartesian")]
+        [TestCaseSource("GenCartesian")]
         public void GenCartesianTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
             Oracle.ValidateFTest(arg1, arg2, arg3, ecfeed);
         }
 
-         [TestCaseSource("GenStatic")]
+        [TestCaseSource("GenStatic")]
         public void GenStaticTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
             Oracle.ValidateFTest(arg1, arg2, arg3, ecfeed);
         }
 
-         [TestCaseSource("GenStaticAll")]
+        [TestCaseSource("GenStaticAll")]
         public void GenStaticAllTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
             Oracle.ValidateFTest(arg1, arg2, arg3, ecfeed);
         }
 
-         [TestCaseSource("GenStaticSelected")]
+        [TestCaseSource("GenStaticSelected")]
         public void GenStaticSelectedTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
             Oracle.ValidateFTest(arg1, arg2, arg3, ecfeed);
+        }
+
+        [TestCaseSource("GenNWiseFeedback")]
+        public void GenNWiseFeedbackTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
+        {
+            Oracle.ValidateFeedbackFTest(arg1, arg2, arg3, ecfeed);
         }
     }
 

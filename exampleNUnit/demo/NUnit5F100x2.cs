@@ -20,6 +20,8 @@ namespace exampleNUnit
             length:1, label:"Random / Custom", custom:new Dictionary<string, string>{{"key1", "value1"}, {"key2", "value2"}});
         static private IEnumerable GenNWise = ConfigDefault.TestProvider.GenerateNWise(ConfigDefault.F_100x2, feedback:true, 
             label:"NWise");
+        static private IEnumerable GenNWiseFeedback = ConfigDefault.TestProvider.GenerateNWise(ConfigDefault.F_100x2, feedback:true, 
+            label:"NWise / Feedback");
 
         [TearDown]
         public void TearDown()
@@ -60,6 +62,12 @@ namespace exampleNUnit
         public void GenNWiseTest(string a, string b, TestHandle ecfeed)
         {
             Oracle.ValidateF100x2(a, b, ecfeed);
+        }
+
+        [TestCaseSource("GenNWiseFeedback")]
+        public void GenNWiseFeedbackTest(string a, string b, TestHandle ecfeed)
+        {
+            Oracle.ValidateFeedbackF100x2(a, b, ecfeed);
         }
     }
 

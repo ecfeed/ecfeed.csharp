@@ -3,7 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <PackageVersion>1.3.0</PackageVersion>
-    <PackageId>EcfDevelop</PackageId>
+    <PackageId>EcFeed</PackageId>
     <Company>EcFeed</Company>
     <Title>EcFeed runner</Title>
     <Authors>Patryk Chamuczyński;Marek Kuczabiński;Krzysztof Skorupski</Authors>

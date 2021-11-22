@@ -33,7 +33,7 @@ namespace Example
     {
         public static void Main(string[] args)
         {
-            TestProvider testProvider = new TestProvider("8489-0551-2472-1941-3375");   // The model ID.
+            TestProvider testProvider = new TestProvider("XXXX-XXXX-XXXX-XXXX-XXXX");   // The model ID.
             foreach(var element in testProvider.ExportNWise("QuickStart.test"))         // The method name.
             {
                 Console.WriteLine(element);
@@ -44,7 +44,7 @@ namespace Example
 ```
 To execute the code, type 'dotnet run' in the terminal.  
 
-Don't hesitate to experiment with the code and modify the welcome model. It can be recreted easily and there is no better way to learn than hands-on excercises.  
+Don't hesitate to experiment with the code and modify the welcome model. It can be recreated easily and there is no better way to learn than hands-on exercises.  
 
 However, have in mind that the ID of every model is unique. If you want to copy and paste the example, be sure to change it accordingly.  
 
@@ -64,7 +64,7 @@ namespace exampleNUnit
     [TestFixture]
     public class UnitTest
     {
-        static public IEnumerable DataInt = new TestProvider("8489-0551-2472-1941-3375").GenerateNWise("QuickStart.test");
+        static public IEnumerable DataInt = new TestProvider("XXXX-XXXX-XXXX-XXXX-XXXX").GenerateNWise("QuickStart.test");
 
         [TestCaseSource("DataInt")]
         public void TestInt(int a0, int a1)
@@ -78,6 +78,51 @@ namespace exampleNUnit
 
 To run tests, type 'dotnet test' in the terminal.
 
+
+## Feedback
+
+To send feedback, you need to have a BASIC account type or be a member of a TEAM.  
+
+An example looks as follows:
+```C#
+static internal TestProvider testProvider = new TestProvider("XXXX-XXXX-XXXX-XXXX-XXXX");
+static internal string method = "com.example.test.Playground.size_10x10";
+
+static public IEnumerable Method1a = testProvider.GenerateNWise(method1, feedback:true);
+
+[TestCaseSource("Method1a")]
+public void MethodTest(string a, string b, string c, string d, string e, string f, string g, string h, string i, string j, TestHandle testHandle)
+{
+    Assert.AreNotEqual(a, "a0"));
+}
+
+[TearDown]
+public void TearDown()
+{
+    TestHandle ecfeed = TestContext.CurrentContext.Test.Arguments[^1] as TestHandle; 
+            
+    ecfeed.addFeedback(
+        TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Passed,
+        comment:TestContext.CurrentContext.Result.Message
+    );
+}
+```
+
+To the generation method an additional argument, i.e. 'TestHandle testHandle', must be added. The class consists of one public method, namely 'addFeedback'. The required argument denotes the result of the test, everything else is optional.  
+
+```C#
+testHandle.addFeedback(True, comment: 'Passed', duration: 1000, custom)
+```
+
+_status_ - The result of the test.
+_comment_ - The optional description of the execution.
+_duration_ - The optional execution time in milliseconds.
+_custom_ - The optional dictionary of custom key-value pairs.
+
+Note, that each test must return a feedback, regardless whether it has passed or failed. One solution to overcome this problem is to create a 'tear down' method, as in the example. However, it can also be done manually. Only the first execution of the 'addFeedback' takes effect. All subsequent executions are neglected.  
+
+Additionally, to the test generation method one optional argument can be added, namely 'label'. It provides a short description of the generated test suite.  
+
 # TestProvider class API
 
 The library provides connectivity with the ecFeed test generation service using the 'TestProvider' class. It requires the model ID, the keystore location, the keystore password, and the generator service address.
@@ -88,15 +133,15 @@ The 'TestProvider' constructor takes one required and three optional arguments.
 
 - *model (required)* - The model ID. It is a 20 digit number (grouped by 4) that can be found in the 'My projects' page at 'ecfeed.com'. It can be also found in an URL of the model editor page. It's value can be changed later using the 'Model' property. For example:
 ```C#
-testProvider.Model = "XXXXX-XXXXX-XXXXX-XXXXX";
+testProvider.Model = "XXXX-XXXX-XXXX-XXXX-XXXX";
 ```
 - *keyStorePath* - The path to a keystore downloaded from 'ecfeed.com' webpage ('Settings' -> 'Security'). The keystore contains the user certificate which is needed to authenticate the user at the generator service. By default, the constructor looks for the keystore in \~/.ecfeed/security.p12, except for Windows, where the default path is \~/ecfeed/security.p12.
 - *keyStorePassword* - The password for the keystore. The default value is 'changeit' and this is the password used to encrypt the keystore downloaded from the 'ecfeed.com' page.
 - *generatorAddress* - The URL of the ecfeed generator service. By default it is 'gen.ecfeed.com'.
 
-Createing a TestProvider object can look like this:
+Creating a TestProvider object can look like this:
 ```C#
-TestProvider testProvider = new TestProvider("8489-0551-2472-1941-3375");
+TestProvider testProvider = new TestProvider("XXXX-XXXX-XXXX-XXXX-XXXX");
 ```
 
 ## Generator calls
@@ -126,6 +171,9 @@ Additionally, two string values can be used instead:
 string constraints = "ALL";
 string constraints = "NONE";
 ```
+- *feedback* - A flag denoting whether feedback should be sent beck to the generator. By default, this functionality is switched off.
+- *label* - An additional label associated with feedback.
+- *custom* - An additional dictionary with custom elements associated with feedback.
 
 ### public IEnumerable<object[]> GenerateCartesian( ... )
 
@@ -135,6 +183,9 @@ Arguments:
 - *method (required)* - See 'GenerateNWise'.
 - *choices* - See 'GenerateNWise'.
 - *constraints* - See 'GenerateNWise'.
+- *feedback* - See 'GenerateNWise'.
+- *label* - See 'GenerateNWise'.
+- *custom* - See 'GenerateNWise'.
 
 ### public IEnumerable<object[]> GenerateRandom( ... )
 
@@ -147,6 +198,9 @@ Arguments:
 - *adaptive* - If set to true, the generator will try to provide tests that are farthest (in the means of the Hamming distance) from the ones already generated. The default is 'false'.
 - *choices* - See 'GenerateNWise'.
 - *constraints* - See 'GenerateNWise'.
+- *feedback* - See 'GenerateNWise'.
+- *label* - See 'GenerateNWise'.
+- *custom* - See 'GenerateNWise'.
 
 ### public IEnumerable<object[]> GenerateStatic( ... )
 
@@ -162,6 +216,9 @@ Additionally, one string value can be used instead:
 ```C#
 string constraints = "ALL";
 ```
+- *feedback* - See 'GenerateNWise'.
+- *label* - See 'GenerateNWise'.
+- *custom* - See 'GenerateNWise'.
 
 ## Export calls
 

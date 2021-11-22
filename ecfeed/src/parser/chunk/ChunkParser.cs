@@ -3,19 +3,26 @@ using System;
 
 namespace EcFeed
 {
-    internal static class StreamParser
+    internal static class ChunkParser
     {
-        internal static object[] ParseTestCaseToDataType(string data, string[] type)
+        internal static object[] ParseTestCaseToDataType(string data, DataSession sessionData)
         {
-            return ParseTestCaseToDataType(JsonConvert.DeserializeObject<TestCase>(data), type);
-        }
-        internal static object[] ParseTestCaseToDataType(TestCase data, string[] type)
-        {
-            object[] result = new object[data.TestCaseArguments.Length];
+            TestCase parsedData = JsonConvert.DeserializeObject<TestCase>(data);
+            object[] result;
 
-            for (int i=0 ; i < data.TestCaseArguments.Length ; i++)
+            if (sessionData.BuildFeedback)
             {
-                result[i] = CastType(data.TestCaseArguments[i].Value, type[i]);
+                result = new object[parsedData.TestCaseArguments.Length + 1];
+                result[result.Length - 1] = new TestHandle(sessionData, data, sessionData.IncrementTestCasesTotal());
+            }
+            else
+            {
+                result = new object[parsedData.TestCaseArguments.Length];
+            }
+
+            for (int i=0 ; i < parsedData.TestCaseArguments.Length ; i++)
+            {
+                result[i] = CastType(parsedData.TestCaseArguments[i].Value, sessionData.MethodArgumentTypes[i]);
             }
 
             return result;

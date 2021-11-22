@@ -1,16 +1,8 @@
 using System.Text;
-using Newtonsoft.Json;
 
 namespace EcFeed
 {
-    internal struct TestCase
-    {
-        [JsonProperty("testCase", Required = Required.Always)] internal TestCaseArgument[] TestCaseArguments { get; set; }
-
-        public override string ToString() => TestCaseHelper.ParseToString(ref this);
-    }
-
-    internal static class TestCaseHelper
+    internal static class HelperTestCase
     {
         internal static string ParseToString(ref TestCase schema)
         {

@@ -11,7 +11,7 @@ namespace exampleNUnit
     public class NUnit5F10x10
     {
         static private IEnumerable GenRandomQuantitySingle = ConfigDefault.TestProvider.GenerateRandom(ConfigDefault.F_10x10, feedback:true,
-            length:1, label:"Random / Quality - Single");
+            length:1, label:"Random / Quantity - Single");
         static private IEnumerable GenRandomQuantityShort = ConfigDefault.TestProvider.GenerateRandom(ConfigDefault.F_10x10, feedback:true, 
             length:(int)(new Random().Next(100, 500)), label:"Random / Quantity - Short");
         static private IEnumerable GenRandomQuantityLong = ConfigDefault.TestProvider.GenerateRandom(ConfigDefault.F_10x10, feedback:true, 

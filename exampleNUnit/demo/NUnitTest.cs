@@ -33,7 +33,7 @@ namespace exampleNUnit
         static private IEnumerable GenNWiseConstraintsSelected = ConfigDefault.TestProvider.GenerateNWise(ConfigDefault.F_TEST, feedback:true, 
             constraints:new string[]{"constraint1", "constraint2"}, label:"NWise / Constraints - Selected");
         static private IEnumerable GenNWiseChoicesSelected = ConfigDefault.TestProvider.GenerateNWise(ConfigDefault.F_TEST, feedback:true, 
-            choices:new Dictionary<string, string[]>{{"arg1", new string[]{"choice1", "choice2"}}, {"arg2", new string[]{"choice2", "choice2", "choice3"}}}, label:"NWise / Choices - Selected");
+            choices:new Dictionary<string, string[]>{{"arg1", new string[]{"choice1", "choice2"}}, {"arg2", new string[]{"choice2", "choice3"}}}, label:"NWise / Choices - Selected");
         static private IEnumerable GenCartesian = ConfigDefault.TestProvider.GenerateCartesian(ConfigDefault.F_TEST, feedback:true, 
             label:"Cartesian");
         static private IEnumerable GenStatic = ConfigDefault.TestProvider.GenerateStatic(ConfigDefault.F_TEST, feedback:true, 

@@ -8,7 +8,7 @@
 // {
 
 //     [TestFixture]
-//     public class NUnitTest
+//     public class NUnit3QuickStart
 //     {
 //         static private IEnumerable GenRandomQuantitySingle = ConfigDefault.TestProvider.GenerateRandom(ConfigDefault.F_TEST, feedback:true,
 //             length:1, label:"Random / Quantity - Single");

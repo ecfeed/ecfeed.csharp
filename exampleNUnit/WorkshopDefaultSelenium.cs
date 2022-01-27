@@ -15,8 +15,8 @@
 //     [TestFixture]
 //     public class SeleniumWorkshop
 //     {
-//         private static IEnumerable dataString = new TestProvider("PZS2-W9NH-FRGZ-LZ4N-VGMR").GenerateNWise("com.example.test.Demo.typeString", feedback:true, label:"Workshop 'selenium'");
-//         private static RemoteWebDriver seleniumDriver = new FirefoxDriver("/home/krzysztof") { Url = "http://www.workshop-2020-march.ecfeed.com?mode=error"};
+//         private static IEnumerable dataString = new TestProvider("6EG2-YL4S-LMAK-Y5VW-VPV9").GenerateNWise("com.example.test.Demo.typeString", feedback:true, label:"Workshop 'selenium'");
+//         private static RemoteWebDriver seleniumDriver = new FirefoxDriver("/home/krzysztof") { Url = "http://www.workshop-2021-december.ecfeed.com/?mode=error"};
 //         private static string[] pageFormControl = new string[] { "submit" };
 //         private static string[] pageFormOutput = new string[] { "status", "response" };
 //         private static string[][] pageFormInput = new string[2][] { new string[] {"name", "address", "quantity", "phone", "email"}, new string[] {"country", "product", "color", "size", "payment", "delivery"} };
@@ -86,6 +86,7 @@
 //         private void HandleInputError(string message, TestHandle ecfeed)
 //         {
 //             ecfeed.addFeedback(false, comment:message, custom:new Dictionary<string, string>{{"Error type", "Input"}});
+//             NUnit.Framework.TestContext.Progress.WriteLine(message);
 //             Assert.Fail();
 //         }
 
@@ -94,6 +95,7 @@
 //             if (!message.Contains("Request accepted"))
 //             {
 //                 ecfeed.addFeedback(false, comment:message, duration:duration, custom:new Dictionary<string, string>{{"Error type", "Output"}});
+//                 NUnit.Framework.TestContext.Progress.WriteLine(message);
 //                 Assert.Fail();
 //             }
 //         }

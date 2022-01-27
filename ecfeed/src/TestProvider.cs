@@ -24,7 +24,7 @@ namespace EcFeed
             Model = model;
 
             KeyStorePath = SetDefaultKeyStorePath(keyStorePath);
-            KeyStorePassword = string.IsNullOrEmpty(keyStorePassword) ? Default.KeyStorePassword : keyStorePassword;;
+            KeyStorePassword = string.IsNullOrEmpty(keyStorePassword) ? Default.KeyStorePassword : keyStorePassword;
             GeneratorAddress = string.IsNullOrEmpty(generatorAddress) ? Default.GeneratorAddress : generatorAddress;
         }
 
@@ -32,10 +32,7 @@ namespace EcFeed
         {
             if (!string.IsNullOrEmpty(keyStorePath))
             {
-                if (File.Exists(keyStorePath))
-                {
-                    return keyStorePath;
-                }
+                return keyStorePath;
             }
 
             foreach (string path in Default.KeyStorePath)
@@ -51,6 +48,11 @@ namespace EcFeed
 
 //-------------------------------------------------------------------------------------------
 
+        public void Validate()
+        {
+            RequestHelper.ValidateConnection(GeneratorAddress, KeyStorePath, KeyStorePassword);
+        }
+        
         public string[] GetMethodTypes(string method)
         {
             return FetchMethodInfo(method)[0];
@@ -143,6 +145,21 @@ namespace EcFeed
             sessionData.Choices = choices;
 
             return Process<string>(sessionData);
+        }
+
+         public IEnumerable<string> ExportPairwise(
+            string method,
+            int n = Default.ParameterN, 
+            int coverage = Default.ParameterCoverage,
+            Dictionary<string, string[]> choices = null,
+            object constraints = null,
+            string model = null,
+            Dictionary<string, string> custom = null,
+            string label = null,
+            bool feedback = false,
+            Template template = Default.ParameterTemplate)
+        {
+            return ExportNWise(method, n = 2, coverage, choices, constraints, model, custom, label, feedback, template);
         }
 
         public IEnumerable<string> ExportCartesian(
@@ -298,6 +315,20 @@ namespace EcFeed
             sessionData.Choices = choices;
 
             return Process<object[]>(sessionData);
+        }
+
+        public IEnumerable<object[]> GeneratePairwise(
+            string method,
+            int n = Default.ParameterN, 
+            int coverage = Default.ParameterCoverage,
+            Dictionary<string, string[]> choices = null,
+            object constraints = null,
+            string model = null,
+            Dictionary<string, string> custom = null,
+            string label = null,
+            bool feedback = false)
+        {
+            return GenerateNWise(method, 2, coverage, choices, constraints, model, custom, label, feedback);
         }
 
         public IEnumerable<object[]> GenerateCartesian(

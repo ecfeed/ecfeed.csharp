@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using NUnit.Framework;
 using EcFeed;
 
-// NUnit.Framework.TestContext.Progress.WriteLine("Test");
-
 namespace exampleNUnit
 {
     public class Oracle
@@ -18,7 +16,7 @@ namespace exampleNUnit
             Assert.AreNotEqual(h, "h6");
         }
 
-        internal static void ValidateFeedbacF10x10(string a, string b, string c, string d, string e, string f, string g, string h, string i, string j, TestHandle ecfeed)
+        internal static void ValidateFeedbackF10x10(string a, string b, string c, string d, string e, string f, string g, string h, string i, string j, TestHandle ecfeed)
         {
             try
             {   

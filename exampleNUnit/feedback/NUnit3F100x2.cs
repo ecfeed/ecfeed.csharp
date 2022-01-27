@@ -8,7 +8,7 @@
 // {
 
 //     [TestFixture]
-//     public class NUnit5F100x2
+//     public class NUnit3F100x2
 //     {
 //         static private IEnumerable GenRandomQuantitySingle = ConfigDefault.TestProvider.GenerateRandom(ConfigDefault.F_100x2, feedback:true,
 //             length:1, label:"Random / Quantity - Single");

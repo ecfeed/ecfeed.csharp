@@ -13,7 +13,7 @@
 //     [TestFixture]
 //     public class SeleniumApi
 //     {
-//         private static IEnumerable dataString = new TestProvider("PZS2-W9NH-FRGZ-LZ4N-VGMR").GenerateNWise("com.example.test.Demo.typeString", feedback:true, label:"Workshop 'api'");
+//         private static IEnumerable dataString = new TestProvider("6EG2-YL4S-LMAK-Y5VW-VPV9").GenerateNWise("com.example.test.Demo.typeString", feedback:true, label:"Workshop 'api'");
        
 //         private void HandleError(dynamic error, int duration, TestHandle ecfeed)
 //         {
@@ -26,6 +26,8 @@
 //             if (error.Length > 0)
 //             {
 //                 ecfeed.addFeedback(false, comment:string.Join("\n", error), duration:duration, custom:new Dictionary<string, string>{{"Error type", type}});
+//                 NUnit.Framework.TestContext.Progress.WriteLine(string.Join("\n", error));
+                
 //                 Assert.Fail();
 //             }
 //         }
@@ -59,7 +61,8 @@
 //                 httpWebRequest.Method = "Post";
 
 //                 HttpWebResponse httpWebResponse = (HttpWebResponse) httpWebRequest.GetResponse();
-//                 // NUnit.Framework.TestContext.Progress.WriteLine(httpWebResponse.StatusDescription);
+//                 NUnit.Framework.TestContext.Progress.WriteLine(httpWebResponse.StatusDescription);
+                
 
 //                 using (StreamReader reader = new StreamReader(httpWebResponse.GetResponseStream(), Encoding.ASCII)) {
 //                     HandleError(JsonConvert.DeserializeObject(reader.ReadLine()), GetTime(stopwatch), ecfeed);

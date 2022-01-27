@@ -6,22 +6,22 @@ The following tutorial is an introduction to the C# runner. Note, that it does n
 
 Prerequisites:
 - Install the [.NET](https://dotnet.microsoft.com/download) framework.
-- Download an IDE. For example [Visual Studio Code](https://code.visualstudio.com/).
-- Create a test model on the ecFeed webpage.
+- Download an IDE. For example [VSCode](https://code.visualstudio.com/).
+- Create a test model on the ecFeed webpage (or use the default one).
 - Generate a personal keystore named 'security.p12' and put it in the \~/.ecfeed/
  directory (Linux users) or in the \~/ecfeed/ directory (Windows users).  
 
-For the full documentation check the source directly at [GitHub](https://github.com/ecfeed/ecfeed.csharp).
+For complete documentation check the source directly at [GitHub](https://github.com/ecfeed/ecfeed.csharp).
 
 ## Installation
 
 Inside a new folder open a terminal console and type 'dotnet new console'. The command creates a new C# project.  
 
-The ecFeed library can be found online in the [NuGet repository](https://www.nuget.org/packages/EcFeed). To include it in the project, type 'dotnet add package ecfeed'.  
+The ecFeed library can be found in the [NuGet repository](https://www.nuget.org/packages/EcFeed). To add it to the project, type 'dotnet add package ecfeed'.  
 
 ## Examples
 
-Methods, used in the tutorial, are available in a welcome model, created during the registration process at the 'ecfeed.com' webpage. It the model is missing (e.g. it has been deleted by the user), it can be imported from [here](https://s3-eu-west-1.amazonaws.com/resources.ecfeed.com/repo/tutorial/Welcome.ect).
+Methods, used in the tutorial,are a part of the welcome model, created during the registration process at the 'ecfeed.com' webpage. It the model is missing (e.g. it has been deleted by the user), it can be downloaded from [here](https://s3-eu-west-1.amazonaws.com/resources.ecfeed.com/repo/tutorial/Welcome.ect).
 
 ```C#
 using System;
@@ -34,7 +34,7 @@ namespace Example
         public static void Main(string[] args)
         {
             TestProvider testProvider = new TestProvider("XXXX-XXXX-XXXX-XXXX-XXXX");   // The model ID.
-            foreach(var element in testProvider.ExportNWise("QuickStart.test"))         // The method name.
+            foreach(var element in testProvider.ExportNWise("QuickStart.test"))         // The name of the method.
             {
                 Console.WriteLine(element);
             }
@@ -46,13 +46,13 @@ To execute the code, type 'dotnet run' in the terminal.
 
 Don't hesitate to experiment with the code and modify the welcome model. It can be recreated easily and there is no better way to learn than hands-on exercises.  
 
-However, have in mind that the ID of every model is unique. If you want to copy and paste the example, be sure to change it accordingly.  
+However, have in mind that the ID of every model (including the welcome model) is unique. If you want to copy and paste the example, be sure to update it accordingly.  
 
 ## NUnit
 
-The provided library can be used to create test cases for NUnit, which is one of the most common C# testing framework. It is possible, because generation methods return the 'IEnumerable<object[]>' interface, which might be directly used as the data source.    
+The ecfeed library can be used to create test cases for NUnit, which is one of the most common testing frameworks for C#. It is possible, because generation methods return the 'IEnumerable<object[]>' interface, which might be directly used as the data source.    
 
-Inside a new folder open the  terminal and type 'dotnet new nunit'. This command creates a new C# test project.
+Inside a new folder open the terminal and type 'dotnet new nunit'. This command creates a new C# test project.
 
 ```C#
 using System.Collections;
@@ -76,14 +76,14 @@ namespace exampleNUnit
 }
 ```
 
-To run tests, type 'dotnet test' in the terminal.
-
+To run tests, type 'dotnet test'.
 
 ## Feedback
 
 To send feedback, you need to have a BASIC account type or be a member of a TEAM.  
 
-An example looks as follows:
+A feedback example looks as follows:
+
 ```C#
 static internal TestProvider testProvider = new TestProvider("XXXX-XXXX-XXXX-XXXX-XXXX");
 static internal string method = "com.example.test.Playground.size_10x10";
@@ -114,29 +114,31 @@ To the generation method an additional argument, i.e. 'TestHandle testHandle', m
 testHandle.addFeedback(True, comment: 'Passed', duration: 1000, custom)
 ```
 
-_status_ - The result of the test.
-_comment_ - The optional description of the execution.
+_status_ - The result of the test. This is the only required field.
 _duration_ - The optional execution time in milliseconds.
+_comment_ - The optional description of the execution.
 _custom_ - The optional dictionary of custom key-value pairs.
 
-Note, that each test must return a feedback, regardless whether it has passed or failed. One solution to overcome this problem is to create a 'tear down' method, as in the example. However, it can also be done manually. Only the first execution of the 'addFeedback' takes effect. All subsequent executions are neglected.  
+Note, that each test must return a feedback, regardless whether it has passed or failed. In each test, only the first invocation of the 'addFeedback' method takes effect. All subsequent invocations are neglected.  
 
 Additionally, to the test generation method one optional argument can be added, namely 'label'. It provides a short description of the generated test suite.  
 
+Generated feedback can be analyzed on the 'ecfeed.com' webpage.  
+
 # TestProvider class API
 
-The library provides connectivity with the ecFeed test generation service using the 'TestProvider' class. It requires the model ID, the keystore location, the keystore password, and the generator service address.
+The library provides connectivity with the ecFeed test generation service using the 'TestProvider' class. It requires the model ID, the keystore location, the keystore password, and the generator web address.
 
 ## Constructor
 
 The 'TestProvider' constructor takes one required and three optional arguments.
 
-- *model (required)* - The model ID. It is a 20 digit number (grouped by 4) that can be found in the 'My projects' page at 'ecfeed.com'. It can be also found in an URL of the model editor page. It's value can be changed later using the 'Model' property. For example:
+- *model (required)* - The model ID. It is a 20 digit number (grouped by 4) that can be found in the 'My projects' page at 'ecfeed.com'. It can be also found in the URL of the model editor page. It's value can be changed later using the 'Model' property. For example:
 ```C#
 testProvider.Model = "XXXX-XXXX-XXXX-XXXX-XXXX";
 ```
-- *keyStorePath* - The path to a keystore downloaded from 'ecfeed.com' webpage ('Settings' -> 'Security'). The keystore contains the user certificate which is needed to authenticate the user at the generator service. By default, the constructor looks for the keystore in \~/.ecfeed/security.p12, except for Windows, where the default path is \~/ecfeed/security.p12.
-- *keyStorePassword* - The password for the keystore. The default value is 'changeit' and this is the password used to encrypt the keystore downloaded from the 'ecfeed.com' page.
+- *keyStorePath* - The path to the keystore downloaded from 'ecfeed.com' webpage ('Settings' -> 'Security'). The keystore contains the user certificate which is needed to authenticate the user at the generator service. By default, the constructor looks for the keystore in \~/.ecfeed/security.p12, except for Windows, where the default path is \~/ecfeed/security.p12.
+- *keyStorePassword* - The password to the keystore. The default value is 'changeit'.
 - *generatorAddress* - The URL of the ecfeed generator service. By default it is 'gen.ecfeed.com'.
 
 Creating a TestProvider object can look like this:
@@ -146,7 +148,7 @@ TestProvider testProvider = new TestProvider("XXXX-XXXX-XXXX-XXXX-XXXX");
 
 ## Generator calls
 
-'TestProvider' can invoke four methods to access the ecFeed generator service. They produce parsed, and streamed data. 
+'TestProvider' can invoke four methods to access the ecFeed generator service.
 
 ### public IEnumerable<object[]> GenerateNWise( ... )
 
@@ -156,7 +158,7 @@ Arguments:
 - *method (required)* - The full name of the method that will be used for generation (including the namespace). If the method is not overloaded, its parameters are not required. 
 - *n* - The 'N' value required in the NWise algorithm. The default is 2 (pairwise).
 - *coverage* - The percentage of N-tuples that the generator will try to cover. The default is 100.
-- *choices* - A dictionary in which keys are names of method parameters. Their values define a list of choices that should be used during the generation process. If an argument is skipped, all choices are used. For example:
+- *choices* - A dictionary in which keys are names of method parameters. Their values define a list of choices that should be used during the generation process. If a key is skipped, all choices are used. For example:
 ```C#
 Dictionary<string, string[]> choices = new Dictionary<string, string[]>();
 choices.Add("arg1", new string[] {"choice1", "choice2"});
@@ -174,6 +176,10 @@ string constraints = "NONE";
 - *feedback* - A flag denoting whether feedback should be sent beck to the generator. By default, this functionality is switched off.
 - *label* - An additional label associated with feedback.
 - *custom* - An additional dictionary with custom elements associated with feedback.
+
+### public IEnumerable<Object[]> GeneratePairwise( ... )
+
+Calls the '2-wise' generation procedure. For people that like being explicit. Apart from 'n' (which is always 2 and cannot be changed), the method accepts the same arguments as 'generateNWise'.  
 
 ### public IEnumerable<object[]> GenerateCartesian( ... )
 
@@ -193,9 +199,9 @@ Generate randomized test cases.
 
 Arguments:
 - *method (required)* - See 'GenerateNWise'.
-- *length* - The number of tests to be generated. The default is 1.
-- *duplicates* - If two identical tests are allowed to be generated. If set to 'false', the generator will stop after creating all allowed combinations. The default is 'true'. 
-- *adaptive* - If set to true, the generator will try to provide tests that are farthest (in the means of the Hamming distance) from the ones already generated. The default is 'false'.
+- *length* - The number of tests to be generated. The default value is 1.
+- *duplicates* - If two identical tests are allowed to be generated. If set to 'false', the generator will stop after creating all allowed combinations. The default value is 'true'. 
+- *adaptive* - If set to true, the generator will try to provide tests that are farthest (in the means of the Hamming distance) from the ones already generated. The default value is 'false'.
 - *choices* - See 'GenerateNWise'.
 - *constraints* - See 'GenerateNWise'.
 - *feedback* - See 'GenerateNWise'.
@@ -222,7 +228,7 @@ string constraints = "ALL";
 
 ## Export calls
 
-Those methods look similarly to 'Generate' methods. However, they return the 'IEnumerable<string>' interface, do not parse the data, and generate the output using templates. For this reason, they require one more argument, namely 'template'. It is located at the end argument list and predefined values are: 'Template.XML', 'Template.JSON', 'Template.Gherkin', 'Template CSV', and 'Template.Stream'. The default value is 'Template.CSV'.   
+Those methods look similarly to 'Generate' methods. However, they return the 'IEnumerable<string>' interface, do not parse the data, and generate the output using templates. For this reason, they require one more argument, namely 'template'. It is located at the end of the argument list and predefined values are: 'Template.XML', 'Template.JSON', 'Template.Gherkin', 'Template CSV', and 'Template.Stream'. The default value is 'Template.CSV'.   
     
 Have in mind that it is also possible to define a custom template. The instruction on how to do it can be found on the ecFeed webpage.  
 

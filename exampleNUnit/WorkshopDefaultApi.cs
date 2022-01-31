@@ -13,7 +13,7 @@
 //     [TestFixture]
 //     public class SeleniumApi
 //     {
-//         private static IEnumerable dataString = new TestProvider("6EG2-YL4S-LMAK-Y5VW-VPV9").GenerateNWise("com.example.test.Demo.typeString", feedback:true, label:"Workshop 'api'");
+//         private static IEnumerable dataString = new TestProvider("6EG2-YL4S-LMAK-Y5VW-VPV9", keyStorePath: ConfigDefault.KEYSTORE_PROD).GenerateNWise("com.example.test.Demo.typeString", feedback:true, label:"Workshop 'api'");
        
 //         private void HandleError(dynamic error, int duration, TestHandle ecfeed)
 //         {

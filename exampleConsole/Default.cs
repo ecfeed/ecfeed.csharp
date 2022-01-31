@@ -9,8 +9,8 @@ namespace Testify.EcFeed.Example
     {
         public static void Main(string[] args)
         {
-            Console.WriteLine($"{ string.Join(", ", ConfigDefault.TestProvider.GetMethodNames(ConfigDefault.F_TEST)) }");
-            Console.WriteLine($"{ string.Join(", ", ConfigDefault.TestProvider.GetMethodTypes(ConfigDefault.F_TEST)) }");
+            Console.WriteLine($"{ string.Join(", ", ConfigDefault.GetTestProvider().GetMethodNames(ConfigDefault.F_TEST)) }");
+            Console.WriteLine($"{ string.Join(", ", ConfigDefault.GetTestProvider().GetMethodTypes(ConfigDefault.F_TEST)) }");
 
             Dictionary<string, string[]> testChoices = new Dictionary<string, string[]>();
             testChoices.Add("arg1", new string[] {"choice1", "choice2"});
@@ -20,8 +20,8 @@ namespace Testify.EcFeed.Example
 
             string[] testSuites = new string[] { "default" };
 
-            // foreach(var element in ConfigDefault.TestProvider.ExportStatic(ConfigDefault.F_TEST, testSuites: testSuites, template: Template.JSON))
-            foreach(object[] element in ConfigDefault.TestProvider.GenerateNWise(ConfigDefault.F_TEST, feedback:true))
+            // foreach(var element in ConfigDefault.GetTestProvider().ExportStatic(ConfigDefault.F_TEST, testSuites: testSuites, template: Template.JSON))
+            foreach(object[] element in ConfigDefault.GetTestProvider().GenerateNWise(ConfigDefault.F_TEST, feedback:true))
             {
                 // NUnit.Framework.TestContext.Progress.WriteLine(httpWebResponse.StatusDescription);
                 TestHandle testData = (TestHandle)element[element.Length - 1];

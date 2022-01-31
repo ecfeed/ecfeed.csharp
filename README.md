@@ -228,7 +228,7 @@ string constraints = "ALL";
 
 ## Export calls
 
-Those methods look similarly to 'Generate' methods. However, they return the 'IEnumerable<string>' interface, do not parse the data, and generate the output using templates. For this reason, they require one more argument, namely 'template'. It is located at the end of the argument list and predefined values are: 'Template.XML', 'Template.JSON', 'Template.Gherkin', 'Template CSV', and 'Template.Stream'. The default value is 'Template.CSV'.   
+Those methods look similarly to 'Generate' methods. However, they return the 'IEnumerable<string>' interface, do not parse the data, and generate the output using templates. For this reason, they require one more argument, namely 'template'. It is located at the end of the argument list and predefined values are: 'Template.XML', 'Template.JSON', 'Template.Gherkin', 'Template CSV', and 'Template.Raw'. The default value is 'Template.CSV'.   
     
 Have in mind that it is also possible to define a custom template. The instruction on how to do it can be found on the ecFeed webpage.  
 

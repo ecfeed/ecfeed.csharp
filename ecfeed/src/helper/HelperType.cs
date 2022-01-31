@@ -14,7 +14,7 @@ namespace EcFeed
                 case Template.CSV: return "CSV";
                 case Template.Gherkin: return "Gherkin";
                 case Template.XML: return "XML";
-                case Template.Stream: return "Stream";
+                case Template.Raw: return "Stream";
             }
             
             throw new TestProviderException("Invalid export type");

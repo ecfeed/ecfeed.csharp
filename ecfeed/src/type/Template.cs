@@ -2,6 +2,6 @@ namespace EcFeed
 {
     public enum Template
     {
-        JSON, CSV, Gherkin, XML, Stream
+        JSON, CSV, Gherkin, XML, Raw
     }
 }

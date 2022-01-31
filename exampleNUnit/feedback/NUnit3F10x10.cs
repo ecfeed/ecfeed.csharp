@@ -10,17 +10,17 @@
 //     [TestFixture]
 //     public class NUnit5F10x10
 //     {
-//         static private IEnumerable GenRandomQuantitySingle = ConfigDefault.TestProvider.GenerateRandom(ConfigDefault.F_10x10, feedback:true,
+//         static private IEnumerable GenRandomQuantitySingle = ConfigDefault.GetTestProvider().GenerateRandom(ConfigDefault.F_10x10, feedback:true,
 //             length:1, label:"Random / Quantity - Single");
-//         static private IEnumerable GenRandomQuantityShort = ConfigDefault.TestProvider.GenerateRandom(ConfigDefault.F_10x10, feedback:true, 
+//         static private IEnumerable GenRandomQuantityShort = ConfigDefault.GetTestProvider().GenerateRandom(ConfigDefault.F_10x10, feedback:true, 
 //             length:(int)(new Random().Next(100, 500)), label:"Random / Quantity - Short");
-//         static private IEnumerable GenRandomQuantityLong = ConfigDefault.TestProvider.GenerateRandom(ConfigDefault.F_10x10, feedback:true, 
+//         static private IEnumerable GenRandomQuantityLong = ConfigDefault.GetTestProvider().GenerateRandom(ConfigDefault.F_10x10, feedback:true, 
 //             length:(int)(new Random().Next(1000, 5000)), label:"Random / Quantity - Long");
-//         static private IEnumerable GenRandomCustom = ConfigDefault.TestProvider.GenerateRandom(ConfigDefault.F_10x10, feedback:true, 
+//         static private IEnumerable GenRandomCustom = ConfigDefault.GetTestProvider().GenerateRandom(ConfigDefault.F_10x10, feedback:true, 
 //             length:1, label:"Random / Custom", custom:new Dictionary<string, string>{{"key1", "value1"}, {"key2", "value2"}});
-//         static private IEnumerable GenNWise = ConfigDefault.TestProvider.GenerateNWise(ConfigDefault.F_10x10, feedback:true, 
+//         static private IEnumerable GenNWise = ConfigDefault.GetTestProvider().GenerateNWise(ConfigDefault.F_10x10, feedback:true, 
 //             label:"NWise");
-//         static private IEnumerable GenNWiseFeedback = ConfigDefault.TestProvider.GenerateNWise(ConfigDefault.F_10x10, feedback:true, 
+//         static private IEnumerable GenNWiseFeedback = ConfigDefault.GetTestProvider().GenerateNWise(ConfigDefault.F_10x10, feedback:true, 
 //             label:"NWise / Feedback");
 
 //         [TearDown]

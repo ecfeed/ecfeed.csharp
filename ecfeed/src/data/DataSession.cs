@@ -22,6 +22,7 @@ namespace EcFeed
         }
         [JsonIgnore] internal string KeyStorePath { get; set; }
         [JsonIgnore] internal string KeyStorePassword { get; set; }
+        [JsonIgnore] internal string GeneratorAddress { get; set; }
         [JsonIgnore] internal bool BuildFeedback { get; set; }
         [JsonIgnore] internal Template Template { get; set; }
         [JsonIgnore] internal string MethodName { get; set; }
@@ -47,7 +48,7 @@ namespace EcFeed
         internal DataSession()
         {
             Framework = "C#";
-            Template = Template.Stream;
+            Template = Template.Raw;
             TestResults = new Dictionary<string, TestHandle>();
             TransmissionFinished = false;
         }
@@ -82,7 +83,7 @@ namespace EcFeed
         {
             if (BuildFeedback)
             {
-                string data = RequestHelper.GenerateFeedbackURL(this, Default.GeneratorAddress);
+                string data = RequestHelper.GenerateFeedbackURL(this, GeneratorAddress);
                 RequestHelper.SendRequest(data, KeyStorePath, KeyStorePassword, ToString());
             }
         }

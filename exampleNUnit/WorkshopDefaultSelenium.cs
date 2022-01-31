@@ -15,7 +15,7 @@
 //     [TestFixture]
 //     public class SeleniumWorkshop
 //     {
-//         private static IEnumerable dataString = new TestProvider("6EG2-YL4S-LMAK-Y5VW-VPV9").GenerateNWise("com.example.test.Demo.typeString", feedback:true, label:"Workshop 'selenium'");
+//         private static IEnumerable dataString = new TestProvider("6EG2-YL4S-LMAK-Y5VW-VPV9", keyStorePath: ConfigDefault.KEYSTORE_PROD).GenerateNWise("com.example.test.Demo.typeString", feedback:true, label:"Workshop 'selenium'");
 //         private static RemoteWebDriver seleniumDriver = new FirefoxDriver("/home/krzysztof") { Url = "http://www.workshop-2021-december.ecfeed.com/?mode=error"};
 //         private static string[] pageFormControl = new string[] { "submit" };
 //         private static string[] pageFormOutput = new string[] { "status", "response" };

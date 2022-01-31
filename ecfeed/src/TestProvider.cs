@@ -75,6 +75,7 @@ namespace EcFeed
             sessionData.GeneratorData = generatorOptions;
             sessionData.ModelId = Model;
             sessionData.MethodName = method;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             IEnumerable<string[][]> queue = Process<string[][]>(sessionData);
 
@@ -108,6 +109,7 @@ namespace EcFeed
             sessionData.Custom = custom;
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             return Process<string>(sessionData);
         }
@@ -143,6 +145,7 @@ namespace EcFeed
             sessionData.TestSessionLabel = label;
             sessionData.Constraints = constraints;
             sessionData.Choices = choices;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             return Process<string>(sessionData);
         }
@@ -189,6 +192,7 @@ namespace EcFeed
             sessionData.TestSessionLabel = label;
             sessionData.Constraints = constraints;
             sessionData.Choices = choices;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             return Process<string>(sessionData);
         }
@@ -226,6 +230,7 @@ namespace EcFeed
             sessionData.TestSessionLabel = label;
             sessionData.Constraints = constraints;
             sessionData.Choices = choices;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             return Process<string>(sessionData);
         }
@@ -256,6 +261,7 @@ namespace EcFeed
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
             sessionData.TestSuites = updatedTestSuites;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             return Process<string>(sessionData);
         }
@@ -280,6 +286,7 @@ namespace EcFeed
             sessionData.Custom = custom;
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             return Process<object[]>(sessionData);
         }
@@ -313,6 +320,7 @@ namespace EcFeed
             sessionData.TestSessionLabel = label;
             sessionData.Constraints = constraints;
             sessionData.Choices = choices;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             return Process<object[]>(sessionData);
         }
@@ -356,6 +364,7 @@ namespace EcFeed
             sessionData.TestSessionLabel = label;
             sessionData.Constraints = constraints;
             sessionData.Choices = choices;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             return Process<object[]>(sessionData);
         }
@@ -391,6 +400,7 @@ namespace EcFeed
             sessionData.TestSessionLabel = label;
             sessionData.Constraints = constraints;
             sessionData.Choices = choices;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             return Process<object[]>(sessionData);
         }
@@ -419,6 +429,7 @@ namespace EcFeed
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
             sessionData.TestSuites = updatedTestSuites;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             return Process<object[]>(sessionData);
         }
@@ -462,7 +473,7 @@ namespace EcFeed
 
         private T ProcessResponseLine<T>(string line, ref DataSession sessionData)
         {
-            if (sessionData.Template == Template.Stream)
+            if (sessionData.Template == Template.Raw)
             {
                 if (line.Contains("\"testCase\""))
                 {

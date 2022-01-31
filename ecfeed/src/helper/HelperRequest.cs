@@ -42,7 +42,7 @@ namespace EcFeed
         public static string GenerateRequestURL(DataSession sessionData, string address, string endpoint = RequestEndpoint.Generator)
         {
             string requestData = $"{ SerializeRequestData(sessionData) }";
-            string requestType = sessionData.Template.GetValue().Equals(Template.Stream.GetValue()) ? RequestTestType.Data : RequestTestType.Export;
+            string requestType = sessionData.Template.GetValue().Equals(Template.Raw.GetValue()) ? RequestTestType.Data : RequestTestType.Export;
             string request = $"{ address }/{ endpoint }?requestType={ requestType }&request={ requestData }";
 
             request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
@@ -54,7 +54,6 @@ namespace EcFeed
 
         public static string GenerateFeedbackURL(DataSession sessionData, string address, string endpoint = RequestEndpoint.Feedback)
         {
-            string requestData = $"{ SerializeFeedbackData(sessionData) }";
             string request = $"{ address }/{ endpoint }?client=C#";
 
             request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
@@ -118,6 +117,7 @@ namespace EcFeed
                 catch (WebException e)
                 {
                     string message = $"The connection could not be established.";
+
                     throw new TestProviderException(message, e);
                 }
                 finally

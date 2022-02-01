@@ -25,7 +25,7 @@ namespace Testify.EcFeed.Example
             {
                 // NUnit.Framework.TestContext.Progress.WriteLine(httpWebResponse.StatusDescription);
                 TestHandle testData = (TestHandle)element[element.Length - 1];
-                testData.addFeedback(true, custom:new Dictionary<string, string>{{"first", "uno"}, {"second", "dos"}});
+                testData.AddFeedback(true, custom:new Dictionary<string, string>{{"first", "uno"}, {"second", "dos"}});
                 Console.WriteLine("HANDLER: [{0}]", string.Join(", ", element));
                 
             }

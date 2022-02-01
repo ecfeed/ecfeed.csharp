@@ -23,21 +23,21 @@ namespace exampleNUnit
                 Assert.AreNotEqual(a, "a0");
             } catch
             {
-                ecfeed.addFeedback(false, duration:GetDuration(), comment:"Failed - a", custom:GetCustom());
+                ecfeed.AddFeedback(false, duration:GetDuration(), comment:"Failed - a", custom:GetCustom());
             }
             try
             {
                 Assert.AreNotEqual(b, "b1");
             } catch
             {
-                 ecfeed.addFeedback(false, duration:GetDuration(), comment:"Failed - b", custom:GetCustom());
+                 ecfeed.AddFeedback(false, duration:GetDuration(), comment:"Failed - b", custom:GetCustom());
             }
             try
             {
                 Assert.AreNotEqual(h, "h6");
             } catch
             {
-                 ecfeed.addFeedback(false, duration:GetDuration(), comment:"Failed - c", custom:GetCustom());
+                 ecfeed.AddFeedback(false, duration:GetDuration(), comment:"Failed - c", custom:GetCustom());
             }
         }
 
@@ -54,14 +54,14 @@ namespace exampleNUnit
                 Assert.AreNotEqual(a, "a00");
             } catch
             {
-                ecfeed.addFeedback(false, duration:GetDuration(), comment:"Failed - a", custom:GetCustom());
+                ecfeed.AddFeedback(false, duration:GetDuration(), comment:"Failed - a", custom:GetCustom());
             }
             try
             {
                 Assert.AreNotEqual(b, "b00");
             } catch
             {
-                 ecfeed.addFeedback(false, duration:GetDuration(), comment:"Failed - b", custom:GetCustom());
+                 ecfeed.AddFeedback(false, duration:GetDuration(), comment:"Failed - b", custom:GetCustom());
             }
         }
 
@@ -77,7 +77,7 @@ namespace exampleNUnit
                 Assert.IsTrue(arg1 < 2);
             } catch
             {
-                ecfeed.addFeedback(false, duration:GetDuration(), comment:"Failed - arg1 < 2", custom:GetCustom());
+                ecfeed.AddFeedback(false, duration:GetDuration(), comment:"Failed - arg1 < 2", custom:GetCustom());
             }
         }
 

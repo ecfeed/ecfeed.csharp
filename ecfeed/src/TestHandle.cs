@@ -22,7 +22,7 @@ namespace EcFeed
             this.pending = true;
         }
 
-        public string addFeedback(bool status, int? duration = null, string comment = null, Dictionary<string, string> custom = null)
+        public string AddFeedback(bool status, int? duration = null, string comment = null, Dictionary<string, string> custom = null)
         {
             if (this.pending)
             {

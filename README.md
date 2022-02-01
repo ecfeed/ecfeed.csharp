@@ -21,7 +21,7 @@ The ecFeed library can be found in the [NuGet repository](https://www.nuget.org/
 
 ## Examples
 
-Methods, used in the tutorial,are a part of the welcome model, created during the registration process at the 'ecfeed.com' webpage. It the model is missing (e.g. it has been deleted by the user), it can be downloaded from [here](https://s3-eu-west-1.amazonaws.com/resources.ecfeed.com/repo/tutorial/Welcome.ect).
+Methods, used in the tutorial, are a part of the welcome model, created during the registration process at the 'ecfeed.com' webpage. If the model is missing (e.g. it has been deleted by the user), it can be downloaded from [here](https://s3-eu-west-1.amazonaws.com/resources.ecfeed.com/repo/tutorial/Welcome.ect).
 
 ```C#
 using System;
@@ -101,17 +101,17 @@ public void TearDown()
 {
     TestHandle ecfeed = TestContext.CurrentContext.Test.Arguments[^1] as TestHandle; 
             
-    ecfeed.addFeedback(
+    ecfeed.AddFeedback(
         TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Passed,
         comment:TestContext.CurrentContext.Result.Message
     );
 }
 ```
 
-To the generation method an additional argument, i.e. 'TestHandle testHandle', must be added. The class consists of one public method, namely 'addFeedback'. The required argument denotes the result of the test, everything else is optional.  
+To the generation method an additional argument, i.e. 'TestHandle testHandle', must be added. The class consists of one public method, namely 'AddFeedback'. The required argument denotes the result of the test, everything else is optional.  
 
 ```C#
-testHandle.addFeedback(True, comment: 'Passed', duration: 1000, custom)
+testHandle.AddFeedback(True, comment: 'Passed', duration: 1000, custom)
 ```
 
 _status_ - The result of the test. This is the only required field.
@@ -119,7 +119,7 @@ _duration_ - The optional execution time in milliseconds.
 _comment_ - The optional description of the execution.
 _custom_ - The optional dictionary of custom key-value pairs.
 
-Note, that each test must return a feedback, regardless whether it has passed or failed. In each test, only the first invocation of the 'addFeedback' method takes effect. All subsequent invocations are neglected.  
+Note, that each test must return a feedback, regardless whether it has passed or failed. In each test, only the first invocation of the 'AddFeedback' method takes effect. All subsequent invocations are neglected.  
 
 Additionally, to the test generation method one optional argument can be added, namely 'label'. It provides a short description of the generated test suite.  
 
@@ -235,6 +235,7 @@ Have in mind that it is also possible to define a custom template. The instructi
 The methods are as follows:
 ```C#
 public IEnumerable<string> ExportNWise( ... , Template template);
+public IEnumerable<string> ExportPairwise( ... , Template template);
 public IEnumerable<string> ExportCartesian( ... , Template template);
 public IEnumerable<string> ExportRandom( ... , Template template);
 public IEnumerable<string> ExportStatic( ... , Template template);

@@ -25,7 +25,7 @@
 //         {
 //             if (error.Length > 0)
 //             {
-//                 ecfeed.addFeedback(false, comment:string.Join("\n", error), duration:duration, custom:new Dictionary<string, string>{{"Error type", type}});
+//                 ecfeed.AddFeedback(false, comment:string.Join("\n", error), duration:duration, custom:new Dictionary<string, string>{{"Error type", type}});
 //                 NUnit.Framework.TestContext.Progress.WriteLine(string.Join("\n", error));
                 
 //                 Assert.Fail();
@@ -68,12 +68,12 @@
 //                     HandleError(JsonConvert.DeserializeObject(reader.ReadLine()), GetTime(stopwatch), ecfeed);
 //                 }
 
-//                 ecfeed.addFeedback(true, duration:GetTime(stopwatch));
+//                 ecfeed.AddFeedback(true, duration:GetTime(stopwatch));
 //             }
 //             catch (WebException e)
 //             {
 //                 string message = $"The connection could not be established.";
-//                 ecfeed.addFeedback(false, comment:message);
+//                 ecfeed.AddFeedback(false, comment:message);
 //                 throw new TestProviderException(message, e);
 //             }    
 //         }

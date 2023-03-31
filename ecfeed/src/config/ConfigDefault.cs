@@ -67,8 +67,8 @@ namespace EcFeed
 
         internal static readonly string[] KeyStorePath =
         {
-            Environment.GetEnvironmentVariable("HOME") + "/.ecfeed/security.p12",
-            Environment.GetEnvironmentVariable("HOME") + "/ecfeed/security.p12",
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/.ecfeed/security.p12",
+            Environment.GetFolderPath(Environment.SpecialFolder.UserProfile) + "/ecfeed/security.p12",
             "./security.p12"
         };
         

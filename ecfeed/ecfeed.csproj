@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp7.0</TargetFramework>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
     <PackageVersion>1.2.1</PackageVersion>
     <PackageId>EcFeed</PackageId>
     <Company>EcFeed</Company>
@@ -20,12 +20,6 @@
 
   <ItemGroup>
     <PackageReference Include="newtonsoft.json" Version="13.0.1" />
-    <PackageReference Include="nunit" Version="3.9"/>
-    <PackageReference Include="NUnit3TestAdapter" Version="3.9">
-      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-      <PrivateAssets>all</PrivateAssets>
-    </PackageReference>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.5.0" />
     <None Include="icon.png" Pack="true" PackagePath="\"/>
   </ItemGroup>
 

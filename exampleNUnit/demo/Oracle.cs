@@ -69,17 +69,25 @@ namespace exampleNUnit
 
         internal static void ValidateFTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
-            Assert.IsTrue(arg1 < 2);
+            Assert.IsTrue(arg1 >= arg2);
+            Assert.IsTrue(arg1 >= arg3);
         }
 
         internal static void ValidateFeedbackFTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
             try
             {   
-                Assert.IsTrue(arg1 < 2);
+                 Assert.IsTrue(arg1 >= arg2);
             } catch
             {
-                ecfeed.addFeedback(false, duration:GetDuration(), comment:"Failed - arg1 < 2", custom:GetCustom());
+                ecfeed.addFeedback(false, duration:GetDuration(), comment:"Failed - arg1 < arg2", custom:GetCustom());
+            }
+             try
+            {   
+                 Assert.IsTrue(arg1 >= arg3);
+            } catch
+            {
+                ecfeed.addFeedback(false, duration:GetDuration(), comment:"Failed - arg1 < arg3", custom:GetCustom());
             }
         }
 

@@ -1,12 +1,12 @@
+using System;
 using System.Reflection;
 using System.Collections.Generic;
 
 namespace EcFeed
 {
-
-    internal class Structure
+    public class Structure
     {
-        internal string Namespace { get; set; } = "";
+        internal Type Source { get; set; } = null;
 
         internal bool Active { get; set; } = false;
         internal ConstructorInfo ActiveConstructor { get; set; } = null;

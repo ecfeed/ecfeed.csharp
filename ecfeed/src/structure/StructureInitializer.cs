@@ -13,7 +13,7 @@ namespace EcFeed
 
         void Activate(params string[] signatureStructure);
 
-        T Instantiate<T>(T type, Queue<string> arguments);
+        T Instantiate<T>(Queue<string> arguments);
 
         object Instantiate(string signatureStructure, Queue<string> arguments);
 

@@ -62,7 +62,7 @@ namespace EcFeed
         {
             var activated = false;
 
-            var signatureParsed = getSignatureName(signature);
+            var signatureParsed = GetSignatureName(signature);
 
             foreach (var structure in structures) {
                 if (structure.NameSimple.Equals(signatureParsed)) {
@@ -76,7 +76,7 @@ namespace EcFeed
             }
         }
 
-        private String getSignatureName(String signature) 
+        private String GetSignatureName(String signature) 
         {
             var signatureParsed = signature.Replace(" ", "");
 

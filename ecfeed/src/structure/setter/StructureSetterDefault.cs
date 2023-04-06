@@ -55,24 +55,36 @@ namespace EcFeed
             
             foreach (var parameter in constructor.GetParameters())
             {
-                parametersParsed.Add(parseConstructorParameter(parameter));
+                parametersParsed.Add(ParseConstructorParameter(parameter));
             }
 
             return "(" + String.Join(",", parametersParsed) + ")";
         }
 
-        private string parseConstructorParameter(ParameterInfo parameter) 
+        private string ParseConstructorParameter(ParameterInfo parameter) 
         {
+            var name = GetNameSimple(parameter.ParameterType);
 
-            return GetNameSimple(parameter.GetType());
+            switch(name)
+            {
+                case "Byte": return "byte";
+                case "Int16": return "short";
+                case "Int32": return "int";
+                case "Int64": return "long";
+                case "Single": return "float";
+                case "Double": return "double";
+                case "Char": return "char";
+            }
+
+            return name;
         }
 
         public void Activate(Structure structure, string signature)
         {
-            var signatureParsed = getSignatureDefinition(signature);
+            var signatureParsed = GetSignatureDefinition(signature);
 
             foreach (var constructor in structure.Constructors) {
-                if (constructor.Key.Equals(signatureParsed)) {
+                if (constructor.Key == signatureParsed) {
                     if (structure.ActiveConstructor != null && structure.ActiveConstructor != constructor.Value) {
                         throw new SystemException("The redefinition of constructors is not supported. Affected structure: '" + structure.NameSimple + "'.");
                     }
@@ -89,7 +101,7 @@ namespace EcFeed
             structure.Active = true;
         }
 
-        private String getSignatureDefinition(String signature) 
+        private string GetSignatureDefinition(string signature) 
         {
             var argumentPairs = Regex.Match(signature, @"(?<=\().+?(?=\))").Value.Split(",");
             var argumentTypes = new List<string>();

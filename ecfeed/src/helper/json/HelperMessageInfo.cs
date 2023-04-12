@@ -1,23 +1,53 @@
 using Newtonsoft.Json;
 using System.Linq;
+using System;
 
 namespace EcFeed
 {
     internal static class HelperMessageInfo 
     { 
-        internal static void ParseInfoMessage(string line, ref DataSession feedback)
+        internal static void ParseInfoMessage(string line, ref DataSession session, StructureInitializer initializer)
         {
-            MessageInfo infoMessage = JsonConvert.DeserializeObject<MessageInfo>(line);
+            var infoMessage = JsonConvert.DeserializeObject<MessageInfo>(line);
+            dynamic info = JsonConvert.DeserializeObject(infoMessage.Info);
                 
-            feedback.MethodArgumentNames = HelperMessageInfo.ExtractArgumentNames(infoMessage);
-            feedback.MethodArgumentTypes = HelperMessageInfo.ExtractArgumentTypes(infoMessage);
-            feedback.MethodNameQualified = HelperMessageInfo.ExtractMethodName(infoMessage);
-            feedback.Timestamp = HelperMessageInfo.ExtractTimestamp(infoMessage);
-            feedback.TestSessionId = HelperMessageInfo.ExtractTestSessionId(infoMessage);
+            if (ParseInfoMessageFieldExists(info, "method"))
+            {
+                ParseInfoMessageMethod(info, ref session);
+                return;
+            }
+           
+            if (ParseInfoMessageFieldExists(info, "signature"))
+            {
+                ParseInfoMessageAddSignature(info, initializer);
+                return;
+            }
         }
-        private static string[] ExtractArgumentNames(MessageInfo schema)
+
+        private static bool ParseInfoMessageFieldExists(dynamic data, string field)
         {
-            string method = ExtractMethodName(schema);
+            try
+            {
+                var tmp = data[field];
+                return true;
+            }
+            catch (Exception)
+            {
+                return false;
+            }
+        }
+
+        private static void ParseInfoMessageMethod(dynamic data, ref DataSession session)
+        {
+            session.MethodArgumentNames = HelperMessageInfo.ExtractArgumentNames(data.method.ToString());
+            session.MethodArgumentTypes = HelperMessageInfo.ExtractArgumentTypes(data.method.ToString());
+            session.MethodNameQualified = data.method;
+            session.Timestamp = data.timestamp;
+            session.TestSessionId = data.testSessionId;
+        }
+
+        private static string[] ExtractArgumentNames(string method)
+        {
             int leftBracket = method.IndexOf("(");
             int rightBracket = method.IndexOf(")");
             string argumentsString = method.Substring(leftBracket + 1, (rightBracket - leftBracket - 1)) + ", TestData ecfeed";
@@ -25,9 +55,8 @@ namespace EcFeed
             return argumentsString.Split(",").Select(argument => argument.Trim().Split(" ")[1]).ToArray();
         }
 
-        private static string[] ExtractArgumentTypes(MessageInfo schema)
+        private static string[] ExtractArgumentTypes(string method)
         {
-            string method = ExtractMethodName(schema);
             int leftBracket = method.IndexOf("(");
             int rightBracket = method.IndexOf(")");
             string argumentsString = method.Substring(leftBracket + 1, (rightBracket - leftBracket)) + ", TestData ecfeed";
@@ -35,25 +64,9 @@ namespace EcFeed
             return argumentsString.Split(",").Select(argument => argument.Trim().Split(" ")[0]).ToArray();
         }
 
-        private static string ExtractMethodName(MessageInfo schema)
+        private static void ParseInfoMessageAddSignature(dynamic data, StructureInitializer initializer)
         {
-            dynamic data = JsonConvert.DeserializeObject(schema.Info);
-
-            return data.method;
-        }
-
-        private static int ExtractTimestamp(MessageInfo schema)
-        {
-            dynamic data = JsonConvert.DeserializeObject(schema.Info);
-
-            return data.timestamp;
-        }
-
-        private static string ExtractTestSessionId(MessageInfo schema)
-        {
-            dynamic data = JsonConvert.DeserializeObject(schema.Info);
-
-            return data.testSessionId;
+            initializer.Activate(data.signature);
         }
     }
 }

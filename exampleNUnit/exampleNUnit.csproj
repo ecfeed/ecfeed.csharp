@@ -15,6 +15,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
     <PackageReference Include="selenium.support" Version="3.141.0" />
     <PackageReference Include="selenium.webdriver" Version="3.141.0" />
+
      <ProjectReference Include="..\ecfeed\ecfeed.csproj" />
   </ItemGroup>
 

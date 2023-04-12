@@ -59,17 +59,19 @@ namespace EcFeed
 
             foreach (var parameter in parameters) 
             {
-                if (IsPrimitive(parameter)) 
+                var parameterParsed = parameter.Split(" ")[0];
+
+                if (IsPrimitive(parameterParsed)) 
                 {
-                    testCase.Add(InstantiatePrimitive(parameter, arguments));
+                    testCase.Add(InstantiatePrimitive(parameterParsed, arguments));
                 } 
-                else if (IsEnum(parameter)) 
+                else if (IsEnum(parameterParsed)) 
                 {
                     testCase.Add(InstantiateEnum(arguments));
                 } 
                 else 
                 {
-                    testCase.Add(InstantiateStructure(GetStructure(parameter), arguments));
+                    testCase.Add(InstantiateStructure(GetStructure(parameterParsed), arguments));
                 }
             }
 
@@ -231,7 +233,7 @@ namespace EcFeed
 
         private string[] GetMethodParameters(string signature) 
         {
-            return Regex.Match(signature, @"(?<=\().+?(?=\))").Value.Split(",");
+            return Regex.Match(signature, @"(?<=\().+?(?=\))").Value.Split(",").Select(e => e.Trim()).ToArray();
         }
 
         private bool IsPrimitive(string typeName) 

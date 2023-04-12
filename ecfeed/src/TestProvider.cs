@@ -1,8 +1,10 @@
 using System.IO;
 using System.Text;
 using System.Net;
+using System.Reflection;
 using System.Collections.Generic;
 using Newtonsoft.Json;
+using System;
 
 namespace EcFeed
 {
@@ -19,9 +21,13 @@ namespace EcFeed
         public string KeyStorePassword { get; private set; }
         public string GeneratorAddress { get; private set; }
 
+        private StructureInitializer Initializer { get; set; }
+
         public TestProvider(string model, string keyStorePath = null, string keyStorePassword = null, string generatorAddress = null)
         {
             Model = model;
+
+            Initializer = Factory.GetStructureInitializer();
 
             KeyStorePath = SetDefaultKeyStorePath(keyStorePath);
             KeyStorePassword = string.IsNullOrEmpty(keyStorePassword) ? Default.KeyStorePassword : keyStorePassword;;
@@ -252,7 +258,9 @@ namespace EcFeed
             string model = null,
             Dictionary<string, string> custom = null,
             string label = null,
-            bool feedback = false)
+            bool feedback = false,
+            Assembly assembly = null,
+            string typesDefinitionsSource = null)
         {
             generatorOptions.Set(RequestTestParameter.DataSource, generator.GetValue());
 
@@ -263,6 +271,11 @@ namespace EcFeed
             sessionData.Custom = custom;
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
+
+            if (assembly != null && typesDefinitionsSource != null)
+            {
+                Initializer.Source(assembly, typesDefinitionsSource);
+            }
 
             return Process<object[]>(sessionData);
         }
@@ -276,7 +289,9 @@ namespace EcFeed
             string model = null,
             Dictionary<string, string> custom = null,
             string label = null,
-            bool feedback = false)
+            bool feedback = false,
+            Assembly assembly = null,
+            string typesDefinitionsSource = null)
         {
             DataGeneratorProperties generatorProperties = new DataGeneratorProperties();
             generatorProperties.Set(RequestTestParameter.N, "" + n);
@@ -297,6 +312,11 @@ namespace EcFeed
             sessionData.Constraints = constraints;
             sessionData.Choices = choices;
 
+            if (assembly != null && typesDefinitionsSource != null)
+            {
+                Initializer.Source(assembly, typesDefinitionsSource);
+            }
+
             return Process<object[]>(sessionData);
         }
 
@@ -307,7 +327,9 @@ namespace EcFeed
             string model = null,
             Dictionary<string, string> custom = null,
             string label = null,
-            bool feedback = false)
+            bool feedback = false,
+            Assembly assembly = null,
+            string typesDefinitionsSource = null)
         {
             DataGeneratorProperties generatorProperties = new DataGeneratorProperties();
 
@@ -326,6 +348,11 @@ namespace EcFeed
             sessionData.Constraints = constraints;
             sessionData.Choices = choices;
 
+            if (assembly != null && typesDefinitionsSource != null)
+            {
+                Initializer.Source(assembly, typesDefinitionsSource);
+            }
+
             return Process<object[]>(sessionData);
         }
 
@@ -339,7 +366,9 @@ namespace EcFeed
             string model = null,
             Dictionary<string, string> custom = null,
             string label = null,
-            bool feedback = false)
+            bool feedback = false,
+            Assembly assembly = null,
+            string typesDefinitionsSource = null)
         {
             DataGeneratorProperties generatorProperties = new DataGeneratorProperties();
             generatorProperties.Set(RequestTestParameter.Length, "" + length);
@@ -361,6 +390,11 @@ namespace EcFeed
             sessionData.Constraints = constraints;
             sessionData.Choices = choices;
 
+            if (assembly != null && typesDefinitionsSource != null)
+            {
+                Initializer.Source(assembly, typesDefinitionsSource);
+            }
+
             return Process<object[]>(sessionData);
         }
 
@@ -370,7 +404,9 @@ namespace EcFeed
             string model = null,
             Dictionary<string, string> custom = null,
             string label = null,
-            bool feedback = false)
+            bool feedback = false,
+            Assembly assembly = null,
+            string typesDefinitionsSource = null)
         {
             object updatedTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
 
@@ -388,6 +424,11 @@ namespace EcFeed
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
             sessionData.TestSuites = updatedTestSuites;
+
+            if (assembly != null && typesDefinitionsSource != null)
+            {
+                Initializer.Source(assembly, typesDefinitionsSource);
+            }
 
             return Process<object[]>(sessionData);
         }
@@ -502,7 +543,7 @@ namespace EcFeed
         {
             try
             {    
-                HelperMessageInfo.ParseInfoMessage(line, ref sessionData);
+                HelperMessageInfo.ParseInfoMessage(line, ref sessionData, Initializer);
                 DebugHelper.PrintTrace("INFO", string.Join(", ", sessionData.MethodArgumentTypes));
             }
             catch (JsonReaderException e) 
@@ -521,7 +562,7 @@ namespace EcFeed
         {
             if (typeof(T).ToString().Equals("System.Object[]"))
             {
-                return (T)(object)ChunkParser.ParseTestCaseToDataType(data, sessionData);
+                return (T)(object)ChunkParser.ParseTestCaseToDataType(data, sessionData, Initializer);
             }
 
             if (typeof(T).ToString().Equals("System.String[][]"))

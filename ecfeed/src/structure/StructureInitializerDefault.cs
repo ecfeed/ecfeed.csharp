@@ -59,19 +59,29 @@ namespace EcFeed
 
             foreach (var parameter in parameters) 
             {
-                var parameterParsed = parameter.Split(" ")[0];
+                string parameterParsedType;
+                string parameterParsedName;
 
-                if (IsPrimitive(parameterParsed)) 
+                if (parameter.Contains(":"))
                 {
-                    testCase.Add(InstantiatePrimitive(parameterParsed, arguments));
+                    GetTestCaseParseParameterNew(parameter, out parameterParsedType, out parameterParsedName);
+                }
+                else
+                {
+                    GetTestCaseParseParameterOld(parameter, out parameterParsedType, out parameterParsedName);
+                }
+
+                if (IsPrimitive(parameterParsedType)) 
+                {
+                    testCase.Add(InstantiatePrimitive(parameterParsedType, arguments));
                 } 
-                else if (IsEnum(parameterParsed)) 
+                else if (IsEnum(parameterParsedType)) 
                 {
                     testCase.Add(InstantiateEnum(arguments));
                 } 
                 else 
                 {
-                    testCase.Add(InstantiateStructure(GetStructure(parameterParsed), arguments));
+                    testCase.Add(InstantiateStructure(GetStructure(parameterParsedType), arguments));
                 }
             }
 
@@ -80,6 +90,28 @@ namespace EcFeed
             }
 
             return testCase.ToArray();
+        }
+
+        private void GetTestCaseParseParameterOld(string parameter, out string parameterParsedType, out string parameterParsedName)
+        {
+            parameterParsedType = parameter.Split(" ")[0];
+            parameterParsedName = parameter.Split(" ")[^1];
+
+            if (parameterParsedType == "Structure")
+            {
+                parameterParsedType = parameterParsedName;
+            }
+        }
+
+        private void GetTestCaseParseParameterNew(string parameter, out string parameterParsedType, out string parameterParsedName)
+        {
+            parameterParsedType = parameter.Split(" ")[^1];
+            parameterParsedName = parameter.Split(" ")[0];
+
+            if (parameterParsedType == "Structure")
+            {
+                parameterParsedType = parameterParsedName;
+            }
         }
 
         public HashSet<Structure> GetStructuresRaw()

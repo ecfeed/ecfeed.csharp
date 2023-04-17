@@ -68,6 +68,7 @@ namespace EcFeed
                 if (structure.NameSimple.Equals(signatureParsed)) {
                     structureSetter.Activate(structure, signature);
                     activated = true;
+                    break;
                 }
             }
 

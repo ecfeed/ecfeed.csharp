@@ -19,7 +19,6 @@ namespace EcFeed
 
             var test = initializer.GetTestCase(session.MethodNameQualified, queue);
 
-
             if (session.BuildFeedback)
             {
                 Array.Resize(ref test, test.Length + 1);

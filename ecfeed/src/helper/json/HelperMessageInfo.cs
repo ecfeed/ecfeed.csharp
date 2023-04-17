@@ -29,7 +29,7 @@ namespace EcFeed
             try
             {
                 var tmp = data[field];
-                return true;
+                return tmp != null;
             }
             catch (Exception)
             {
@@ -66,7 +66,10 @@ namespace EcFeed
 
         private static void ParseInfoMessageAddSignature(dynamic data, StructureInitializer initializer)
         {
-            initializer.Activate(data.signature);
+            var signatures = new string[1];
+            signatures[0] = data.signature.ToString();
+
+            initializer.Activate(signatures);
         }
     }
 }

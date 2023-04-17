@@ -74,6 +74,7 @@ namespace EcFeed
                 case "Single": return "float";
                 case "Double": return "double";
                 case "Char": return "char";
+                case "String": return "String";
             }
 
             return name;

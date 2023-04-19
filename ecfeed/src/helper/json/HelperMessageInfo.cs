@@ -28,8 +28,7 @@ namespace EcFeed
         {
             try
             {
-                var tmp = data[field];
-                return tmp != null;
+                return data[field] != null;
             }
             catch (Exception)
             {
@@ -39,29 +38,112 @@ namespace EcFeed
 
         private static void ParseInfoMessageMethod(dynamic data, ref DataSession session)
         {
-            session.MethodArgumentNames = HelperMessageInfo.ExtractArgumentNames(data.method.ToString());
-            session.MethodArgumentTypes = HelperMessageInfo.ExtractArgumentTypes(data.method.ToString());
+            string method = data.method.ToString();
+
+            int leftBracket = method.IndexOf("(");
+            int rightBracket = method.IndexOf(")");
+            string argumentsString = method.Substring(leftBracket + 1, (rightBracket - leftBracket - 1)) + ", TestData ecfeed";
+            string[] argumentsList = argumentsString.Split(",").Select(e => e.Trim()).ToArray();
+
+            session.MethodArgumentNames = ExtractArgumentNames(argumentsList);
+            session.MethodArgumentTypes = ExtractArgumentTypes(argumentsList);
             session.MethodNameQualified = data.method;
             session.Timestamp = data.timestamp;
             session.TestSessionId = data.testSessionId;
         }
 
-        private static string[] ExtractArgumentNames(string method)
+        private static string[] ExtractArgumentNames(string[] argumentsList)
         {
-            int leftBracket = method.IndexOf("(");
-            int rightBracket = method.IndexOf(")");
-            string argumentsString = method.Substring(leftBracket + 1, (rightBracket - leftBracket - 1)) + ", TestData ecfeed";
+            if (argumentsList.Length == 0)
+            {
+                return new string[0];
+            }
+
+            if (argumentsList[0].Contains(":"))
+            {
+                return ExtractArgumentNamesNew(argumentsList);
+            }
+            else
+            {
+                return ExtractArgumentNamesOld(argumentsList);
+            }
             
-            return argumentsString.Split(",").Select(argument => argument.Trim().Split(" ")[1]).ToArray();
         }
 
-        private static string[] ExtractArgumentTypes(string method)
+        private static string[] ExtractArgumentNamesOld(string[] argumentsList)
         {
-            int leftBracket = method.IndexOf("(");
-            int rightBracket = method.IndexOf(")");
-            string argumentsString = method.Substring(leftBracket + 1, (rightBracket - leftBracket)) + ", TestData ecfeed";
             
-            return argumentsString.Split(",").Select(argument => argument.Trim().Split(" ")[0]).ToArray();
+            return argumentsList.Select(argument => argument.Split(" ")[1]).ToArray();
+        }
+
+        private static string[] ExtractArgumentNamesNew(string[] argumentsList)
+        {
+            
+            return argumentsList.Select(argument => argument.Split(" ")[0]).ToArray();
+        }
+
+        private static string[] ExtractArgumentTypes(string[] argumentsList)
+        {
+            if (argumentsList.Length == 0)
+            {
+                return new string[0];
+            }
+
+            if (argumentsList[0].Contains(":"))
+            {
+                return ExtractArgumentTypesNew(argumentsList);
+            }
+            else
+            {
+                return ExtractArgumentTypesOld(argumentsList);
+            }
+            
+        }
+
+        private static string[] ExtractArgumentTypesOld(string[] argumentsList)
+        {
+            var results = new string[argumentsList.Length];
+
+            for (var i = 0 ; i < argumentsList.Length ; i++)
+            {
+                var elements = argumentsList[i].Split(" ");
+                var name = elements[1];
+                var type = elements[0];
+
+                if (type == "Structure")
+                {
+                    results[i] = name;
+                }
+                else
+                {
+                    results[i] = type;
+                }
+            }
+            
+            return results;
+        }
+
+        private static string[] ExtractArgumentTypesNew(string[] argumentsList)
+        {
+            var results = new string[argumentsList.Length];
+
+            for (var i = 0 ; i < argumentsList.Length ; i++)
+            {
+                var elements = argumentsList[i].Split(" ");
+                var name = elements[0];
+                var type = elements[^1];
+
+                if (type == "Structure")
+                {
+                    results[i] = name;
+                }
+                else
+                {
+                    results[i] = type;
+                }
+            }
+            
+            return results;
         }
 
         private static void ParseInfoMessageAddSignature(dynamic data, StructureInitializer initializer)

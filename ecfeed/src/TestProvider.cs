@@ -112,6 +112,7 @@ namespace EcFeed
             sessionData.Custom = custom;
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             return Process<string>(sessionData);
         }
@@ -147,6 +148,7 @@ namespace EcFeed
             sessionData.TestSessionLabel = label;
             sessionData.Constraints = constraints;
             sessionData.Choices = choices;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             return Process<string>(sessionData);
         }
@@ -178,6 +180,7 @@ namespace EcFeed
             sessionData.TestSessionLabel = label;
             sessionData.Constraints = constraints;
             sessionData.Choices = choices;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             return Process<string>(sessionData);
         }
@@ -215,6 +218,7 @@ namespace EcFeed
             sessionData.TestSessionLabel = label;
             sessionData.Constraints = constraints;
             sessionData.Choices = choices;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             return Process<string>(sessionData);
         }
@@ -245,6 +249,7 @@ namespace EcFeed
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
             sessionData.TestSuites = updatedTestSuites;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             return Process<string>(sessionData);
         }
@@ -271,6 +276,7 @@ namespace EcFeed
             sessionData.Custom = custom;
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             if (assembly != null && typesDefinitionsSource != null)
             {
@@ -311,6 +317,7 @@ namespace EcFeed
             sessionData.TestSessionLabel = label;
             sessionData.Constraints = constraints;
             sessionData.Choices = choices;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             if (assembly != null && typesDefinitionsSource != null)
             {
@@ -347,6 +354,7 @@ namespace EcFeed
             sessionData.TestSessionLabel = label;
             sessionData.Constraints = constraints;
             sessionData.Choices = choices;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             if (assembly != null && typesDefinitionsSource != null)
             {
@@ -389,6 +397,7 @@ namespace EcFeed
             sessionData.TestSessionLabel = label;
             sessionData.Constraints = constraints;
             sessionData.Choices = choices;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             if (assembly != null && typesDefinitionsSource != null)
             {
@@ -424,6 +433,7 @@ namespace EcFeed
             sessionData.BuildFeedback = feedback;
             sessionData.TestSessionLabel = label;
             sessionData.TestSuites = updatedTestSuites;
+            sessionData.GeneratorAddress = GeneratorAddress;
 
             if (assembly != null && typesDefinitionsSource != null)
             {

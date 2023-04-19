@@ -30,6 +30,7 @@ namespace EcFeed
         [JsonIgnore] internal int TestCasesTotal { get; set; }
         [JsonIgnore] internal int TestCasesParsed { get; set; }
         [JsonIgnore] internal bool TransmissionFinished { get; set; }
+        [JsonIgnore] internal string GeneratorAddress { get; set; }
         [JsonProperty(RequestFeedbackBody.GeneratorType)] internal string GeneratorType { get; set; }
         [JsonProperty(RequestFeedbackBody.GeneratorOptions)] internal string GeneratorOptions { get; set; }
         [JsonProperty(RequestFeedbackBody.ModelId)] internal string ModelId { get; set; }
@@ -82,7 +83,7 @@ namespace EcFeed
         {
             if (BuildFeedback)
             {
-                string data = RequestHelper.GenerateFeedbackURL(this, Default.GeneratorAddress);
+                string data = RequestHelper.GenerateFeedbackURL(this, GeneratorAddress);
                 RequestHelper.SendRequest(data, KeyStorePath, KeyStorePassword, ToString());
             }
         }

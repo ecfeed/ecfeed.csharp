@@ -1,7 +1,6 @@
 using System;
 using System.Reflection;
 using System.Collections;
-using System.Collections.Generic;
 using NUnit.Framework;
 using EcFeed;
 using Source;
@@ -31,16 +30,15 @@ namespace exampleNUnit
         [TestCaseSource("GenRandomQuantitySingle")]
         public void GenRandomQuantitySingleTest(int arg1, int arg2, int arg3, TestHandle ecfeed)
         {
+            Console.WriteLine($"{arg1} {arg2} {arg3}");
             NUnit.Framework.TestContext.Progress.WriteLine($"{arg1} {arg2} {arg3}");
-            // Oracle.ValidateFTest(arg1, arg2, arg3, ecfeed);
         }
 
         [TestCaseSource("GenRandomQualityStructureSingle")]
         public void GenRandomQuantitySingleStructureTest(Data a, int b, TestHandle ecfeed)
         {
             Console.WriteLine(a + ", " + b);
-            NUnit.Framework.TestContext.Progress.WriteLine("test");
-            NUnit.Framework.TestContext.Progress.WriteLine(a);
+            NUnit.Framework.TestContext.Progress.WriteLine(a + ", " + b);
         }
     }
 

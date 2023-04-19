@@ -4,7 +4,6 @@ using System.Net;
 using System.Reflection;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using System;
 
 namespace EcFeed
 {
@@ -264,7 +263,6 @@ namespace EcFeed
             Dictionary<string, string> custom = null,
             string label = null,
             bool feedback = false,
-            Assembly assembly = null,
             string typesDefinitionsSource = null)
         {
             generatorOptions.Set(RequestTestParameter.DataSource, generator.GetValue());
@@ -278,9 +276,9 @@ namespace EcFeed
             sessionData.TestSessionLabel = label;
             sessionData.GeneratorAddress = GeneratorAddress;
 
-            if (assembly != null && typesDefinitionsSource != null)
+            if (Assembly.GetCallingAssembly() != null && typesDefinitionsSource != null)
             {
-                Initializer.Source(assembly, typesDefinitionsSource);
+                Initializer.Source(Assembly.GetCallingAssembly(), typesDefinitionsSource);
             }
 
             return Process<object[]>(sessionData);
@@ -296,7 +294,6 @@ namespace EcFeed
             Dictionary<string, string> custom = null,
             string label = null,
             bool feedback = false,
-            Assembly assembly = null,
             string typesDefinitionsSource = null)
         {
             DataGeneratorProperties generatorProperties = new DataGeneratorProperties();
@@ -319,9 +316,9 @@ namespace EcFeed
             sessionData.Choices = choices;
             sessionData.GeneratorAddress = GeneratorAddress;
 
-            if (assembly != null && typesDefinitionsSource != null)
+            if (Assembly.GetCallingAssembly() != null && typesDefinitionsSource != null)
             {
-                Initializer.Source(assembly, typesDefinitionsSource);
+                Initializer.Source(Assembly.GetCallingAssembly(), typesDefinitionsSource);
             }
 
             return Process<object[]>(sessionData);
@@ -335,7 +332,6 @@ namespace EcFeed
             Dictionary<string, string> custom = null,
             string label = null,
             bool feedback = false,
-            Assembly assembly = null,
             string typesDefinitionsSource = null)
         {
             DataGeneratorProperties generatorProperties = new DataGeneratorProperties();
@@ -356,9 +352,9 @@ namespace EcFeed
             sessionData.Choices = choices;
             sessionData.GeneratorAddress = GeneratorAddress;
 
-            if (assembly != null && typesDefinitionsSource != null)
+            if (Assembly.GetCallingAssembly() != null && typesDefinitionsSource != null)
             {
-                Initializer.Source(assembly, typesDefinitionsSource);
+                Initializer.Source(Assembly.GetCallingAssembly(), typesDefinitionsSource);
             }
 
             return Process<object[]>(sessionData);
@@ -375,7 +371,6 @@ namespace EcFeed
             Dictionary<string, string> custom = null,
             string label = null,
             bool feedback = false,
-            Assembly assembly = null,
             string typesDefinitionsSource = null)
         {
             DataGeneratorProperties generatorProperties = new DataGeneratorProperties();
@@ -399,9 +394,9 @@ namespace EcFeed
             sessionData.Choices = choices;
             sessionData.GeneratorAddress = GeneratorAddress;
 
-            if (assembly != null && typesDefinitionsSource != null)
+            if (Assembly.GetCallingAssembly() != null && typesDefinitionsSource != null)
             {
-                Initializer.Source(assembly, typesDefinitionsSource);
+                Initializer.Source(Assembly.GetCallingAssembly(), typesDefinitionsSource);
             }
 
             return Process<object[]>(sessionData);
@@ -414,7 +409,6 @@ namespace EcFeed
             Dictionary<string, string> custom = null,
             string label = null,
             bool feedback = false,
-            Assembly assembly = null,
             string typesDefinitionsSource = null)
         {
             object updatedTestSuites = testSuites == null ? Default.ParameterTestSuite : testSuites;
@@ -435,9 +429,9 @@ namespace EcFeed
             sessionData.TestSuites = updatedTestSuites;
             sessionData.GeneratorAddress = GeneratorAddress;
 
-            if (assembly != null && typesDefinitionsSource != null)
+            if (Assembly.GetCallingAssembly() != null && typesDefinitionsSource != null)
             {
-                Initializer.Source(assembly, typesDefinitionsSource);
+                Initializer.Source(Assembly.GetCallingAssembly(), typesDefinitionsSource);
             }
 
             return Process<object[]>(sessionData);

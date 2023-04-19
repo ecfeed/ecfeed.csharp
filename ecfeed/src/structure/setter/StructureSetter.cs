@@ -2,7 +2,7 @@ using System;
 
 namespace EcFeed
 {
-    internal interface StructureSetter
+    public interface StructureSetter
     {
         Structure Parse(Type source);
         void Activate(Structure structure, string signature);

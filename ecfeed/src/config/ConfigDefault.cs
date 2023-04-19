@@ -1,5 +1,3 @@
-// # define DEVELOP
-
 using System;
 
 namespace EcFeed
@@ -57,11 +55,7 @@ namespace EcFeed
 
     static class Default
     {
-        #if DEVELOP
-            internal const string GeneratorAddress = "https://develop-gen.ecfeed.com";
-        #else
-            internal const string GeneratorAddress = "https://gen.ecfeed.com";
-        #endif
+        internal const string GeneratorAddress = "https://gen.ecfeed.com";
 
         internal const string KeyStorePassword = "changeit";
 

@@ -1,7 +1,3 @@
-// # define DEVELOP
-
-using System;
-
 namespace EcFeed
 {
     public enum Generator

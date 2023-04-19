@@ -6,5 +6,15 @@ namespace EcFeed
         {
             return StructureInitializerDefault.Get();
         }
+
+        public static StructureSetter GetStructureSetter()
+        {
+            return StructureSetterDefault.Get();
+        }
+
+        public static StructuresSetter GetStructuresSetter(StructureSetter setter)
+        {
+            return StructuresSetterDefault.Get(setter);
+        }
     }
 }

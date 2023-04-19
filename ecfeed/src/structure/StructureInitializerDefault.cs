@@ -4,12 +4,11 @@ using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Linq;
 
-
 namespace EcFeed
 {
     internal class StructureInitializerDefault : StructureInitializer
     {
-        private StructuresSetter structuresSetter = StructuresSetterDefault.Get(StructureSetterDefault.Get());
+        private StructuresSetter structuresSetter = Factory.GetStructuresSetter(Factory.GetStructureSetter());
         private HashSet<Structure> structures = new HashSet<Structure>();
 
         private StructureInitializerDefault()
@@ -71,7 +70,7 @@ namespace EcFeed
                     GetTestCaseParseParameterOld(parameter, out parameterParsedType, out parameterParsedName);
                 }
 
-                if (IsPrimitive(parameterParsedType)) 
+                if (HelperType.IsPrimitive(parameterParsedType)) 
                 {
                     testCase.Add(InstantiatePrimitive(parameterParsedType, arguments));
                 } 
@@ -170,7 +169,7 @@ namespace EcFeed
             var constructorParameters = new Queue<object>();
 
             foreach (var parameter in structure.ActiveConstructor.GetParameters()) {
-                constructorParameters.Enqueue(getValue(parseConstructorParameter(parameter), arguments));
+                constructorParameters.Enqueue(getValue(HelperType.ParseConstructorParameter(parameter), arguments));
             }
 
             try {
@@ -178,24 +177,6 @@ namespace EcFeed
             } catch (Exception) {
                 throw new SystemException("The structure '" + structure.NameSimple + "' could not be instantiated!");
             }
-        }
-
-        private string parseConstructorParameter(ParameterInfo parameter) 
-        {
-            var name = parameter.ParameterType.Name;
-
-            switch(name)
-            {
-                case "Byte": return "byte";
-                case "Int16": return "short";
-                case "Int32": return "int";
-                case "Int64": return "long";
-                case "Single": return "float";
-                case "Double": return "double";
-                case "Char": return "char";
-            }
-
-            return name;
         }
 
         private object getValue(string typeName, Queue<string> arguments) {
@@ -266,25 +247,6 @@ namespace EcFeed
         private string[] GetMethodParameters(string signature) 
         {
             return Regex.Match(signature, @"(?<=\().+?(?=\))").Value.Split(",").Select(e => e.Trim()).ToArray();
-        }
-
-        private bool IsPrimitive(string typeName) 
-        {
-            switch (typeName) 
-            {
-                case "byte":
-                case "short":
-                case "int":
-                case "long":
-                case "float":
-                case "double":
-                case "boolean":
-                case "char":
-                case "String":
-                    return true;
-                default:
-                    return false; 
-            }
         }
 
         private bool IsEnum(string typeName) {

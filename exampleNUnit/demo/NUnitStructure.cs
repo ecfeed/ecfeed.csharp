@@ -1,5 +1,4 @@
 using System;
-using System.Reflection;
 using System.Collections;
 using NUnit.Framework;
 using EcFeed;
@@ -14,7 +13,7 @@ namespace exampleNUnit
             length:1, label:"Random / Quality - Single");
 
         static private IEnumerable GenRandomQualityStructureSingle = ConfigDefault.GetTestProvider(ConfigDefault.DEVELOP).GenerateRandom(ConfigDefault.F_STRUCTURE, feedback:true,
-            length:1, assembly: Assembly.GetExecutingAssembly(), typesDefinitionsSource: "Source");
+            length:1, typesDefinitionsSource: "Source");
 
         [TearDown]
         public void TearDown()

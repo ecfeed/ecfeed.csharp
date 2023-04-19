@@ -55,29 +55,10 @@ namespace EcFeed
             
             foreach (var parameter in constructor.GetParameters())
             {
-                parametersParsed.Add(ParseConstructorParameter(parameter));
+                parametersParsed.Add(HelperType.ParseConstructorParameter(parameter));
             }
 
             return "(" + String.Join(",", parametersParsed) + ")";
-        }
-
-        private string ParseConstructorParameter(ParameterInfo parameter) 
-        {
-            var name = GetNameSimple(parameter.ParameterType);
-
-            switch(name)
-            {
-                case "Byte": return "byte";
-                case "Int16": return "short";
-                case "Int32": return "int";
-                case "Int64": return "long";
-                case "Single": return "float";
-                case "Double": return "double";
-                case "Char": return "char";
-                case "String": return "String";
-            }
-
-            return name;
         }
 
         public void Activate(Structure structure, string signature)

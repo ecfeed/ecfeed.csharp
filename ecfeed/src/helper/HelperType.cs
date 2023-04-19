@@ -1,6 +1,4 @@
-// # define DEVELOP
-
-using System;
+using System.Reflection;
 
 namespace EcFeed
 {
@@ -31,6 +29,44 @@ namespace EcFeed
             }
 
             throw new TestProviderException("Invalid generator type");
+        }
+
+        internal static string ParseConstructorParameter(ParameterInfo parameter) 
+        {
+            var name = parameter.ParameterType.Name;
+
+            switch(name)
+            {
+                case "Byte": return "byte";
+                case "Int16": return "short";
+                case "Int32": return "int";
+                case "Int64": return "long";
+                case "Single": return "float";
+                case "Double": return "double";
+                case "Char": return "char";
+                case "String": return "String";
+            }
+
+            return name;
+        }
+
+        internal static bool IsPrimitive(string typeName) 
+        {
+            switch (typeName) 
+            {
+                case "byte":
+                case "short":
+                case "int":
+                case "long":
+                case "float":
+                case "double":
+                case "boolean":
+                case "char":
+                case "String":
+                    return true;
+                default:
+                    return false; 
+            }
         }
     }
 }

@@ -85,7 +85,7 @@
 
 //         private void HandleInputError(string message, TestHandle ecfeed)
 //         {
-//             ecfeed.addFeedback(false, comment:message, custom:new Dictionary<string, string>{{"Error type", "Input"}});
+//             ecfeed.AddFeedback(false, comment:message, custom:new Dictionary<string, string>{{"Error type", "Input"}});
 //             Assert.Fail();
 //         }
 
@@ -93,7 +93,7 @@
 //         {
 //             if (!message.Contains("Request accepted"))
 //             {
-//                 ecfeed.addFeedback(false, comment:message, duration:duration, custom:new Dictionary<string, string>{{"Error type", "Output"}});
+//                 ecfeed.AddFeedback(false, comment:message, duration:duration, custom:new Dictionary<string, string>{{"Error type", "Output"}});
 //                 Assert.Fail();
 //             }
 //         }
@@ -139,7 +139,7 @@
 
 //             HandleOutputError(response, duration, ecfeed);
             
-//             ecfeed.addFeedback(true, duration:duration, comment:response);
+//             ecfeed.AddFeedback(true, duration:duration, comment:response);
 //         }
 //     }
 

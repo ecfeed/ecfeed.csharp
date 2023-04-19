@@ -20,7 +20,7 @@ namespace exampleNUnit
         {
             TestHandle ecfeed = TestContext.CurrentContext.Test.Arguments[^1] as TestHandle; 
             
-            ecfeed.addFeedback(
+            ecfeed.AddFeedback(
                 TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Passed,
                 comment:TestContext.CurrentContext.Result.Message
             );

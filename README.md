@@ -2,7 +2,7 @@
 
 ## Introduction
 
-The following tutorial is an introduction to the C# runner. Note, that it does not cover the ecFeed basics. Therefore, if you want to learn how to create a sample model and generate a personal keystore, visit the tutorial section on our [webpage](https://ecfeed.com/tutorials).
+The following tutorial is an introduction to the C# runner. Note, that it does not cover the ecFeed basics. Therefore, if you want to learn how to create a sample model and generate a personal keystore, visit the tutorial section on our [webpage](https://ecfeed.com/tutorials).  
 
 Prerequisites:
 - Install the [.NET](https://dotnet.microsoft.com/download) framework.
@@ -11,7 +11,7 @@ Prerequisites:
 - Generate a personal keystore named 'security.p12' and put it in the \~/.ecfeed/
  directory (Linux users) or in the \~/ecfeed/ directory (Windows users).  
 
-For the full documentation check the source directly at [GitHub](https://github.com/ecfeed/ecfeed.csharp).
+For the full documentation check the source directly at [GitHub](https://github.com/ecfeed/ecfeed.csharp).  
 
 ## Installation
 
@@ -21,7 +21,7 @@ The ecFeed library can be found online in the [NuGet repository](https://www.nug
 
 ## Examples
 
-Methods, used in the tutorial, are available in a welcome model, created during the registration process at the 'ecfeed.com' webpage. It the model is missing (e.g. it has been deleted by the user), it can be imported from [here](https://s3-eu-west-1.amazonaws.com/resources.ecfeed.com/repo/tutorial/Welcome.ect).
+Methods, used in the tutorial, are available in a welcome model, created during the registration process at the 'ecfeed.com' webpage. It the model is missing (e.g. it has been deleted by the user), it can be imported from [here](https://s3-eu-west-1.amazonaws.com/resources.ecfeed.com/repo/tutorial/Welcome.ect).  
 
 ```C#
 using System;
@@ -50,7 +50,7 @@ However, have in mind that the ID of every model is unique. If you want to copy 
 
 ## NUnit
 
-The provided library can be used to create test cases for NUnit, which is one of the most common C# testing framework. It is possible, because generation methods return the 'IEnumerable<object[]>' interface, which might be directly used as the data source.    
+The provided library can be used to create test cases for NUnit, which is one of the most common C# testing framework. It is possible, because generation methods return the 'IEnumerable<object[]>' interface, which might be directly used as the data source.  
 
 Inside a new folder open the  terminal and type 'dotnet new nunit'. This command creates a new C# test project.
 
@@ -76,14 +76,14 @@ namespace exampleNUnit
 }
 ```
 
-To run tests, type 'dotnet test' in the terminal.
-
+To run tests, type 'dotnet test' in the terminal.  
 
 ## Feedback
 
 To send feedback, you need to have a BASIC account type or be a member of a TEAM.  
 
-An example looks as follows:
+An example looks as follows:  
+
 ```C#
 static internal TestProvider testProvider = new TestProvider("XXXX-XXXX-XXXX-XXXX-XXXX");
 static internal string method = "com.example.test.Playground.size_10x10";
@@ -101,17 +101,17 @@ public void TearDown()
 {
     TestHandle ecfeed = TestContext.CurrentContext.Test.Arguments[^1] as TestHandle; 
             
-    ecfeed.addFeedback(
+    ecfeed.AddFeedback(
         TestContext.CurrentContext.Result.Outcome.Status == NUnit.Framework.Interfaces.TestStatus.Passed,
         comment:TestContext.CurrentContext.Result.Message
     );
 }
 ```
 
-To the generation method an additional argument, i.e. 'TestHandle testHandle', must be added. The class consists of one public method, namely 'addFeedback'. The required argument denotes the result of the test, everything else is optional.  
+To the generation method an additional argument, i.e. 'TestHandle testHandle', must be added. The class consists of one public method, namely 'AddFeedback'. The required argument denotes the result of the test, everything else is optional.  
 
 ```C#
-testHandle.addFeedback(True, comment: 'Passed', duration: 1000, custom)
+testHandle.AddFeedback(True, comment: 'Passed', duration: 1000, custom)
 ```
 
 _status_ - The result of the test.
@@ -122,6 +122,52 @@ _custom_ - The optional dictionary of custom key-value pairs.
 Note, that each test must return a feedback, regardless whether it has passed or failed. One solution to overcome this problem is to create a 'tear down' method, as in the example. However, it can also be done manually. Only the first execution of the 'addFeedback' takes effect. All subsequent executions are neglected.  
 
 Additionally, to the test generation method one optional argument can be added, namely 'label'. It provides a short description of the generated test suite.  
+
+## Structures
+
+If you want to use classes (defined as structures in the model) you must manually create a constructor for each one of them. Classes are retrieved from the code using reflection and instantiated using values received from the server.  
+
+Note, that if a structure is directly linked to a global structure (it does not contain any additional fields), only the definition of the global structure is needed, regardless of the name of the linked structure.  
+
+All classes must be defined in a separate namespace, e.g. 'Source'.  
+
+```C#
+namespace Source
+{
+    public class Person
+    {
+        public Person(string name, int age)
+        {}
+    }
+
+    public class Data
+    {
+        public Data(Person delinquent, int id)
+        {}
+    }
+}
+```
+
+In this case, one additional argument must be added to the generation method, namely 'typesDefinitionsSource', which defines the namespace where custom classes are defined.  
+
+```C#
+namespace exampleNUnit
+{
+    [TestFixture]
+    public class NUnitStructureTest
+    {
+
+        static internal TestProvider testProvider = new TestProvider("XXXX-XXXX-XXXX-XXXX-XXXX");
+        static internal string method = "TestStructure.generate";
+
+        static public IEnumerable Method1a = testProvider.GenerateNWise(method1, typesDefinitionsSource: "Source");
+
+        [TestCaseSource("Method1a")]
+        public void GenRandomQuantitySingleStructureTest(Data a, int b)
+        {}
+    }
+}
+```
 
 # TestProvider class API
 
@@ -174,6 +220,7 @@ string constraints = "NONE";
 - *feedback* - A flag denoting whether feedback should be sent beck to the generator. By default, this functionality is switched off.
 - *label* - An additional label associated with feedback.
 - *custom* - An additional dictionary with custom elements associated with feedback.
+- *typesDefinitionsSource* - The namespace where custom classes are defined.
 
 ### public IEnumerable<object[]> GenerateCartesian( ... )
 
@@ -186,6 +233,7 @@ Arguments:
 - *feedback* - See 'GenerateNWise'.
 - *label* - See 'GenerateNWise'.
 - *custom* - See 'GenerateNWise'.
+- *typesDefinitionsSource* - See 'GenerateNWise'.
 
 ### public IEnumerable<object[]> GenerateRandom( ... )
 
@@ -201,6 +249,7 @@ Arguments:
 - *feedback* - See 'GenerateNWise'.
 - *label* - See 'GenerateNWise'.
 - *custom* - See 'GenerateNWise'.
+- *typesDefinitionsSource* - See 'GenerateNWise'.
 
 ### public IEnumerable<object[]> GenerateStatic( ... )
 
@@ -219,6 +268,7 @@ string constraints = "ALL";
 - *feedback* - See 'GenerateNWise'.
 - *label* - See 'GenerateNWise'.
 - *custom* - See 'GenerateNWise'.
+- *typesDefinitionsSource* - See 'GenerateNWise'.
 
 ## Export calls
 

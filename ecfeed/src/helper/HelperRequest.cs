@@ -41,9 +41,16 @@ namespace EcFeed
 
         public static string GenerateRequestURL(DataSession sessionData, string address, string endpoint = RequestEndpoint.Generator)
         {
+            string requestModel = "";
+
+            if (sessionData.ModelId == "TestUuid11")
+            {
+                requestModel = "&clientType=localTestRap";
+            }
+
             string requestData = $"{ SerializeRequestData(sessionData) }";
             string requestType = sessionData.Template.GetValue().Equals(Template.Stream.GetValue()) ? RequestTestType.Data : RequestTestType.Export;
-            string request = $"{ address }/{ endpoint }?requestType={ requestType }&request={ requestData }";
+            string request = $"{ address }/{ endpoint }?requestType={ requestType }{ requestModel }&request={ requestData }";
 
             request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
 
@@ -54,8 +61,15 @@ namespace EcFeed
 
         public static string GenerateFeedbackURL(DataSession sessionData, string address, string endpoint = RequestEndpoint.Feedback)
         {
+            string requestModel = "";
+
+            if (sessionData.ModelId == "TestUuid11")
+            {
+                requestModel = "?clientType=localTestRap";
+            }
+
             string requestData = $"{ SerializeFeedbackData(sessionData) }";
-            string request = $"{ address }/{ endpoint }?client=C#";
+            string request = $"{ address }/{ endpoint }{ requestModel }";
 
             request = Uri.EscapeUriString(request).Replace("[", "%5B").Replace("]", "%5D");
 

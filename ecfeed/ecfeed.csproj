@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp6</TargetFramework>
-    <PackageVersion>1.2.1</PackageVersion>
+    <PackageVersion>1.3.0</PackageVersion>
     <PackageId>EcFeed</PackageId>
     <Company>EcFeed</Company>
     <Title>EcFeed runner</Title>
@@ -10,12 +10,12 @@
     <Description>An open library used to connect to the ecFeed service.</Description>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <PackageLicenseExpression>EPL-1.0</PackageLicenseExpression>
-    <PackageReleaseNotes>First beta release.</PackageReleaseNotes>
     <PackageTags>test;ecfeed;nwise</PackageTags>
     <IncludeSource>true</IncludeSource>
     <PackageIcon>icon.png</PackageIcon>
     <projectUrl>https://ecfeed.com/</projectUrl>
     <RepositoryUrl>https://github.com/ecfeed/ecfeed.csharp</RepositoryUrl>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
